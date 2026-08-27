@@ -1,6 +1,4 @@
-"""Mode examen interactif : menu d'exams, progression par niveaux avec un
-pool d'exercices par niveau, navigation next/re, test à la demande.
-"""
+
 import random
 import sys
 from pathlib import Path
@@ -20,6 +18,7 @@ def show_help() -> None:
     text = (
         "[bold]📄 test[/]  compile et teste ton code\n"
         "[bold]📄 next[/]  exercice suivant du niveau\n"
+        "[bold]📄 sujet[/]  réaffiche le sujet de l'exercice\n"
         "[bold]📄 re[/]    exercice précédent du niveau\n"
         "[bold]📄 help[/]  réaffiche cette aide\n"
         "[bold]📄 quit[/]  quitte le mode examen"
@@ -174,7 +173,10 @@ def run_interactive_exam(exams_root: Path, exercises_exam_root: Path,
             student_dir = _ensure_student_files(exo_name, exercises_exam_root, rendu_root)
             _print_current(level, exo_name, student_dir, exercises_exam_root)
             continue
-
+        if cmd == "sujet":
+            _show_readme(exo_name, exercises_exam_root)
+            continue
+        
         if cmd == "test":
             results = run_exercise(exo_name, student_dir, exercises_exam_root)
             passed = print_results(exo_name, results)

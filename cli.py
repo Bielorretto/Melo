@@ -60,11 +60,15 @@ def cmd_ai_explain(args):
     from ai.client import Assistant
     from ai.prompts import SYSTEM_EXPLAIN
     from ai.tools import get_exercise_context
+    from core.runner import find_exercise
 
-    context = get_exercise_context(EXERCISES_ROOT / args.exercise)
+    try:
+        exo_dir = find_exercise(EXERCISES_ROOT, args.exercise)
+    except FileNotFoundError:
+        exo_dir = find_exercise(EXERCISES_EXAM_ROOT, args.exercise)
+    context = get_exercise_context(exo_dir)
     assistant = Assistant()
     print(assistant.ask(SYSTEM_EXPLAIN, f"Sujet de l'exercice :\n\n{context}"))
-
 
 def cmd_ai_debug(args):
     from ai.client import Assistant
