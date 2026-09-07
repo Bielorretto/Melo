@@ -1,17 +1,9 @@
-"""Outils ('function calling') que le LLM peut appeler pour aider l'élève.
 
-Le point sensible ici est run_gdb_session : on exécute réellement gdb sur le
-binaire de l'élève, donc on whiteliste strictement les commandes autorisées
-et on impose un timeout, pour éviter qu'un binaire foireux (boucle infinie...)
-ne bloque l'outil.
-"""
 import subprocess
 from pathlib import Path
 from typing import List
 
-# whitelist stricte de commandes gdb (préfixes) autorisées.
-# volontairement pas de 'shell', 'call', 'python' etc. qui permettraient
-# d'exécuter du code arbitraire côté machine hôte.
+
 ALLOWED_GDB_PREFIXES = (
     "break", "b ", "run", "r", "backtrace", "bt", "print", "p ",
     "next", "n", "step", "s", "continue", "c", "list", "l",
@@ -59,7 +51,6 @@ def get_exercise_context(exercise_dir: Path) -> str:
     return manifest.read_text(encoding="utf-8") if manifest.exists() else ""
 
 
-# racine du dossier des exercices (même logique que cli.py / EXERCISES_ROOT)
 EXERCISES_ROOT = Path(__file__).parent.parent / "exercises"
 
 
@@ -89,8 +80,6 @@ def get_exercise_subject(exercise_name: str) -> str:
     return context or f"Aucun README ni manifest lisible pour '{exercise_name}'."
 
 
-# outils liés aux exercices : lister / lire un sujet. Toujours disponibles
-# en conversation, pour que l'IA aille chercher elle-même le bon sujet.
 EXERCISE_TOOLS_SCHEMA = [
     {
         "type": "function",
@@ -126,7 +115,6 @@ EXERCISE_TOOLS_SCHEMA = [
     },
 ]
 
-# outil gdb, réservé au mode debug (potentiellement coûteux / sensible)
 DEBUG_TOOLS_SCHEMA = [
     {
         "type": "function",
@@ -153,5 +141,4 @@ DEBUG_TOOLS_SCHEMA = [
     }
 ]
 
-# alias conservé pour compat (ancien nom utilisé ailleurs éventuellement)
 TOOLS_SCHEMA = DEBUG_TOOLS_SCHEMA

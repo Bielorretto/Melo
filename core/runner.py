@@ -1,13 +1,4 @@
-"""Coeur du testeur : compile le rendu de l'élève + un test, exécute, compare.
 
-Un exercice = un dossier contenant un manifest.yaml qui décrit :
-  - les fichiers sources attendus chez l'élève
-  - les options de compilation
-  - une liste de tests (main.c inline ou fichier externe, args, stdin,
-    sortie attendue, exit code attendu, check mémoire ou non)
-
-Ce module ne connaît aucun exercice "en dur" : tout vient du manifest.
-"""
 import shutil
 import subprocess
 import tempfile
@@ -40,14 +31,12 @@ def load_manifest(exercise_dir: Path) -> dict:
 
 def _prepare_workdir(exercise_dir: Path, student_dir: Path, test: dict,
                       manifest: dict, tmp: Path) -> None:
-    """Copie les sources élève + génère/copie le fichier de test dans tmp."""
     for src in manifest["sources"]:
         student_file = student_dir / src
         if not student_file.exists():
             raise FileNotFoundError(f"fichier manquant chez l'élève : {src}")
         shutil.copy(student_file, tmp / src)
 
-    # headers éventuels fournis par le sujet (facultatif)
     includes_dir = exercise_dir / "includes"
     if includes_dir.exists():
         for header in includes_dir.glob("*.h"):
@@ -55,20 +44,12 @@ def _prepare_workdir(exercise_dir: Path, student_dir: Path, test: dict,
 
     main_path = tmp / "main.c"
     if manifest.get("own_main"):
-        # L'élève écrit son propre main(argc, argv) dans ses sources
-        # (ex: programmes en ligne de commande comme first_word).
-        # On ne génère aucun fichier main.c pour éviter un conflit
-        # de définition de main() à la compilation.
         return
     if "main" in test:
         main_path.write_text(test["main"], encoding="utf-8")
     elif "program" in test:
         shutil.copy(exercise_dir / test["program"], main_path)
     elif "body" in test:
-        # Format allégé : le manifest fournit un "prelude" (includes + protos,
-        # commun à tous les tests de l'exercice), chaque test ne fournit que
-        # le corps de son main(). Évite de dupliquer le boilerplate C dans
-        # chaque test quand un exercice en a beaucoup.
         prelude = manifest.get("prelude", "")
         generated = f"{prelude}\n\nint main(void)\n{{\n{test['body']}\n\treturn (0);\n}}\n"
         main_path.write_text(generated, encoding="utf-8")
@@ -146,9 +127,6 @@ def run_test(exercise_dir: Path, student_dir: Path, test: dict,
                            stderr=result.stderr, memory=memory_report)
 
 def find_exercise(exercises_root: Path, exercise_name: str) -> Path:
-    """
-    Recherche récursivement un exercice contenant un manifest.yaml.
-    """
     for path in exercises_root.rglob(exercise_name):
         if path.is_dir() and (path / "manifest.yaml").exists():
             return path
@@ -158,14 +136,6 @@ def find_exercise(exercises_root: Path, exercise_name: str) -> Path:
     )
 
 def find_targets(exercises_root: Path, target: str) -> List[Path]:
-    """Résout `target` en une liste de dossiers d'exercices (chemins absolus).
-
-    - Si `target` correspond à un exercice précis (dossier avec manifest.yaml),
-      renvoie ce seul dossier.
-    - Sinon, si `target` correspond à un dossier existant contenant des
-      exercices (un module), renvoie tous les exercices trouvés dedans.
-    - Sinon, renvoie une liste vide.
-    """
     for path in exercises_root.rglob(target):
         if path.is_dir() and (path / "manifest.yaml").exists():
             return [path]

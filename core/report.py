@@ -1,4 +1,4 @@
-"""Affichage lisible des résultats de test dans le terminal."""
+
 from typing import List
 
 from core.runner import TestResult

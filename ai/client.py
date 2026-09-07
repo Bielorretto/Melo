@@ -1,8 +1,4 @@
-"""Wrapper simple autour du client OpenAI, avec boucle de function calling.
 
-Un seul point d'entrée principal (Assistant.ask / Assistant.send) : facile à
-relire, à modifier, ou à brancher sur un autre modèle plus tard.
-"""
 import json
 import os
 from pathlib import Path
@@ -56,12 +52,7 @@ class Assistant:
         return f"Outil inconnu : {name}"
 
     def _run_completion(self, messages: list, tools: list | None = None) -> str:
-        """Boucle de function calling sur une liste de messages donnée (mutée
-        en place : les réponses de l'assistant et des outils y sont ajoutées).
-        """
-        # boucle simple : tant que le modèle demande un outil, on l'exécute
-        # et on lui renvoie le résultat, jusqu'à ce qu'il réponde en texte.
-        for _ in range(5):  # garde-fou pour éviter une boucle infinie
+        for _ in range(5):
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=messages,

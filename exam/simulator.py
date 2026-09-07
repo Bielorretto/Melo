@@ -1,8 +1,4 @@
-"""Simulateur d'examen : pioche des exercices par tag, chronomètre, calcule un score.
 
-S'appuie entièrement sur core.runner : aucune logique de compilation/exécution
-n'est dupliquée ici, on ne fait qu'orchestrer avec une contrainte de temps.
-"""
 import json
 import random
 import time

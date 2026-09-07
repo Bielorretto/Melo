@@ -1,8 +1,4 @@
-"""Wrapper autour de valgrind : lance le binaire sous valgrind et parse les leaks.
 
-Si valgrind n'est pas installé sur la machine, on le signale (available=False)
-plutôt que de planter, pour que le testeur reste utilisable sans.
-"""
 import re
 import shutil
 import subprocess
@@ -12,8 +8,8 @@ from typing import List, Optional
 
 @dataclass
 class MemoryReport:
-    available: bool       # valgrind est installé sur cette machine ?
-    clean: bool            # pas de leak / pas d'erreur détectée
+    available: bool       
+    clean: bool        
     definitely_lost: int
     indirectly_lost: int
     errors: int
@@ -41,7 +37,7 @@ def check_memory(binary_path: str, args: Optional[List[str]] = None,
     except subprocess.TimeoutExpired:
         return MemoryReport(True, False, -1, -1, -1, "valgrind: timeout")
 
-    output = proc.stderr  # valgrind écrit son rapport sur stderr
+    output = proc.stderr
 
     def _extract(pattern: str, text: str) -> int:
         m = re.search(pattern, text)

@@ -1,14 +1,5 @@
 #!/usr/bin/env python3
 
-"""Point d'entrée du testeur piscine 42.
-
-Usage :
-  ./cli.py list
-  ./cli.py test ft_strdup /chemin/vers/rendu/
-  ./cli.py exam
-  ./cli.py ai-explain ft_strdup
-  ./cli.py ai-debug ft_strdup /chemin/vers/rendu/ "segfault sur une chaine vide"
-"""
 import argparse
 import sys
 from pathlib import Path

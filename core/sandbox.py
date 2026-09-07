@@ -1,9 +1,4 @@
-"""Exécution isolée d'un binaire : timeout, capture stdout/stderr/exit code.
 
-Ce module ne connaît rien aux exercices ni aux tests : il sait juste
-lancer un binaire avec des arguments/stdin et récupérer proprement le résultat,
-y compris en cas de boucle infinie (timeout).
-"""
 import subprocess
 from dataclasses import dataclass
 from typing import List, Optional
@@ -13,7 +8,7 @@ from typing import List, Optional
 class ExecResult:
     stdout: str
     stderr: str
-    returncode: Optional[int]  # None si timeout
+    returncode: Optional[int]
     timed_out: bool
 
 
