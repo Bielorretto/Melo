@@ -1,8 +1,8 @@
-# piscine-tester
+# Simulateur de piscine Melo
 
 Simulateur maison pour la Piscine 42.
 
-`piscine-tester` permet de tester ses exercices avant la Moulinette, de simuler un examen, de vérifier des modules entiers et d'obtenir de l'aide grâce à un assistant IA.
+`Melo` permet de tester ses exercices avant la Moulinette, de simuler un examen, de vérifier des modules entiers et d'obtenir de l'aide grâce à un assistant IA.
 
 ## Features
 
@@ -18,7 +18,7 @@ Clone le projet puis installe les dépendances :
 
 ```bash
 git clone <URL_DU_REPO>
-cd piscine-tester
+cd Melo
 pip install -r requirements.txt
 ```
 
