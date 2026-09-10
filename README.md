@@ -31,6 +31,9 @@ export OPENAI_API_KEY=sk-...
 
 # 🤖 Assistant IA
 
+
+![Melo AI Assistant](assets/chatbot.png)
+
 **Melo** est un chatbot qui fonctionne via des appels API directement depuis le terminal.
 
 Elle n'a **pas accès directement aux fichiers de ton projet**.
@@ -60,13 +63,11 @@ Pour utiliser l'API OpenAI, configure ta clé :
 export OPENAI_API_KEY=sk-...
 ```
 
-### Fonctionnement
-
-![Melo AI Assistant](assets/chatbot.png)
-
----
 
 # 📝 Exam Simulator
+
+![Exam Simulator](assets/exam.png)
+
 
 Le mode `exam` permet de simuler une session d'examen avec une progression par niveaux.
 
@@ -151,11 +152,6 @@ Le mode exam :
 * attend que tu codes,
 * puis lance les tests du `manifest.yaml` lorsque tu utilises `test`.
 
-### Fonctionnement de l'examen
-
-![Exam Simulator](assets/exam.png)
-
----
 
 # 🧪 Moulinette Simulator
 
