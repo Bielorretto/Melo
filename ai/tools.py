@@ -17,7 +17,6 @@ def _is_allowed(cmd: str) -> bool:
 
 
 def run_gdb_session(binary_path: str, commands: List[str], timeout: int = 10) -> str:
-    """Lance gdb en mode batch sur le binaire avec une liste de commandes."""
     if not Path(binary_path).exists():
         return f"Erreur : binaire introuvable ({binary_path})"
 
@@ -43,7 +42,6 @@ def run_gdb_session(binary_path: str, commands: List[str], timeout: int = 10) ->
 
 
 def get_exercise_context(exercise_dir: Path) -> str:
-    """Contenu du sujet/README d'un exercice, utilisé comme contexte pour le LLM."""
     readme = exercise_dir / "README.md"
     if readme.exists():
         return readme.read_text(encoding="utf-8")
@@ -55,9 +53,6 @@ EXERCISES_ROOT = Path(__file__).parent.parent / "exercises"
 
 
 def list_exercise_names() -> List[str]:
-    """Noms des exercices disponibles (ceux qui ont un manifest.yaml),
-    récursif pour supporter les exercices rangés par module (module/exo).
-    """
     if not EXERCISES_ROOT.exists():
         return []
     return sorted(
@@ -66,9 +61,6 @@ def list_exercise_names() -> List[str]:
     )
 
 def get_exercise_subject(exercise_name: str) -> str:
-    """Sujet d'un exercice donné par son nom (utilisé par le LLM via function
-    calling, pour ne pas obliger l'élève à copier-coller l'énoncé lui-même).
-    """
     exo_dir = EXERCISES_ROOT / exercise_name
     if not exo_dir.exists() or not (exo_dir / "manifest.yaml").exists():
         available = ", ".join(list_exercise_names()) or "(aucun)"

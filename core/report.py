@@ -10,7 +10,6 @@ RESET = "\033[0m"
 
 
 def print_results(exercise_name: str, results: List[TestResult]) -> bool:
-    """Affiche les résultats un par un. Retourne True si tout est passé."""
     print(f"\n=== {exercise_name} ===")
     all_passed = True
 
