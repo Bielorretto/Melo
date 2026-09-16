@@ -1,0 +1,105 @@
+name: ft_ft
+tags: ["piscine", "ex0", "pointeurs"]
+
+sources:
+  - ft_ft.c
+
+compile:
+  compiler: cc
+  flags:
+    - -Wall
+    - -Wextra
+    - -Werror
+
+tests:
+
+  - name: "affecte 42 a un entier initialise a 0"
+    main: |
+      #include <stdio.h>
+      void ft_ft(int *nbr);
+
+      int main(void)
+      {
+          int n = 0;
+          ft_ft(&n);
+          if (n != 42)
+          {
+              printf("n = %d, attendu 42\n", n);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "affecte 42 meme si la valeur initiale est deja grande"
+    main: |
+      #include <stdio.h>
+      void ft_ft(int *nbr);
+
+      int main(void)
+      {
+          int n = 1000000;
+          ft_ft(&n);
+          if (n != 42)
+          {
+              printf("n = %d, attendu 42\n", n);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "affecte 42 meme si la valeur initiale est negative"
+    main: |
+      #include <stdio.h>
+      void ft_ft(int *nbr);
+
+      int main(void)
+      {
+          int n = -500;
+          ft_ft(&n);
+          if (n != 42)
+          {
+              printf("n = %d, attendu 42\n", n);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "n'affecte que l'entier pointe, pas les cases voisines"
+    main: |
+      #include <stdio.h>
+      void ft_ft(int *nbr);
+
+      int main(void)
+      {
+          int arr[3] = {111, 0, 222};
+          ft_ft(&arr[1]);
+          if (arr[0] != 111 || arr[1] != 42 || arr[2] != 222)
+          {
+              printf("arr = [%d, %d, %d], attendu [111, 42, 222]\n",
+                     arr[0], arr[1], arr[2]);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "reste 42 si la valeur initiale est deja 42"
+    main: |
+      #include <stdio.h>
+      void ft_ft(int *nbr);
+
+      int main(void)
+      {
+          int n = 42;
+          ft_ft(&n);
+          if (n != 42)
+          {
+              printf("n = %d, attendu 42\n", n);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0

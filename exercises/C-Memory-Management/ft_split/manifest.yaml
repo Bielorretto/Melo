@@ -1,0 +1,388 @@
+name: ft_split
+tags: ["piscine", "ex5", "memoire"]
+
+sources:
+  - ft_split.c
+
+compile:
+  compiler: cc
+  flags:
+    - -Wall
+    - -Wextra
+    - -Werror
+
+tests:
+
+  - name: "separateur simple (charset = un espace)"
+    main: |
+      #include <stdio.h>
+      #include <string.h>
+      #include <stdlib.h>
+      char **ft_split(char *str, char *charset);
+
+      static void free_split(char **res)
+      {
+          int i;
+
+          i = 0;
+          while (res[i])
+          {
+              free(res[i]);
+              i++;
+          }
+          free(res);
+      }
+
+      int main(void)
+      {
+          char **res = ft_split("bonjour le monde", " ");
+          char *expected[] = {"bonjour", "le", "monde"};
+          int i = 0;
+
+          if (!res)
+          {
+              printf("ft_split a retourne NULL\n");
+              return (1);
+          }
+          while (i < 3)
+          {
+              if (!res[i] || strcmp(res[i], expected[i]) != 0)
+              {
+                  printf("res[%d] = \"%s\", attendu \"%s\"\n",
+                         i, res[i] ? res[i] : "(NULL)", expected[i]);
+                  free_split(res);
+                  return (1);
+              }
+              i++;
+          }
+          if (res[3] != NULL)
+          {
+              printf("le tableau n'est pas termine par NULL apres 3 elements\n");
+              free_split(res);
+              return (1);
+          }
+          free_split(res);
+          return (0);
+      }
+    expected_exit: 0
+    check_memory: true
+
+  - name: "plusieurs caracteres differents dans le charset"
+    main: |
+      #include <stdio.h>
+      #include <string.h>
+      #include <stdlib.h>
+      char **ft_split(char *str, char *charset);
+
+      static void free_split(char **res)
+      {
+          int i;
+
+          i = 0;
+          while (res[i])
+          {
+              free(res[i]);
+              i++;
+          }
+          free(res);
+      }
+
+      int main(void)
+      {
+          char **res = ft_split("a,b;c d", ",; ");
+          char *expected[] = {"a", "b", "c", "d"};
+          int i = 0;
+
+          if (!res)
+          {
+              printf("ft_split a retourne NULL\n");
+              return (1);
+          }
+          while (i < 4)
+          {
+              if (!res[i] || strcmp(res[i], expected[i]) != 0)
+              {
+                  printf("res[%d] = \"%s\", attendu \"%s\"\n",
+                         i, res[i] ? res[i] : "(NULL)", expected[i]);
+                  free_split(res);
+                  return (1);
+              }
+              i++;
+          }
+          if (res[4] != NULL)
+          {
+              printf("le tableau n'est pas termine par NULL apres 4 elements\n");
+              free_split(res);
+              return (1);
+          }
+          free_split(res);
+          return (0);
+      }
+    expected_exit: 0
+    check_memory: true
+
+  - name: "separateurs consecutifs ignores (pas de chaines vides)"
+    main: |
+      #include <stdio.h>
+      #include <string.h>
+      #include <stdlib.h>
+      char **ft_split(char *str, char *charset);
+
+      static void free_split(char **res)
+      {
+          int i;
+
+          i = 0;
+          while (res[i])
+          {
+              free(res[i]);
+              i++;
+          }
+          free(res);
+      }
+
+      int main(void)
+      {
+          char **res = ft_split("un   deux", " ");
+          char *expected[] = {"un", "deux"};
+          int i = 0;
+
+          if (!res)
+          {
+              printf("ft_split a retourne NULL\n");
+              return (1);
+          }
+          while (i < 2)
+          {
+              if (!res[i] || strcmp(res[i], expected[i]) != 0)
+              {
+                  printf("res[%d] = \"%s\", attendu \"%s\"\n",
+                         i, res[i] ? res[i] : "(NULL)", expected[i]);
+                  free_split(res);
+                  return (1);
+              }
+              i++;
+          }
+          if (res[2] != NULL)
+          {
+              printf("le tableau n'est pas termine par NULL apres 2 elements\n");
+              free_split(res);
+              return (1);
+          }
+          free_split(res);
+          return (0);
+      }
+    expected_exit: 0
+    check_memory: true
+
+  - name: "separateurs en debut et fin de chaine"
+    main: |
+      #include <stdio.h>
+      #include <string.h>
+      #include <stdlib.h>
+      char **ft_split(char *str, char *charset);
+
+      static void free_split(char **res)
+      {
+          int i;
+
+          i = 0;
+          while (res[i])
+          {
+              free(res[i]);
+              i++;
+          }
+          free(res);
+      }
+
+      int main(void)
+      {
+          char **res = ft_split("  hello  ", " ");
+
+          if (!res)
+          {
+              printf("ft_split a retourne NULL\n");
+              return (1);
+          }
+          if (!res[0] || strcmp(res[0], "hello") != 0 || res[1] != NULL)
+          {
+              printf("resultat incorrect pour les separateurs en debut/fin\n");
+              free_split(res);
+              return (1);
+          }
+          free_split(res);
+          return (0);
+      }
+    expected_exit: 0
+    check_memory: true
+
+  - name: "chaine uniquement composee de separateurs"
+    main: |
+      #include <stdio.h>
+      #include <stdlib.h>
+      char **ft_split(char *str, char *charset);
+
+      int main(void)
+      {
+          char **res = ft_split("   ", " ");
+
+          if (!res)
+          {
+              printf("ft_split a retourne NULL, attendu un tableau vide freeable\n");
+              return (1);
+          }
+          if (res[0] != NULL)
+          {
+              printf("res[0] devrait etre NULL (aucun mot)\n");
+              free(res);
+              return (1);
+          }
+          free(res);
+          return (0);
+      }
+    expected_exit: 0
+    check_memory: true
+
+  - name: "chaine vide retourne un tableau vide"
+    main: |
+      #include <stdio.h>
+      #include <stdlib.h>
+      char **ft_split(char *str, char *charset);
+
+      int main(void)
+      {
+          char **res = ft_split("", " ");
+
+          if (!res)
+          {
+              printf("ft_split a retourne NULL, attendu un tableau vide freeable\n");
+              return (1);
+          }
+          if (res[0] != NULL)
+          {
+              printf("res[0] devrait etre NULL (aucun mot)\n");
+              free(res);
+              return (1);
+          }
+          free(res);
+          return (0);
+      }
+    expected_exit: 0
+    check_memory: true
+
+  - name: "aucun separateur present : un seul mot"
+    main: |
+      #include <stdio.h>
+      #include <string.h>
+      #include <stdlib.h>
+      char **ft_split(char *str, char *charset);
+
+      static void free_split(char **res)
+      {
+          int i;
+
+          i = 0;
+          while (res[i])
+          {
+              free(res[i]);
+              i++;
+          }
+          free(res);
+      }
+
+      int main(void)
+      {
+          char **res = ft_split("bonjour", " ");
+
+          if (!res || !res[0] || strcmp(res[0], "bonjour") != 0 || res[1] != NULL)
+          {
+              printf("resultat incorrect pour une chaine sans separateur\n");
+              if (res)
+                  free_split(res);
+              return (1);
+          }
+          free_split(res);
+          return (0);
+      }
+    expected_exit: 0
+    check_memory: true
+
+  - name: "charset vide : aucune separation"
+    main: |
+      #include <stdio.h>
+      #include <string.h>
+      #include <stdlib.h>
+      char **ft_split(char *str, char *charset);
+
+      static void free_split(char **res)
+      {
+          int i;
+
+          i = 0;
+          while (res[i])
+          {
+              free(res[i]);
+              i++;
+          }
+          free(res);
+      }
+
+      int main(void)
+      {
+          char **res = ft_split("bonjour le monde", "");
+
+          if (!res || !res[0] || strcmp(res[0], "bonjour le monde") != 0 || res[1] != NULL)
+          {
+              printf("resultat incorrect pour un charset vide\n");
+              if (res)
+                  free_split(res);
+              return (1);
+          }
+          free_split(res);
+          return (0);
+      }
+    expected_exit: 0
+    check_memory: true
+
+  - name: "tableau bien termine par NULL (pas de lecture hors bornes)"
+    main: |
+      #include <stdio.h>
+      #include <stdlib.h>
+      char **ft_split(char *str, char *charset);
+
+      static void free_split(char **res)
+      {
+          int i;
+
+          i = 0;
+          while (res[i])
+          {
+              free(res[i]);
+              i++;
+          }
+          free(res);
+      }
+
+      int main(void)
+      {
+          char **res = ft_split("x y z", " ");
+          int count = 0;
+
+          if (!res)
+          {
+              printf("ft_split a retourne NULL\n");
+              return (1);
+          }
+          while (res[count])
+              count++;
+          if (count != 3 || res[count] != NULL)
+          {
+              printf("count=%d (attendu 3, avec sentinelle NULL)\n", count);
+              free_split(res);
+              return (1);
+          }
+          free_split(res);
+          return (0);
+      }
+    expected_exit: 0
+    check_memory: true

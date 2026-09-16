@@ -1,0 +1,123 @@
+name: ft_strcmp
+tags: ["piscine", "ex2", "strings"]
+
+sources:
+  - ft_strcmp.c
+
+compile:
+  compiler: cc
+  flags:
+    - -Wall
+    - -Wextra
+    - -Werror
+
+tests:
+
+  - name: "chaines identiques retournent 0"
+    main: |
+      #include <stdio.h>
+      int ft_strcmp(char *s1, char *s2);
+
+      int main(void)
+      {
+          int res = ft_strcmp("bonjour", "bonjour");
+
+          if (res != 0)
+          {
+              printf("ft_strcmp = %d, attendu 0\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "s1 lexicographiquement plus petite retourne une valeur negative"
+    main: |
+      #include <stdio.h>
+      int ft_strcmp(char *s1, char *s2);
+
+      int main(void)
+      {
+          int res = ft_strcmp("abc", "abd");
+
+          if (res >= 0)
+          {
+              printf("ft_strcmp = %d, attendu une valeur negative\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "s1 lexicographiquement plus grande retourne une valeur positive"
+    main: |
+      #include <stdio.h>
+      int ft_strcmp(char *s1, char *s2);
+
+      int main(void)
+      {
+          int res = ft_strcmp("abd", "abc");
+
+          if (res <= 0)
+          {
+              printf("ft_strcmp = %d, attendu une valeur positive\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "une chaine prefixe de l'autre est consideree inferieure"
+    main: |
+      #include <stdio.h>
+      int ft_strcmp(char *s1, char *s2);
+
+      int main(void)
+      {
+          int res1 = ft_strcmp("abc", "abcdef");
+          int res2 = ft_strcmp("abcdef", "abc");
+
+          if (res1 >= 0 || res2 <= 0)
+          {
+              printf("res1=%d res2=%d (attendu res1<0 res2>0)\n", res1, res2);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "chaines vides sont egales"
+    main: |
+      #include <stdio.h>
+      int ft_strcmp(char *s1, char *s2);
+
+      int main(void)
+      {
+          int res = ft_strcmp("", "");
+
+          if (res != 0)
+          {
+              printf("ft_strcmp = %d, attendu 0\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "une chaine vide est inferieure a une chaine non vide"
+    main: |
+      #include <stdio.h>
+      int ft_strcmp(char *s1, char *s2);
+
+      int main(void)
+      {
+          int res = ft_strcmp("", "a");
+
+          if (res >= 0)
+          {
+              printf("ft_strcmp = %d, attendu une valeur negative\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0

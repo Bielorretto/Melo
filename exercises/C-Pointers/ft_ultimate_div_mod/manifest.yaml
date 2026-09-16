@@ -1,0 +1,114 @@
+name: ft_ultimate_div_mod
+tags: ["piscine", "ex4", "pointeurs"]
+
+sources:
+  - ft_ultimate_div_mod.c
+
+compile:
+  compiler: cc
+  flags:
+    - -Wall
+    - -Wextra
+    - -Werror
+
+tests:
+
+  - name: "division simple sans reste"
+    main: |
+      #include <stdio.h>
+      void ft_ultimate_div_mod(int *a, int *b);
+
+      int main(void)
+      {
+          int a = 10;
+          int b = 2;
+
+          ft_ultimate_div_mod(&a, &b);
+          if (a != 5 || b != 0)
+          {
+              printf("a=%d b=%d, attendu a=5 b=0\n", a, b);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "division avec reste (le reste doit utiliser le dividende original)"
+    main: |
+      #include <stdio.h>
+      void ft_ultimate_div_mod(int *a, int *b);
+
+      int main(void)
+      {
+          int a = 17;
+          int b = 5;
+
+          ft_ultimate_div_mod(&a, &b);
+          if (a != 3 || b != 2)
+          {
+              printf("a=%d b=%d, attendu a=3 b=2\n", a, b);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "dividende negatif"
+    main: |
+      #include <stdio.h>
+      void ft_ultimate_div_mod(int *a, int *b);
+
+      int main(void)
+      {
+          int a = -7;
+          int b = 2;
+
+          ft_ultimate_div_mod(&a, &b);
+          if (a != -3 || b != -1)
+          {
+              printf("a=%d b=%d, attendu a=-3 b=-1\n", a, b);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "diviseur negatif"
+    main: |
+      #include <stdio.h>
+      void ft_ultimate_div_mod(int *a, int *b);
+
+      int main(void)
+      {
+          int a = 7;
+          int b = -2;
+
+          ft_ultimate_div_mod(&a, &b);
+          if (a != -3 || b != 1)
+          {
+              printf("a=%d b=%d, attendu a=-3 b=1\n", a, b);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "dividende et diviseur negatifs"
+    main: |
+      #include <stdio.h>
+      void ft_ultimate_div_mod(int *a, int *b);
+
+      int main(void)
+      {
+          int a = -9;
+          int b = -4;
+
+          ft_ultimate_div_mod(&a, &b);
+          if (a != 2 || b != -1)
+          {
+              printf("a=%d b=%d, attendu a=2 b=-1\n", a, b);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0

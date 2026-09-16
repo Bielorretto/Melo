@@ -1,0 +1,114 @@
+name: ft_div_mod
+tags: ["piscine", "ex3", "pointeurs"]
+
+sources:
+  - ft_div_mod.c
+
+compile:
+  compiler: cc
+  flags:
+    - -Wall
+    - -Wextra
+    - -Werror
+
+tests:
+
+  - name: "division simple sans reste"
+    main: |
+      #include <stdio.h>
+      void ft_div_mod(int a, int b, int *div, int *mod);
+
+      int main(void)
+      {
+          int div;
+          int mod;
+
+          ft_div_mod(10, 2, &div, &mod);
+          if (div != 5 || mod != 0)
+          {
+              printf("div=%d mod=%d, attendu div=5 mod=0\n", div, mod);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "division avec reste"
+    main: |
+      #include <stdio.h>
+      void ft_div_mod(int a, int b, int *div, int *mod);
+
+      int main(void)
+      {
+          int div;
+          int mod;
+
+          ft_div_mod(17, 5, &div, &mod);
+          if (div != 3 || mod != 2)
+          {
+              printf("div=%d mod=%d, attendu div=3 mod=2\n", div, mod);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "dividende negatif"
+    main: |
+      #include <stdio.h>
+      void ft_div_mod(int a, int b, int *div, int *mod);
+
+      int main(void)
+      {
+          int div;
+          int mod;
+
+          ft_div_mod(-7, 2, &div, &mod);
+          if (div != -3 || mod != -1)
+          {
+              printf("div=%d mod=%d, attendu div=-3 mod=-1\n", div, mod);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "diviseur negatif"
+    main: |
+      #include <stdio.h>
+      void ft_div_mod(int a, int b, int *div, int *mod);
+
+      int main(void)
+      {
+          int div;
+          int mod;
+
+          ft_div_mod(7, -2, &div, &mod);
+          if (div != -3 || mod != 1)
+          {
+              printf("div=%d mod=%d, attendu div=-3 mod=1\n", div, mod);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "dividende et diviseur negatifs"
+    main: |
+      #include <stdio.h>
+      void ft_div_mod(int a, int b, int *div, int *mod);
+
+      int main(void)
+      {
+          int div;
+          int mod;
+
+          ft_div_mod(-9, -4, &div, &mod);
+          if (div != 2 || mod != -1)
+          {
+              printf("div=%d mod=%d, attendu div=2 mod=-1\n", div, mod);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0

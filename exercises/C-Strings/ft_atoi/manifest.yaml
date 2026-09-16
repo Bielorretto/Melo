@@ -1,0 +1,176 @@
+name: ft_atoi
+tags: ["piscine", "ex7", "strings"]
+
+sources:
+  - ft_atoi.c
+
+compile:
+  compiler: cc
+  flags:
+    - -Wall
+    - -Wextra
+    - -Werror
+
+tests:
+
+  - name: "nombre simple sans espaces ni signes"
+    main: |
+      #include <stdio.h>
+      int ft_atoi(char *str);
+
+      int main(void)
+      {
+          int res = ft_atoi("1234");
+
+          if (res != 1234)
+          {
+              printf("ft_atoi = %d, attendu 1234\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "espaces en tete ignores"
+    main: |
+      #include <stdio.h>
+      int ft_atoi(char *str);
+
+      int main(void)
+      {
+          int res = ft_atoi("   42");
+
+          if (res != 42)
+          {
+              printf("ft_atoi = %d, attendu 42\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "signe negatif simple"
+    main: |
+      #include <stdio.h>
+      int ft_atoi(char *str);
+
+      int main(void)
+      {
+          int res = ft_atoi("-42");
+
+          if (res != -42)
+          {
+              printf("ft_atoi = %d, attendu -42\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "exemple du sujet : signes multiples et lettres apres les chiffres"
+    main: |
+      #include <stdio.h>
+      int ft_atoi(char *str);
+
+      int main(void)
+      {
+          int res = ft_atoi(" --+-+1234ab567");
+
+          if (res != -1234)
+          {
+              printf("ft_atoi = %d, attendu -1234\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "arret au premier caractere non numerique"
+    main: |
+      #include <stdio.h>
+      int ft_atoi(char *str);
+
+      int main(void)
+      {
+          int res = ft_atoi("567abc");
+
+          if (res != 567)
+          {
+              printf("ft_atoi = %d, attendu 567\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "nombre pair de signes moins donne un resultat positif"
+    main: |
+      #include <stdio.h>
+      int ft_atoi(char *str);
+
+      int main(void)
+      {
+          int res = ft_atoi("--42");
+
+          if (res != 42)
+          {
+              printf("ft_atoi = %d, attendu 42\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "chaine sans chiffres retourne 0"
+    main: |
+      #include <stdio.h>
+      int ft_atoi(char *str);
+
+      int main(void)
+      {
+          int res = ft_atoi("abc");
+
+          if (res != 0)
+          {
+              printf("ft_atoi = %d, attendu 0\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "chaine vide retourne 0"
+    main: |
+      #include <stdio.h>
+      int ft_atoi(char *str);
+
+      int main(void)
+      {
+          int res = ft_atoi("");
+
+          if (res != 0)
+          {
+              printf("ft_atoi = %d, attendu 0\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "signes plus multiples n'affectent pas le signe"
+    main: |
+      #include <stdio.h>
+      int ft_atoi(char *str);
+
+      int main(void)
+      {
+          int res = ft_atoi("+++42");
+
+          if (res != 42)
+          {
+              printf("ft_atoi = %d, attendu 42\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0

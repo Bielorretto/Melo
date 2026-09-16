@@ -1,0 +1,139 @@
+name: ft_any
+tags: ["piscine", "ex2", "pointeurs_fonctions"]
+
+sources:
+  - ft_any.c
+
+compile:
+  compiler: cc
+  flags:
+    - -Wall
+    - -Wextra
+    - -Werror
+
+tests:
+
+  - name: "retourne 1 si au moins une chaine correspond"
+    main: |
+      #include <stdio.h>
+      int ft_any(char **tab, int (*f)(char *));
+
+      static int is_empty(char *s)
+      {
+          return (*s == '\0');
+      }
+
+      int main(void)
+      {
+          char *tab[] = {"bonjour", "", "monde", NULL};
+          int res = ft_any(tab, &is_empty);
+
+          if (res != 1)
+          {
+              printf("ft_any = %d, attendu 1\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "retourne 0 si aucune chaine ne correspond"
+    main: |
+      #include <stdio.h>
+      int ft_any(char **tab, int (*f)(char *));
+
+      static int is_empty(char *s)
+      {
+          return (*s == '\0');
+      }
+
+      int main(void)
+      {
+          char *tab[] = {"a", "b", "c", NULL};
+          int res = ft_any(tab, &is_empty);
+
+          if (res != 0)
+          {
+              printf("ft_any = %d, attendu 0\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "tableau contenant uniquement le NULL final retourne 0"
+    main: |
+      #include <stdio.h>
+      int ft_any(char **tab, int (*f)(char *));
+
+      static int always_true(char *s)
+      {
+          (void)s;
+          return (1);
+      }
+
+      int main(void)
+      {
+          char *tab[] = {NULL};
+          int res = ft_any(tab, &always_true);
+
+          if (res != 0)
+          {
+              printf("ft_any = %d, attendu 0 (tableau vide)\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "s'arrete correctement au NULL final (pas de lecture hors bornes)"
+    main: |
+      #include <stdio.h>
+      int ft_any(char **tab, int (*f)(char *));
+
+      static int calls = 0;
+
+      static int count_calls(char *s)
+      {
+          (void)s;
+          calls++;
+          return (0);
+      }
+
+      int main(void)
+      {
+          char *tab[] = {"un", "deux", "trois", NULL};
+          int res = ft_any(tab, &count_calls);
+
+          if (calls != 3 || res != 0)
+          {
+              printf("calls=%d res=%d (attendu calls=3 res=0)\n", calls, res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "une seule chaine correspondante suffit"
+    main: |
+      #include <stdio.h>
+      int ft_any(char **tab, int (*f)(char *));
+
+      static int starts_with_x(char *s)
+      {
+          return (s[0] == 'x');
+      }
+
+      int main(void)
+      {
+          char *tab[] = {"a", "b", "xyz", "c", NULL};
+          int res = ft_any(tab, &starts_with_x);
+
+          if (res != 1)
+          {
+              printf("ft_any = %d, attendu 1\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0

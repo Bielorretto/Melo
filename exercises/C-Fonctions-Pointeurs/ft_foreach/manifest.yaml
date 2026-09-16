@@ -1,0 +1,149 @@
+name: ft_foreach
+tags: ["piscine", "ex0", "pointeurs_fonctions"]
+
+sources:
+  - ft_foreach.c
+
+compile:
+  compiler: cc
+  flags:
+    - -Wall
+    - -Wextra
+    - -Werror
+
+tests:
+
+  - name: "chaque element est visite et cumule correctement"
+    main: |
+      #include <stdio.h>
+      void ft_foreach(int *tab, int length, void (*f)(int));
+
+      static int g_calls = 0;
+      static int g_sum = 0;
+      static int g_last = 0;
+
+      static void record(int n)
+      {
+          g_calls++;
+          g_sum += n;
+          g_last = n;
+      }
+
+      int main(void)
+      {
+          int tab[5] = {1, 2, 3, 4, 5};
+          ft_foreach(tab, 5, &record);
+          if (g_calls != 5 || g_sum != 15 || g_last != 5)
+          {
+              printf("calls=%d sum=%d last=%d (attendu calls=5 sum=15 last=5)\n",
+                     g_calls, g_sum, g_last);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "l'ordre du tableau est respecte"
+    main: |
+      #include <stdio.h>
+      void ft_foreach(int *tab, int length, void (*f)(int));
+
+      static int seq[4];
+      static int idx = 0;
+
+      static void record_seq(int n)
+      {
+          seq[idx] = n;
+          idx++;
+      }
+
+      int main(void)
+      {
+          int tab[4] = {10, 20, 30, 40};
+          ft_foreach(tab, 4, &record_seq);
+          if (idx != 4 || seq[0] != 10 || seq[1] != 20 || seq[2] != 30 || seq[3] != 40)
+          {
+              printf("ordre incorrect ou nombre d'appels incorrect (idx=%d)\n", idx);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "length 0 ne declenche aucun appel"
+    main: |
+      #include <stdio.h>
+      void ft_foreach(int *tab, int length, void (*f)(int));
+
+      static int calls = 0;
+
+      static void inc(int n)
+      {
+          (void)n;
+          calls++;
+      }
+
+      int main(void)
+      {
+          int tab[1] = {42};
+          ft_foreach(tab, 0, &inc);
+          if (calls != 0)
+          {
+              printf("calls = %d, attendu 0\n", calls);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "gere correctement les nombres negatifs"
+    main: |
+      #include <stdio.h>
+      void ft_foreach(int *tab, int length, void (*f)(int));
+
+      static int sum = 0;
+
+      static void addv(int n)
+      {
+          sum += n;
+      }
+
+      int main(void)
+      {
+          int tab[3] = {-5, 10, -3};
+          ft_foreach(tab, 3, &addv);
+          if (sum != 2)
+          {
+              printf("sum = %d, attendu 2\n", sum);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "tableau a un seul element"
+    main: |
+      #include <stdio.h>
+      void ft_foreach(int *tab, int length, void (*f)(int));
+
+      static int val = 0;
+      static int calls = 0;
+
+      static void set(int n)
+      {
+          val = n;
+          calls++;
+      }
+
+      int main(void)
+      {
+          int tab[1] = {99};
+          ft_foreach(tab, 1, &set);
+          if (calls != 1 || val != 99)
+          {
+              printf("calls=%d val=%d (attendu calls=1 val=99)\n", calls, val);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0

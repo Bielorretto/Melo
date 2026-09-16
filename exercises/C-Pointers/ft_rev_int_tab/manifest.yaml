@@ -1,0 +1,127 @@
+name: ft_rev_int_tab
+tags: ["piscine", "ex5", "pointeurs"]
+
+sources:
+  - ft_rev_int_tab.c
+
+compile:
+  compiler: cc
+  flags:
+    - -Wall
+    - -Wextra
+    - -Werror
+
+tests:
+
+  - name: "inverse un tableau de taille impaire"
+    main: |
+      #include <stdio.h>
+      void ft_rev_int_tab(int *tab, int size);
+
+      int main(void)
+      {
+          int tab[5] = {1, 2, 3, 4, 5};
+          int expected[5] = {5, 4, 3, 2, 1};
+          int i = 0;
+
+          ft_rev_int_tab(tab, 5);
+          while (i < 5)
+          {
+              if (tab[i] != expected[i])
+              {
+                  printf("tab[%d] = %d, attendu %d\n", i, tab[i], expected[i]);
+                  return (1);
+              }
+              i++;
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "inverse un tableau de taille paire"
+    main: |
+      #include <stdio.h>
+      void ft_rev_int_tab(int *tab, int size);
+
+      int main(void)
+      {
+          int tab[4] = {10, 20, 30, 40};
+          int expected[4] = {40, 30, 20, 10};
+          int i = 0;
+
+          ft_rev_int_tab(tab, 4);
+          while (i < 4)
+          {
+              if (tab[i] != expected[i])
+              {
+                  printf("tab[%d] = %d, attendu %d\n", i, tab[i], expected[i]);
+                  return (1);
+              }
+              i++;
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "tableau d'un seul element reste inchange"
+    main: |
+      #include <stdio.h>
+      void ft_rev_int_tab(int *tab, int size);
+
+      int main(void)
+      {
+          int tab[1] = {99};
+
+          ft_rev_int_tab(tab, 1);
+          if (tab[0] != 99)
+          {
+              printf("tab[0] = %d, attendu 99\n", tab[0]);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "tableau vide (size 0) ne plante pas"
+    main: |
+      #include <stdio.h>
+      void ft_rev_int_tab(int *tab, int size);
+
+      int main(void)
+      {
+          int tab[1] = {77};
+
+          ft_rev_int_tab(tab, 0);
+          if (tab[0] != 77)
+          {
+              printf("tab[0] = %d, attendu 77 (inchange)\n", tab[0]);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "gere les nombres negatifs et les doublons"
+    main: |
+      #include <stdio.h>
+      void ft_rev_int_tab(int *tab, int size);
+
+      int main(void)
+      {
+          int tab[6] = {-1, 5, 5, -3, 0, 2};
+          int expected[6] = {2, 0, -3, 5, 5, -1};
+          int i = 0;
+
+          ft_rev_int_tab(tab, 6);
+          while (i < 6)
+          {
+              if (tab[i] != expected[i])
+              {
+                  printf("tab[%d] = %d, attendu %d\n", i, tab[i], expected[i]);
+                  return (1);
+              }
+              i++;
+          }
+          return (0);
+      }
+    expected_exit: 0

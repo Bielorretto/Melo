@@ -1,0 +1,137 @@
+name: ft_strdup
+tags: ["piscine", "ex0", "memoire"]
+
+sources:
+  - ft_strdup.c
+
+compile:
+  compiler: cc
+  flags:
+    - -Wall
+    - -Wextra
+    - -Werror
+
+tests:
+
+  - name: "duplique une chaine simple"
+    main: |
+      #include <stdio.h>
+      #include <string.h>
+      #include <stdlib.h>
+      char *ft_strdup(char *src);
+
+      int main(void)
+      {
+          char *src = "Hello, 42!";
+          char *dup = ft_strdup(src);
+
+          if (!dup || strcmp(dup, src) != 0)
+          {
+              printf("dup = \"%s\", attendu \"%s\"\n", dup ? dup : "(NULL)", src);
+              free(dup);
+              return (1);
+          }
+          free(dup);
+          return (0);
+      }
+    expected_exit: 0
+    check_memory: true
+
+  - name: "duplique une chaine vide"
+    main: |
+      #include <stdio.h>
+      #include <stdlib.h>
+      char *ft_strdup(char *src);
+
+      int main(void)
+      {
+          char *dup = ft_strdup("");
+
+          if (!dup || dup[0] != '\0')
+          {
+              printf("dup n'est pas une chaine vide valide\n");
+              free(dup);
+              return (1);
+          }
+          free(dup);
+          return (0);
+      }
+    expected_exit: 0
+    check_memory: true
+
+  - name: "la copie est independante de l'original"
+    main: |
+      #include <stdio.h>
+      #include <stdlib.h>
+      char *ft_strdup(char *src);
+
+      int main(void)
+      {
+          char src[] = "mutable";
+          char *dup = ft_strdup(src);
+
+          if (!dup)
+          {
+              printf("ft_strdup a retourne NULL\n");
+              return (1);
+          }
+          src[0] = 'X';
+          if (dup[0] != 'm')
+          {
+              printf("dup[0] = '%c', attendu 'm' (la copie ne doit pas dependre de l'original)\n", dup[0]);
+              free(dup);
+              return (1);
+          }
+          free(dup);
+          return (0);
+      }
+    expected_exit: 0
+    check_memory: true
+
+  - name: "gere les caracteres speciaux (retours a la ligne, tabulations)"
+    main: |
+      #include <stdio.h>
+      #include <string.h>
+      #include <stdlib.h>
+      char *ft_strdup(char *src);
+
+      int main(void)
+      {
+          char *src = "Line1\nLine2\ttab";
+          char *dup = ft_strdup(src);
+
+          if (!dup || strcmp(dup, src) != 0)
+          {
+              printf("copie incorrecte pour une chaine avec caracteres speciaux\n");
+              free(dup);
+              return (1);
+          }
+          free(dup);
+          return (0);
+      }
+    expected_exit: 0
+    check_memory: true
+
+  - name: "la chaine dupliquee a la bonne longueur"
+    main: |
+      #include <stdio.h>
+      #include <string.h>
+      #include <stdlib.h>
+      char *ft_strdup(char *src);
+
+      int main(void)
+      {
+          char *src = "quarante-deux";
+          char *dup = ft_strdup(src);
+
+          if (!dup || strlen(dup) != strlen(src))
+          {
+              printf("longueur incorrecte\n");
+              free(dup);
+              return (1);
+          }
+          free(dup);
+          return (0);
+      }
+    expected_exit: 0
+    check_memory: true

@@ -1,0 +1,248 @@
+name: ft_convert_base
+tags: ["piscine", "ex4", "memoire"]
+
+sources:
+  - ft_convert_base.c
+  - ft_convert_base2.c
+
+compile:
+  compiler: cc
+  flags:
+    - -Wall
+    - -Wextra
+    - -Werror
+
+tests:
+
+  - name: "conversion decimal vers binaire"
+    main: |
+      #include <stdio.h>
+      #include <string.h>
+      #include <stdlib.h>
+      char *ft_convert_base(char *nbr, char *base_from, char *base_to);
+
+      int main(void)
+      {
+          char *res = ft_convert_base("42", "0123456789", "01");
+
+          if (!res || strcmp(res, "101010") != 0)
+          {
+              printf("res = \"%s\", attendu \"101010\"\n", res ? res : "(NULL)");
+              free(res);
+              return (1);
+          }
+          free(res);
+          return (0);
+      }
+    expected_exit: 0
+    check_memory: true
+
+  - name: "conversion binaire vers decimal"
+    main: |
+      #include <stdio.h>
+      #include <string.h>
+      #include <stdlib.h>
+      char *ft_convert_base(char *nbr, char *base_from, char *base_to);
+
+      int main(void)
+      {
+          char *res = ft_convert_base("101010", "01", "0123456789");
+
+          if (!res || strcmp(res, "42") != 0)
+          {
+              printf("res = \"%s\", attendu \"42\"\n", res ? res : "(NULL)");
+              free(res);
+              return (1);
+          }
+          free(res);
+          return (0);
+      }
+    expected_exit: 0
+    check_memory: true
+
+  - name: "conversion decimal vers hexadecimal"
+    main: |
+      #include <stdio.h>
+      #include <string.h>
+      #include <stdlib.h>
+      char *ft_convert_base(char *nbr, char *base_from, char *base_to);
+
+      int main(void)
+      {
+          char *res = ft_convert_base("255", "0123456789", "0123456789ABCDEF");
+
+          if (!res || strcmp(res, "FF") != 0)
+          {
+              printf("res = \"%s\", attendu \"FF\"\n", res ? res : "(NULL)");
+              free(res);
+              return (1);
+          }
+          free(res);
+          return (0);
+      }
+    expected_exit: 0
+    check_memory: true
+
+  - name: "nombre negatif : un seul signe moins conserve"
+    main: |
+      #include <stdio.h>
+      #include <string.h>
+      #include <stdlib.h>
+      char *ft_convert_base(char *nbr, char *base_from, char *base_to);
+
+      int main(void)
+      {
+          char *res = ft_convert_base("-42", "0123456789", "01");
+
+          if (!res || strcmp(res, "-101010") != 0)
+          {
+              printf("res = \"%s\", attendu \"-101010\"\n", res ? res : "(NULL)");
+              free(res);
+              return (1);
+          }
+          free(res);
+          return (0);
+      }
+    expected_exit: 0
+    check_memory: true
+
+  - name: "zero reste zero quelle que soit la base"
+    main: |
+      #include <stdio.h>
+      #include <string.h>
+      #include <stdlib.h>
+      char *ft_convert_base(char *nbr, char *base_from, char *base_to);
+
+      int main(void)
+      {
+          char *res = ft_convert_base("0", "0123456789", "01");
+
+          if (!res || strcmp(res, "0") != 0)
+          {
+              printf("res = \"%s\", attendu \"0\"\n", res ? res : "(NULL)");
+              free(res);
+              return (1);
+          }
+          free(res);
+          return (0);
+      }
+    expected_exit: 0
+    check_memory: true
+
+  - name: "base personnalisee (poneyvif) : conversion depuis le decimal"
+    main: |
+      #include <stdio.h>
+      #include <string.h>
+      #include <stdlib.h>
+      char *ft_convert_base(char *nbr, char *base_from, char *base_to);
+
+      int main(void)
+      {
+          char *res = ft_convert_base("8", "0123456789", "poneyvif");
+
+          if (!res || strcmp(res, "op") != 0)
+          {
+              printf("res = \"%s\", attendu \"op\"\n", res ? res : "(NULL)");
+              free(res);
+              return (1);
+          }
+          free(res);
+          return (0);
+      }
+    expected_exit: 0
+    check_memory: true
+
+  - name: "base personnalisee (poneyvif) : conversion vers le decimal"
+    main: |
+      #include <stdio.h>
+      #include <string.h>
+      #include <stdlib.h>
+      char *ft_convert_base(char *nbr, char *base_from, char *base_to);
+
+      int main(void)
+      {
+          char *res = ft_convert_base("op", "poneyvif", "0123456789");
+
+          if (!res || strcmp(res, "8") != 0)
+          {
+              printf("res = \"%s\", attendu \"8\"\n", res ? res : "(NULL)");
+              free(res);
+              return (1);
+          }
+          free(res);
+          return (0);
+      }
+    expected_exit: 0
+    check_memory: true
+
+  - name: "base invalide : caractere duplique retourne NULL"
+    main: |
+      #include <stdio.h>
+      char *ft_convert_base(char *nbr, char *base_from, char *base_to);
+
+      int main(void)
+      {
+          char *res = ft_convert_base("5", "0123456789", "AAB");
+
+          if (res != NULL)
+          {
+              printf("res = \"%s\", attendu NULL (base avec caractere duplique)\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "base invalide : un seul caractere retourne NULL"
+    main: |
+      #include <stdio.h>
+      char *ft_convert_base(char *nbr, char *base_from, char *base_to);
+
+      int main(void)
+      {
+          char *res = ft_convert_base("5", "0123456789", "0");
+
+          if (res != NULL)
+          {
+              printf("res = \"%s\", attendu NULL (base d'un seul caractere)\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "base invalide : espace dans la base retourne NULL"
+    main: |
+      #include <stdio.h>
+      char *ft_convert_base(char *nbr, char *base_from, char *base_to);
+
+      int main(void)
+      {
+          char *res = ft_convert_base("5", "0123456789", "01 2");
+
+          if (res != NULL)
+          {
+              printf("res = \"%s\", attendu NULL (base contenant un espace)\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "base invalide : signe moins dans la base retourne NULL"
+    main: |
+      #include <stdio.h>
+      char *ft_convert_base(char *nbr, char *base_from, char *base_to);
+
+      int main(void)
+      {
+          char *res = ft_convert_base("5", "0123456789", "01-2");
+
+          if (res != NULL)
+          {
+              printf("res = \"%s\", attendu NULL (base contenant '-')\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
