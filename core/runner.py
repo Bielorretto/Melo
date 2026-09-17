@@ -29,12 +29,25 @@ def load_manifest(exercise_dir: Path) -> dict:
         return yaml.safe_load(f)
 
 
+def _find_student_file(student_dir: Path, src: str) -> Path:
+    direct = student_dir / src
+    if direct.exists():
+        return direct
+    matches = sorted(student_dir.rglob(src))
+    if not matches:
+        raise FileNotFoundError(f"fichier manquant chez l'élève : {src}")
+    if len(matches) > 1:
+        found = ", ".join(str(m.relative_to(student_dir)) for m in matches)
+        raise FileNotFoundError(
+            f"plusieurs fichiers '{src}' trouvés chez l'élève ({found}), impossible de choisir"
+        )
+    return matches[0]
+
+
 def _prepare_workdir(exercise_dir: Path, student_dir: Path, test: dict,
                       manifest: dict, tmp: Path) -> None:
     for src in manifest["sources"]:
-        student_file = student_dir / src
-        if not student_file.exists():
-            raise FileNotFoundError(f"fichier manquant chez l'élève : {src}")
+        student_file = _find_student_file(student_dir, src)
         shutil.copy(student_file, tmp / src)
 
     includes_dir = exercise_dir / "includes"
@@ -147,6 +160,57 @@ def find_targets(exercises_root: Path, target: str) -> List[Path]:
                 return found
 
     return []
+
+def _student_has_file(student_dir: Path, src: str) -> bool:
+    if (student_dir / src).exists():
+        return True
+    return next(student_dir.rglob(src), None) is not None
+
+
+def list_modules(exercises_root: Path) -> List[str]:
+    modules = set()
+    for manifest_path in exercises_root.rglob("manifest.yaml"):
+        rel_parts = manifest_path.parent.relative_to(exercises_root).parts
+        if len(rel_parts) >= 2:
+            modules.add(rel_parts[0])
+    return sorted(modules)
+
+
+def detect_module(exercises_root: Path, student_dir: Path) -> str:
+    modules = list_modules(exercises_root)
+    if not modules:
+        raise ValueError(f"aucun module trouvé dans {exercises_root}")
+
+    name_matches = [m for m in modules if m.lower() == student_dir.name.lower()]
+    if len(name_matches) == 1:
+        return name_matches[0]
+
+    scores: Dict[str, int] = {}
+    for module in modules:
+        count = 0
+        for manifest_path in (exercises_root / module).rglob("manifest.yaml"):
+            manifest = load_manifest(manifest_path.parent)
+            sources = manifest.get("sources", [])
+            if sources and all(_student_has_file(student_dir, s) for s in sources):
+                count += 1
+        if count > 0:
+            scores[module] = count
+
+    if len(scores) == 1:
+        return next(iter(scores))
+    if len(scores) > 1:
+        ranked = ", ".join(
+            f"{m} ({c} exo(s))" for m, c in sorted(scores.items(), key=lambda kv: -kv[1])
+        )
+        raise ValueError(
+            f"plusieurs modules correspondent aux fichiers présents : {ranked} "
+            f"— précise le module en argument"
+        )
+    raise ValueError(
+        f"impossible de détecter le module automatiquement dans {student_dir} "
+        f"— précise le module en argument (modules disponibles : {', '.join(modules)})"
+    )
+
 
 def run_exercise(exercise_name: str, student_dir: Path, exercises_root: Path,
                  timeout: int = 5) -> List[TestResult]:

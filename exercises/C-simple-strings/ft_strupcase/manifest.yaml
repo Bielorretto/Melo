@@ -1,0 +1,112 @@
+name: ft_strupcase
+tags: ["piscine", "ex5", "casse"]
+
+sources:
+  - ft_strupcase.c
+
+compile:
+  compiler: cc
+  flags:
+    - -Wall
+    - -Wextra
+    - -Werror
+
+tests:
+
+  - name: "met une chaine minuscule en majuscule"
+    main: |
+      #include <stdio.h>
+      #include <string.h>
+      char *ft_strupcase(char *str);
+
+      int main(void)
+      {
+          char str[20] = "bonjour";
+
+          ft_strupcase(str);
+          if (strcmp(str, "BONJOUR") != 0)
+          {
+              printf("str = \"%s\", attendu \"BONJOUR\"\n", str);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "ne modifie pas les caracteres non alphabetiques"
+    main: |
+      #include <stdio.h>
+      #include <string.h>
+      char *ft_strupcase(char *str);
+
+      int main(void)
+      {
+          char str[20] = "abc123!";
+
+          ft_strupcase(str);
+          if (strcmp(str, "ABC123!") != 0)
+          {
+              printf("str = \"%s\", attendu \"ABC123!\"\n", str);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "chaine deja en majuscule reste inchangee"
+    main: |
+      #include <stdio.h>
+      #include <string.h>
+      char *ft_strupcase(char *str);
+
+      int main(void)
+      {
+          char str[20] = "DEJA";
+
+          ft_strupcase(str);
+          if (strcmp(str, "DEJA") != 0)
+          {
+              printf("str = \"%s\", attendu \"DEJA\"\n", str);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "retourne bien le pointeur str"
+    main: |
+      #include <stdio.h>
+      char *ft_strupcase(char *str);
+
+      int main(void)
+      {
+          char str[20] = "test";
+          char *ret = ft_strupcase(str);
+
+          if (ret != str)
+          {
+              printf("la fonction ne retourne pas str\n");
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "chaine vide reste vide"
+    main: |
+      #include <stdio.h>
+      char *ft_strupcase(char *str);
+
+      int main(void)
+      {
+          char str[5] = "";
+
+          ft_strupcase(str);
+          if (str[0] != '\0')
+          {
+              printf("str n'est pas restee vide\n");
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0

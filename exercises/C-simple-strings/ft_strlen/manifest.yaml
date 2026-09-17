@@ -1,0 +1,104 @@
+name: ft_strlen
+tags: ["piscine", "ex8", "strings"]
+
+sources:
+  - ft_strlen.c
+
+compile:
+  compiler: cc
+  flags:
+    - -Wall
+    - -Wextra
+    - -Werror
+
+tests:
+
+  - name: "longueur d'une chaine simple"
+    main: |
+      #include <stdio.h>
+      int ft_strlen(char *str);
+
+      int main(void)
+      {
+          int res = ft_strlen("bonjour");
+
+          if (res != 7)
+          {
+              printf("res = %d, attendu 7\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "chaine vide retourne 0"
+    main: |
+      #include <stdio.h>
+      int ft_strlen(char *str);
+
+      int main(void)
+      {
+          int res = ft_strlen("");
+
+          if (res != 0)
+          {
+              printf("res = %d, attendu 0\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "compte les espaces"
+    main: |
+      #include <stdio.h>
+      int ft_strlen(char *str);
+
+      int main(void)
+      {
+          int res = ft_strlen("a b c");
+
+          if (res != 5)
+          {
+              printf("res = %d, attendu 5\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "compte les caracteres speciaux"
+    main: |
+      #include <stdio.h>
+      int ft_strlen(char *str);
+
+      int main(void)
+      {
+          int res = ft_strlen("a\tb\nc");
+
+          if (res != 5)
+          {
+              printf("res = %d, attendu 5\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "longueur d'une chaine plus longue"
+    main: |
+      #include <stdio.h>
+      int ft_strlen(char *str);
+
+      int main(void)
+      {
+          int res = ft_strlen("the quick brown fox");
+
+          if (res != 19)
+          {
+              printf("res = %d, attendu 19\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0

@@ -20,10 +20,21 @@ RENDU_ROOT = ROOT / "rendu"
 
 def cmd_test(args):
     student_dir = Path(args.student_dir).resolve() if args.student_dir else ROOT.parent
-    exercise_dirs = find_targets(EXERCISES_ROOT, args.exercise)
+
+    exercise = args.exercise
+    if exercise is None:
+        from core.runner import detect_module
+        try:
+            exercise = detect_module(EXERCISES_ROOT, student_dir)
+        except ValueError as e:
+            print(f"Impossible de détecter le module automatiquement : {e}")
+            sys.exit(1)
+        print(f"Module détecté automatiquement : {exercise}\n")
+
+    exercise_dirs = find_targets(EXERCISES_ROOT, exercise)
 
     if not exercise_dirs:
-        print(f"'{args.exercise}' introuvable (ni exercice, ni module) dans {EXERCISES_ROOT}")
+        print(f"'{exercise}' introuvable (ni exercice, ni module) dans {EXERCISES_ROOT}")
         sys.exit(1)
 
     all_ok = True
@@ -120,7 +131,8 @@ def main():
     sub = parser.add_subparsers(dest="command", required=True)
 
     p_test = sub.add_parser("test", help="teste un exercice")
-    p_test.add_argument("exercise")
+    p_test.add_argument("exercise", nargs="?", default=None,
+                         help="nom de l'exercice ou du module (défaut : détection automatique)")
     p_test.add_argument("student_dir", nargs="?", default=None,
                          help="dossier du rendu (défaut : dossier parent de Meloweo/)")
     p_test.add_argument("--timeout", type=int, default=5)

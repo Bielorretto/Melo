@@ -1,0 +1,112 @@
+name: ft_strlowcase
+tags: ["piscine", "ex6", "casse"]
+
+sources:
+  - ft_strlowcase.c
+
+compile:
+  compiler: cc
+  flags:
+    - -Wall
+    - -Wextra
+    - -Werror
+
+tests:
+
+  - name: "met une chaine majuscule en minuscule"
+    main: |
+      #include <stdio.h>
+      #include <string.h>
+      char *ft_strlowcase(char *str);
+
+      int main(void)
+      {
+          char str[20] = "BONJOUR";
+
+          ft_strlowcase(str);
+          if (strcmp(str, "bonjour") != 0)
+          {
+              printf("str = \"%s\", attendu \"bonjour\"\n", str);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "ne modifie pas les caracteres non alphabetiques"
+    main: |
+      #include <stdio.h>
+      #include <string.h>
+      char *ft_strlowcase(char *str);
+
+      int main(void)
+      {
+          char str[20] = "ABC123!";
+
+          ft_strlowcase(str);
+          if (strcmp(str, "abc123!") != 0)
+          {
+              printf("str = \"%s\", attendu \"abc123!\"\n", str);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "chaine deja en minuscule reste inchangee"
+    main: |
+      #include <stdio.h>
+      #include <string.h>
+      char *ft_strlowcase(char *str);
+
+      int main(void)
+      {
+          char str[20] = "deja";
+
+          ft_strlowcase(str);
+          if (strcmp(str, "deja") != 0)
+          {
+              printf("str = \"%s\", attendu \"deja\"\n", str);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "retourne bien le pointeur str"
+    main: |
+      #include <stdio.h>
+      char *ft_strlowcase(char *str);
+
+      int main(void)
+      {
+          char str[20] = "TEST";
+          char *ret = ft_strlowcase(str);
+
+          if (ret != str)
+          {
+              printf("la fonction ne retourne pas str\n");
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "chaine vide reste vide"
+    main: |
+      #include <stdio.h>
+      char *ft_strlowcase(char *str);
+
+      int main(void)
+      {
+          char str[5] = "";
+
+          ft_strlowcase(str);
+          if (str[0] != '\0')
+          {
+              printf("str n'est pas restee vide\n");
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0

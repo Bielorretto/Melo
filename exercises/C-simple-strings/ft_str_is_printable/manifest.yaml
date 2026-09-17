@@ -1,0 +1,104 @@
+name: ft_str_is_printable
+tags: ["piscine", "ex4", "classification"]
+
+sources:
+  - ft_str_is_printable.c
+
+compile:
+  compiler: cc
+  flags:
+    - -Wall
+    - -Wextra
+    - -Werror
+
+tests:
+
+  - name: "chaine entierement imprimable retourne 1"
+    main: |
+      #include <stdio.h>
+      int ft_str_is_printable(char *str);
+
+      int main(void)
+      {
+          int res = ft_str_is_printable("Hello, World! 123");
+
+          if (res != 1)
+          {
+              printf("res = %d, attendu 1\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "chaine contenant une tabulation retourne 0"
+    main: |
+      #include <stdio.h>
+      int ft_str_is_printable(char *str);
+
+      int main(void)
+      {
+          int res = ft_str_is_printable("abc\tdef");
+
+          if (res != 0)
+          {
+              printf("res = %d, attendu 0\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "chaine vide retourne 1"
+    main: |
+      #include <stdio.h>
+      int ft_str_is_printable(char *str);
+
+      int main(void)
+      {
+          int res = ft_str_is_printable("");
+
+          if (res != 1)
+          {
+              printf("res = %d, attendu 1\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "chaine contenant un retour a la ligne retourne 0"
+    main: |
+      #include <stdio.h>
+      int ft_str_is_printable(char *str);
+
+      int main(void)
+      {
+          int res = ft_str_is_printable("line1\nline2");
+
+          if (res != 0)
+          {
+              printf("res = %d, attendu 0\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "un espace simple est considere imprimable"
+    main: |
+      #include <stdio.h>
+      int ft_str_is_printable(char *str);
+
+      int main(void)
+      {
+          int res = ft_str_is_printable(" ");
+
+          if (res != 1)
+          {
+              printf("res = %d, attendu 1\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0

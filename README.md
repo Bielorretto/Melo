@@ -162,6 +162,7 @@ Le mode `test` permet de vérifier directement ton rendu avec les mêmes princip
 ### Lancer un test
 
 ```bash
+./cli.py test (détecte automatiquement le module à tester)
 ./cli.py test ft_putnbr (pour tester un seul exo)
 ./cli.py test nom_du_module (pour tester tout le module d'un coup)
 ```

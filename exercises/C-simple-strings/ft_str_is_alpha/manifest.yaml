@@ -1,0 +1,104 @@
+name: ft_str_is_alpha
+tags: ["piscine", "ex0", "classification"]
+
+sources:
+  - ft_str_is_alpha.c
+
+compile:
+  compiler: cc
+  flags:
+    - -Wall
+    - -Wextra
+    - -Werror
+
+tests:
+
+  - name: "chaine entierement alphabetique retourne 1"
+    main: |
+      #include <stdio.h>
+      int ft_str_is_alpha(char *str);
+
+      int main(void)
+      {
+          int res = ft_str_is_alpha("Bonjour");
+
+          if (res != 1)
+          {
+              printf("res = %d, attendu 1\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "chaine contenant un chiffre retourne 0"
+    main: |
+      #include <stdio.h>
+      int ft_str_is_alpha(char *str);
+
+      int main(void)
+      {
+          int res = ft_str_is_alpha("abc123");
+
+          if (res != 0)
+          {
+              printf("res = %d, attendu 0\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "chaine contenant un espace retourne 0"
+    main: |
+      #include <stdio.h>
+      int ft_str_is_alpha(char *str);
+
+      int main(void)
+      {
+          int res = ft_str_is_alpha("hello world");
+
+          if (res != 0)
+          {
+              printf("res = %d, attendu 0\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "chaine vide retourne 1"
+    main: |
+      #include <stdio.h>
+      int ft_str_is_alpha(char *str);
+
+      int main(void)
+      {
+          int res = ft_str_is_alpha("");
+
+          if (res != 1)
+          {
+              printf("res = %d, attendu 1\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "chaine avec ponctuation retourne 0"
+    main: |
+      #include <stdio.h>
+      int ft_str_is_alpha(char *str);
+
+      int main(void)
+      {
+          int res = ft_str_is_alpha("abc!");
+
+          if (res != 0)
+          {
+              printf("res = %d, attendu 0\n", res);
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
