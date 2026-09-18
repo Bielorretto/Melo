@@ -55,26 +55,36 @@ class LldbSession:
             lines = lines[:-1]
         return "\n".join(lines).strip()
 
-    def goto_line(self, file: str, line: int) -> str:
-        """Amene l'execution jusqu'a file:line, peu importe la position actuelle.
-        Relance systematiquement le programme depuis zero : lldb ne permet pas de
-        revenir en arriere, donc c'est la seule facon fiable de garantir qu'on
-        atteint la ligne demandee, meme si elle a deja ete depassee."""
+    def _break_and_run(self, bp_cmd: str, target_desc: str) -> str:
+        """Pose un breakpoint (par nom de fonction ou fichier:ligne) et (re)lance
+        le programme jusqu'a ce point. Relance systematiquement depuis zero :
+        lldb ne permet pas de revenir en arriere, donc c'est la seule facon
+        fiable de garantir qu'on atteint la cible demandee, meme si elle a deja
+        ete depassee."""
         if self._goto_breakpoint_id is not None:
             self._send(f"breakpoint delete {self._goto_breakpoint_id}")
 
-        bp_output = self._send(f"b {file}:{line}")
+        bp_output = self._send(bp_cmd)
         match = re.search(r"Breakpoint (\d+):", bp_output)
         self._goto_breakpoint_id = int(match.group(1)) if match else None
 
         if not match:
-            return f"Impossible de poser un breakpoint a {file}:{line} :\n{bp_output}"
+            return f"Impossible de poser un breakpoint sur {target_desc} :\n{bp_output}"
 
         if self._started:
             self._send("process kill")
         run_output = self._send("run")
         self._started = True
         return run_output
+
+    def start_at_main(self) -> str:
+        """Lance le programme et l'arrete des le debut de main(), comportement
+        par defaut quand rien de precis n'a encore ete demande."""
+        return self._break_and_run("b main", "main")
+
+    def goto_line(self, file: str, line: int) -> str:
+        """Amene l'execution jusqu'a file:line, peu importe la position actuelle."""
+        return self._break_and_run(f"b {file}:{line}", f"{file}:{line}")
 
     def print_variable(self, name: str) -> str:
         return self._send(f"print {name}")

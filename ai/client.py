@@ -54,7 +54,13 @@ class Assistant:
         if name == "start_debug":
             self.close_lldb_session()
             self.lldb_session = LldbSession(args["binary_path"])
-            return "Session de debug démarrée."
+            output = self.lldb_session.start_at_main()
+            console.print(Panel(output, title="📍 main", border_style="cyan",
+                                 expand=False, padding=(0, 2)))
+            return (
+                "Session de debug démarrée, le programme est arrêté au début "
+                f"de main (aucun autre appel n'est nécessaire pour ça) :\n{output}"
+            )
 
         if name in ("goto_line", "print_variable", "list_variables"):
             if not self.lldb_session:

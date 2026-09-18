@@ -116,7 +116,7 @@ def cmd_chat(args):
                 break
 
             try:
-                answer = assistant.send(user_input, use_tools=args.debug)
+                answer = assistant.send(user_input, use_tools=True)
             except Exception as e:
                 console.print(f"[bold red]Erreur : {e}[/]")
                 continue
@@ -154,11 +154,7 @@ def main():
     p_explain.add_argument("exercise")
     p_explain.set_defaults(func=cmd_ai_explain)
 
-    p_chat = sub.add_parser("melo", help="discute librement avec l'IA dans le terminal")
-    p_chat.add_argument(
-        "--debug", action="store_true",
-        help="autorise l'IA à utiliser l'outil lldb pendant la conversation",
-    )
+    p_chat = sub.add_parser("melo", help="discute librement avec l'IA dans le terminal (debug lldb inclus)")
     p_chat.set_defaults(func=cmd_chat)
 
     p_debug = sub.add_parser("ai-debug", help="aide au debug (lldb) via le LLM")

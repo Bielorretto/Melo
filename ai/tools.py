@@ -76,9 +76,10 @@ DEBUG_TOOLS_SCHEMA = [
             "name": "start_debug",
             "description": (
                 "Démarre une session de debug lldb persistante sur le binaire "
-                "compilé de l'élève. À appeler une seule fois, avant goto_line, "
-                "print_variable ou list_variables. Rappeler avec le même chemin "
-                "relance le programme depuis le début si besoin."
+                "compilé de l'élève ET lance déjà le programme, arrêté au début "
+                "de main (aucun autre appel n'est nécessaire pour ça). À "
+                "appeler une seule fois, avant goto_line, print_variable ou "
+                "list_variables."
             ),
             "parameters": {
                 "type": "object",
