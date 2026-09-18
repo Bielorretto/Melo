@@ -117,6 +117,64 @@ DEBUG_TOOLS_SCHEMA = [
     {
         "type": "function",
         "function": {
+            "name": "goto_function",
+            "description": (
+                "Amène l'exécution au tout début d'une fonction, par son nom "
+                "exact (ex: 'ft_split'), quel que soit le fichier où elle est "
+                "définie et sans avoir besoin de connaître le numéro de ligne. "
+                "C'est le bon outil quand l'élève demande d'entrer/rentrer dans "
+                "une fonction précise, plutôt que d'essayer de calculer un "
+                "nombre de next/step. Relance depuis le début si nécessaire, "
+                "comme goto_line."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "function": {
+                        "type": "string",
+                        "description": "nom exact de la fonction, ex: ft_split",
+                    },
+                },
+                "required": ["function"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "show_source",
+            "description": (
+                "Affiche le code source d'un fichier, en partie ou en entier, "
+                "indépendamment de l'endroit où l'exécution est arrêtée. "
+                "Utile quand l'élève demande de voir le code, tout le fichier, "
+                "ou une zone précise, sans forcément déplacer l'exécution."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "file": {
+                        "type": "string",
+                        "description": "nom du fichier source, ex: ft_split.c",
+                    },
+                    "line": {
+                        "type": "integer",
+                        "description": "ligne de départ (défaut : 1, début du fichier)",
+                    },
+                    "count": {
+                        "type": "integer",
+                        "description": (
+                            "nombre de lignes à afficher (défaut : 200, suffisant "
+                            "pour un fichier entier d'exercice de piscine)"
+                        ),
+                    },
+                },
+                "required": ["file"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "print_variable",
             "description": (
                 "Affiche la valeur actuelle d'une variable ou d'une expression "

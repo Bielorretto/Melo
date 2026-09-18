@@ -62,15 +62,24 @@ class Assistant:
                 f"de main (aucun autre appel n'est nécessaire pour ça) :\n{output}"
             )
 
-        if name in ("goto_line", "print_variable", "list_variables"):
+        if name in ("goto_line", "goto_function", "print_variable",
+                    "list_variables", "show_source"):
             if not self.lldb_session:
                 return "Erreur : appelle d'abord start_debug avec le chemin du binaire."
             if name == "goto_line":
                 output = self.lldb_session.goto_line(args["file"], args["line"])
                 title = f"📍 {args['file']}:{args['line']}"
+            elif name == "goto_function":
+                output = self.lldb_session.goto_function(args["function"])
+                title = f"📍 {args['function']}()"
             elif name == "print_variable":
                 output = self.lldb_session.print_variable(args["name"])
                 title = "🔍 Variables"
+            elif name == "show_source":
+                output = self.lldb_session.show_source(
+                    args["file"], args.get("line", 1), args.get("count", 200)
+                )
+                title = f"📄 {args['file']}"
             else:
                 output = self.lldb_session.list_variables()
                 title = "🔍 Variables"

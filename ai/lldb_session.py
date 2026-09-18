@@ -86,11 +86,23 @@ class LldbSession:
         """Amene l'execution jusqu'a file:line, peu importe la position actuelle."""
         return self._break_and_run(f"b {file}:{line}", f"{file}:{line}")
 
+    def goto_function(self, function: str) -> str:
+        """Amene l'execution au debut d'une fonction par son nom (ex: 'ft_split'),
+        quel que soit le fichier ou elle est definie. Equivalent a "rentrer dans"
+        cette fonction sans avoir a compter des next/step."""
+        return self._break_and_run(f"b {function}", function)
+
     def print_variable(self, name: str) -> str:
         return self._send(f"print {name}")
 
     def list_variables(self) -> str:
         return self._send("frame variable")
+
+    def show_source(self, file: str, line: int = 1, count: int = 200) -> str:
+        """Affiche une portion du code source (par defaut, jusqu'a 200 lignes a
+        partir du debut du fichier, ce qui couvre un fichier entier pour la
+        plupart des exercices de piscine)."""
+        return self._send(f"source list -f {file} -l {line} -c {count}")
 
     def close(self) -> None:
         try:
