@@ -81,7 +81,7 @@ class Assistant:
         return f"Outil inconnu : {name}"
 
     def _run_completion(self, messages: list, tools: list | None = None) -> str:
-        for _ in range(5):
+        for _ in range(8):
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=messages,
