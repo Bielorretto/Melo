@@ -1,0 +1,42 @@
+name: ft_print_params
+tags: ["piscine", "ex1", "system"]
+own_main: true
+
+sources:
+  - ft_print_params.c
+
+compile:
+  compiler: cc
+  flags: ["-Wall", "-Wextra", "-Werror"]
+  extra: []
+
+tests:
+  - name: "trois arguments"
+    args: ["test1", "test2", "test3"]
+    expected_stdout: "test1\ntest2\ntest3\n"
+    expected_exit: 0
+
+  - name: "aucun argument"
+    args: []
+    expected_stdout: ""
+    expected_exit: 0
+
+  - name: "un seul argument"
+    args: ["seul"]
+    expected_stdout: "seul\n"
+    expected_exit: 0
+
+  - name: "deux arguments"
+    args: ["premier", "second"]
+    expected_stdout: "premier\nsecond\n"
+    expected_exit: 0
+
+  - name: "arguments avec espaces internes"
+    args: ["bonjour le monde", "salut"]
+    expected_stdout: "bonjour le monde\nsalut\n"
+    expected_exit: 0
+
+  - name: "beaucoup d'arguments"
+    args: ["a", "b", "c", "d", "e", "f", "g"]
+    expected_stdout: "a\nb\nc\nd\ne\nf\ng\n"
+    expected_exit: 0

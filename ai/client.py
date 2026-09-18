@@ -5,16 +5,20 @@ from pathlib import Path
 from dotenv import load_dotenv
 import yaml
 from openai import OpenAI
+from rich.console import Console
+from rich.panel import Panel
 
+from ai.lldb_session import LldbSession
 from ai.tools import (
     DEBUG_TOOLS_SCHEMA,
     EXERCISE_TOOLS_SCHEMA,
     get_exercise_subject,
     list_exercise_names,
-    run_gdb_session,
 )
 
 load_dotenv()
+
+console = Console()
 
 CONFIG_PATH = Path(__file__).parent.parent / "config.yaml"
 
@@ -35,14 +39,39 @@ class Assistant:
             )
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         self.model = config["openai"]["model"]
+        self.lldb_session: LldbSession | None = None
+
+    def close_lldb_session(self) -> None:
+        if self.lldb_session:
+            self.lldb_session.close()
+            self.lldb_session = None
 
     def _dispatch_tool(self, tool_call) -> str:
         """Exécute l'outil demandé par le modèle et renvoie le résultat texte."""
         name = tool_call.function.name
         args = json.loads(tool_call.function.arguments or "{}")
 
-        if name == "run_gdb_session":
-            return run_gdb_session(args["binary_path"], args["commands"])
+        if name == "start_debug":
+            self.close_lldb_session()
+            self.lldb_session = LldbSession(args["binary_path"])
+            return "Session de debug démarrée."
+
+        if name in ("goto_line", "print_variable", "list_variables"):
+            if not self.lldb_session:
+                return "Erreur : appelle d'abord start_debug avec le chemin du binaire."
+            if name == "goto_line":
+                output = self.lldb_session.goto_line(args["file"], args["line"])
+                title = f"📍 {args['file']}:{args['line']}"
+            elif name == "print_variable":
+                output = self.lldb_session.print_variable(args["name"])
+                title = "🔍 Variables"
+            else:
+                output = self.lldb_session.list_variables()
+                title = "🔍 Variables"
+            console.print(Panel(output, title=title, border_style="cyan",
+                                 expand=False, padding=(0, 2)))
+            return output
+
         if name == "list_exercises":
             names = list_exercise_names()
             return ", ".join(names) if names else "Aucun exercice trouvé."
@@ -77,7 +106,7 @@ class Assistant:
 
     def ask(self, system_prompt: str, user_message: str, use_tools: bool = False) -> str:
         """Un seul aller-retour, sans mémoire (utilisé par ai-explain / ai-debug).
-        use_tools=True donne accès à gdb (mode debug historique).
+        use_tools=True donne accès à lldb (mode debug historique).
         """
         messages = [
             {"role": "system", "content": system_prompt},
@@ -96,7 +125,7 @@ class Assistant:
 
         Les outils "exercices" (list_exercises, get_exercise_subject) sont
         toujours disponibles en chat, pour que l'IA aille lire elle-même le
-        bon sujet. use_tools=True ajoute en plus l'outil gdb (mode debug).
+        bon sujet. use_tools=True ajoute en plus l'outil lldb (mode debug).
         """
         if not hasattr(self, "messages"):
             raise RuntimeError("start_chat() doit être appelé avant send()")

@@ -1,0 +1,42 @@
+name: ft_sort_params
+tags: ["piscine", "ex3", "system"]
+own_main: true
+
+sources:
+  - ft_sort_params.c
+
+compile:
+  compiler: cc
+  flags: ["-Wall", "-Wextra", "-Werror"]
+  extra: []
+
+tests:
+  - name: "trie des mots par ordre alphabetique"
+    args: ["banana", "apple", "cherry"]
+    expected_stdout: "apple\nbanana\ncherry\n"
+    expected_exit: 0
+
+  - name: "sensible a la casse (majuscules avant minuscules en ASCII)"
+    args: ["Banana", "apple"]
+    expected_stdout: "Banana\napple\n"
+    expected_exit: 0
+
+  - name: "aucun argument"
+    args: []
+    expected_stdout: ""
+    expected_exit: 0
+
+  - name: "un seul argument"
+    args: ["seul"]
+    expected_stdout: "seul\n"
+    expected_exit: 0
+
+  - name: "doublons conserves"
+    args: ["b", "a", "b"]
+    expected_stdout: "a\nb\nb\n"
+    expected_exit: 0
+
+  - name: "tri ASCII strict, pas numerique naturel"
+    args: ["10", "9", "2"]
+    expected_stdout: "10\n2\n9\n"
+    expected_exit: 0

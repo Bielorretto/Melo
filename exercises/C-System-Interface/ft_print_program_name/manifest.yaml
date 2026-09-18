@@ -1,0 +1,22 @@
+name: ft_print_program_name
+tags: ["piscine", "ex0", "system"]
+own_main: true
+
+sources:
+  - ft_print_program_name.c
+
+compile:
+  compiler: cc
+  flags: ["-Wall", "-Wextra", "-Werror"]
+  extra: []
+
+tests:
+  - name: "affiche le nom du programme suivi d'un retour a la ligne"
+    args: []
+    expected_stdout: "./a.out\n"
+    expected_exit: 0
+
+  - name: "n'affiche rien d'autre meme si des arguments sont passes"
+    args: ["ignoreme", "aussi"]
+    expected_stdout: "./a.out\n"
+    expected_exit: 0

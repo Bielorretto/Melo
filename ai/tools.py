@@ -1,44 +1,6 @@
 
-import subprocess
 from pathlib import Path
 from typing import List
-
-
-ALLOWED_GDB_PREFIXES = (
-    "break", "b ", "run", "r", "backtrace", "bt", "print", "p ",
-    "next", "n", "step", "s", "continue", "c", "list", "l",
-    "info", "watch", "frame", "f ",
-)
-
-
-def _is_allowed(cmd: str) -> bool:
-    cmd = cmd.strip()
-    return any(cmd == p.strip() or cmd.startswith(p) for p in ALLOWED_GDB_PREFIXES)
-
-
-def run_gdb_session(binary_path: str, commands: List[str], timeout: int = 10) -> str:
-    if not Path(binary_path).exists():
-        return f"Erreur : binaire introuvable ({binary_path})"
-
-    safe_commands = [c for c in commands if _is_allowed(c)]
-    rejected = [c for c in commands if c not in safe_commands]
-
-    gdb_args = ["gdb", "--batch", "-q"]
-    for c in safe_commands:
-        gdb_args += ["-ex", c]
-    gdb_args.append(binary_path)
-
-    try:
-        proc = subprocess.run(gdb_args, capture_output=True, text=True, timeout=timeout)
-        output = proc.stdout + proc.stderr
-    except FileNotFoundError:
-        return "Erreur : gdb n'est pas installé sur cette machine."
-    except subprocess.TimeoutExpired:
-        output = "gdb : timeout (le binaire boucle probablement à l'infini)"
-
-    if rejected:
-        output += f"\n\n(commandes refusées, non autorisées : {rejected})"
-    return output
 
 
 def get_exercise_context(exercise_dir: Path) -> str:
@@ -111,26 +73,75 @@ DEBUG_TOOLS_SCHEMA = [
     {
         "type": "function",
         "function": {
-            "name": "run_gdb_session",
+            "name": "start_debug",
             "description": (
-                "Lance gdb en mode batch sur le binaire compilé de l'élève avec une "
-                "liste de commandes gdb (break, run, print, backtrace, next, step...). "
-                "Utile pour localiser un segfault ou inspecter des variables."
+                "Démarre une session de debug lldb persistante sur le binaire "
+                "compilé de l'élève. À appeler une seule fois, avant goto_line, "
+                "print_variable ou list_variables. Rappeler avec le même chemin "
+                "relance le programme depuis le début si besoin."
             ),
             "parameters": {
                 "type": "object",
                 "properties": {
                     "binary_path": {"type": "string"},
-                    "commands": {
-                        "type": "array",
-                        "items": {"type": "string"},
-                        "description": "ex: ['break main', 'run', 'next', 'print *ptr']",
-                    },
                 },
-                "required": ["binary_path", "commands"],
+                "required": ["binary_path"],
             },
         },
-    }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "goto_line",
+            "description": (
+                "Amène l'exécution du programme jusqu'à une ligne précise d'un "
+                "fichier source, peu importe si on est avant ou après dans le "
+                "programme (relance depuis le début si nécessaire, il n'y a pas "
+                "de retour en arrière possible en debug). Affiche le code source "
+                "autour de cette ligne une fois arrivé."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "file": {
+                        "type": "string",
+                        "description": "nom du fichier source, ex: ft_split.c",
+                    },
+                    "line": {"type": "integer"},
+                },
+                "required": ["file", "line"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "print_variable",
+            "description": (
+                "Affiche la valeur actuelle d'une variable ou d'une expression "
+                "précise dans le contexte courant (là où goto_line s'est arrêté)."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "nom de variable ou expression, ex: tab[i]",
+                    },
+                },
+                "required": ["name"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "list_variables",
+            "description": (
+                "Liste toutes les variables locales et leur valeur actuelle dans "
+                "le contexte courant (là où goto_line s'est arrêté)."
+            ),
+            "parameters": {"type": "object", "properties": {}},
+        },
+    },
 ]
-
-TOOLS_SCHEMA = DEBUG_TOOLS_SCHEMA

@@ -17,7 +17,8 @@ def run_binary(binary_path: str, args: Optional[List[str]] = None,
     args = args or []
     try:
         proc = subprocess.run(
-            [binary_path, *args],
+            ["./a.out", *args],
+            executable=binary_path,
             input=stdin_data,
             capture_output=True,
             text=True,

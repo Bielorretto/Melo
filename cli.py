@@ -77,13 +77,16 @@ def cmd_ai_debug(args):
     from ai.prompts import SYSTEM_DEBUG
 
     student_dir = Path(args.student_dir).resolve() if args.student_dir else ROOT.parent
-    hint = f"Dossier source de l'élève : {student_dir}\n(compile son code toi-même via gdb si besoin, ou demande-lui le chemin du binaire)"
+    hint = f"Dossier source de l'élève : {student_dir}\n(compile son code toi-même via lldb si besoin, ou demande-lui le chemin du binaire)"
     assistant = Assistant()
-    answer = assistant.ask(
-        SYSTEM_DEBUG,
-        f"{hint}\n\nDescription du problème par l'élève :\n{args.message}",
-        use_tools=True,
-    )
+    try:
+        answer = assistant.ask(
+            SYSTEM_DEBUG,
+            f"{hint}\n\nDescription du problème par l'élève :\n{args.message}",
+            use_tools=True,
+        )
+    finally:
+        assistant.close_lldb_session()
     print(answer)
 
 
@@ -97,34 +100,37 @@ def cmd_chat(args):
     print("Discussion avec l'assistant piscine 42.")
     print("(tape 'exit' ou 'quit' ou 'diouf' pour arrêter, Ctrl+D marche aussi)\n")
 
-    while True:
-        try:
-            user_input = console.input("[bold cyan]User: [/]")
-        except (EOFError, KeyboardInterrupt):
-            console.print("[yellow]Bonne chance pour ta piscine ![/]")
-            break
+    try:
+        while True:
+            try:
+                user_input = console.input("[bold cyan]User: [/]")
+            except (EOFError, KeyboardInterrupt):
+                console.print("[yellow]Bonne chance pour ta piscine ![/]")
+                break
 
-        if not user_input.strip():
-            continue
+            if not user_input.strip():
+                continue
 
-        if user_input.lower() in ("diouf", "quit", "q"):
-            console.print("[yellow]Bonne chance pour ta piscine ![/]")
-            break
+            if user_input.lower() in ("diouf", "quit", "q"):
+                console.print("[yellow]Bonne chance pour ta piscine ![/]")
+                break
 
-        try:
-            answer = assistant.send(user_input)
-        except Exception as e:
-            console.print(f"[bold red]Erreur : {e}[/]")
-            continue
+            try:
+                answer = assistant.send(user_input, use_tools=args.debug)
+            except Exception as e:
+                console.print(f"[bold red]Erreur : {e}[/]")
+                continue
 
-        console.print(
-            Panel(
-                answer,
-                title="🚲 Melo",
-                border_style="green",
-                expand=False
+            console.print(
+                Panel(
+                    answer,
+                    title="🚲 Melo",
+                    border_style="green",
+                    expand=False
+                )
             )
-        )
+    finally:
+        assistant.close_lldb_session()
 
 def main():
     parser = argparse.ArgumentParser(prog="piscine-tester")
@@ -151,11 +157,11 @@ def main():
     p_chat = sub.add_parser("melo", help="discute librement avec l'IA dans le terminal")
     p_chat.add_argument(
         "--debug", action="store_true",
-        help="autorise l'IA à utiliser l'outil gdb pendant la conversation",
+        help="autorise l'IA à utiliser l'outil lldb pendant la conversation",
     )
     p_chat.set_defaults(func=cmd_chat)
 
-    p_debug = sub.add_parser("ai-debug", help="aide au debug (gdb) via le LLM")
+    p_debug = sub.add_parser("ai-debug", help="aide au debug (lldb) via le LLM")
     p_debug.add_argument("exercise")
     p_debug.add_argument("student_dir", nargs="?", default=None,
                           help="dossier du rendu (défaut : dossier parent de Meloweo/)")
