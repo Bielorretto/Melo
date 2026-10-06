@@ -14,6 +14,7 @@ compile:
 tests:
 
   - name: "nombre positif simple"
+    input: 'ft_putnbr(42)'
     main: |
       #include <unistd.h>
       void ft_putnbr(int nb);
@@ -26,6 +27,7 @@ tests:
     expected_exit: 0
 
   - name: "zero"
+    input: 'ft_putnbr(0)'
     main: |
       #include <unistd.h>
       void ft_putnbr(int nb);
@@ -38,6 +40,7 @@ tests:
     expected_exit: 0
 
   - name: "chiffre unique"
+    input: 'ft_putnbr(7)'
     main: |
       #include <unistd.h>
       void ft_putnbr(int nb);
@@ -50,6 +53,7 @@ tests:
     expected_exit: 0
 
   - name: "nombre negatif"
+    input: 'ft_putnbr(-42)'
     main: |
       #include <unistd.h>
       void ft_putnbr(int nb);
@@ -62,6 +66,7 @@ tests:
     expected_exit: 0
 
   - name: "negatif chiffre unique"
+    input: 'ft_putnbr(-7)'
     main: |
       #include <unistd.h>
       void ft_putnbr(int nb);
@@ -74,6 +79,7 @@ tests:
     expected_exit: 0
 
   - name: "INT_MAX (borne haute)"
+    input: 'ft_putnbr(2147483647)'
     main: |
       #include <unistd.h>
       #include <limits.h>
@@ -87,6 +93,7 @@ tests:
     expected_exit: 0
 
   - name: "INT_MIN (piege classique : -nb overflow)"
+    input: 'ft_putnbr(-2147483648)'
     main: |
       #include <unistd.h>
       #include <limits.h>
@@ -100,6 +107,7 @@ tests:
     expected_exit: 0
 
   - name: "puissance de 10 (dizaine)"
+    input: 'ft_putnbr(10)'
     main: |
       #include <unistd.h>
       void ft_putnbr(int nb);
@@ -112,6 +120,7 @@ tests:
     expected_exit: 0
 
   - name: "puissance de 10 negative"
+    input: 'ft_putnbr(-100)'
     main: |
       #include <unistd.h>
       void ft_putnbr(int nb);
@@ -124,6 +133,7 @@ tests:
     expected_exit: 0
 
   - name: "appels multiples consecutifs"
+    input: 'ft_putnbr(123); ft_putnbr(-456); ft_putnbr(0);'
     main: |
       #include <unistd.h>
       void ft_putnbr(int nb);

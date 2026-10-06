@@ -14,6 +14,7 @@ compile:
 tests:
 
   - name: "trouve une sous-chaine presente"
+    input: 'char str[] = "hello world"; ft_strstr(str, "world");'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -26,8 +27,8 @@ tests:
 
           if (!res || res != str + 6 || strcmp(res, "world") != 0)
           {
-              printf("res = \"%s\" (attendu pointeur sur str+6, contenu \"world\")\n",
-                     res ? res : "(NULL)");
+              printf("obtenu : "); if (res) printf("str + %ld (\"%s\")\n", (long)(res - str), res); else printf("NULL\n");
+              printf("attendu : str + 6 (\"world\")\n");
               return (1);
           }
           return (0);
@@ -35,6 +36,7 @@ tests:
     expected_exit: 0
 
   - name: "sous-chaine absente retourne NULL"
+    input: 'char str[] = "hello world"; ft_strstr(str, "xyz");'
     main: |
       #include <stdio.h>
       char *ft_strstr(char *str, char *to_find);
@@ -46,7 +48,8 @@ tests:
 
           if (res != NULL)
           {
-              printf("ft_strstr aurait du retourner NULL\n");
+              printf("obtenu : "); if (res) printf("str + %ld (\"%s\")\n", (long)(res - str), res); else printf("NULL\n");
+              printf("attendu : NULL\n");
               return (1);
           }
           return (0);
@@ -54,6 +57,7 @@ tests:
     expected_exit: 0
 
   - name: "sous-chaine vide retourne str lui-meme"
+    input: 'char str[] = "hello"; ft_strstr(str, "");'
     main: |
       #include <stdio.h>
       char *ft_strstr(char *str, char *to_find);
@@ -65,7 +69,8 @@ tests:
 
           if (res != str)
           {
-              printf("ft_strstr(str, \"\") devrait retourner str lui-meme\n");
+              printf("obtenu : "); if (res) printf("str + %ld (\"%s\")\n", (long)(res - str), res); else printf("NULL\n");
+              printf("attendu : str + 0 (\"hello\")\n");
               return (1);
           }
           return (0);
@@ -73,6 +78,7 @@ tests:
     expected_exit: 0
 
   - name: "trouve la premiere occurrence uniquement"
+    input: 'char str[] = "xxabcxxabc"; ft_strstr(str, "abc");'
     main: |
       #include <stdio.h>
       char *ft_strstr(char *str, char *to_find);
@@ -84,7 +90,8 @@ tests:
 
           if (res != str + 2)
           {
-              printf("ft_strstr n'a pas trouve la premiere occurrence\n");
+              printf("obtenu : "); if (res) printf("str + %ld (\"%s\")\n", (long)(res - str), res); else printf("NULL\n");
+              printf("attendu : str + 2 (\"abcxxabc\")\n");
               return (1);
           }
           return (0);
@@ -92,6 +99,7 @@ tests:
     expected_exit: 0
 
   - name: "la sous-chaine est egale a la chaine entiere"
+    input: 'char str[] = "test"; ft_strstr(str, "test");'
     main: |
       #include <stdio.h>
       char *ft_strstr(char *str, char *to_find);
@@ -103,7 +111,8 @@ tests:
 
           if (res != str)
           {
-              printf("ft_strstr devrait retourner str lui-meme\n");
+              printf("obtenu : "); if (res) printf("str + %ld (\"%s\")\n", (long)(res - str), res); else printf("NULL\n");
+              printf("attendu : str + 0 (\"test\")\n");
               return (1);
           }
           return (0);
@@ -111,6 +120,7 @@ tests:
     expected_exit: 0
 
   - name: "sous-chaine plus longue que la chaine retourne NULL"
+    input: 'char str[] = "hi"; ft_strstr(str, "hello");'
     main: |
       #include <stdio.h>
       char *ft_strstr(char *str, char *to_find);
@@ -122,7 +132,8 @@ tests:
 
           if (res != NULL)
           {
-              printf("ft_strstr aurait du retourner NULL\n");
+              printf("obtenu : "); if (res) printf("str + %ld (\"%s\")\n", (long)(res - str), res); else printf("NULL\n");
+              printf("attendu : NULL\n");
               return (1);
           }
           return (0);

@@ -39,6 +39,7 @@ tests:
     expected_exit: 0
 
   - name: "pas de retour a la ligne ajoute"
+    input: 'ft_putstr("test"); write(1, "|FIN", 4);'
     body: |
       ft_putstr("test");
       write(1, "|FIN", 4);
@@ -46,6 +47,7 @@ tests:
     expected_exit: 0
 
   - name: "s'arrete au premier null"
+    input: 'char s[6] = {''a'', ''b'', ''\0'', ''c'', ''d'', ''\0''}; ft_putstr(s); write(1, "|FIN", 4);'
     body: |
       char s[6] = {'a', 'b', '\0', 'c', 'd', '\0'};
       ft_putstr(s);

@@ -14,6 +14,7 @@ compile:
 tests:
 
   - name: "cas special : 0 puissance 0 vaut 1"
+    input: 'ft_iterative_power(0, 0)'
     main: |
       #include <stdio.h>
       int ft_iterative_power(int nb, int power);
@@ -22,7 +23,7 @@ tests:
           int res = ft_iterative_power(0, 0);
           if (res != 1)
           {
-              printf("ft_iterative_power(0, 0) = %d, attendu 1\n", res);
+              printf("obtenu : %d\nattendu : 1\n", res);
               return (1);
           }
           return (0);
@@ -30,6 +31,7 @@ tests:
     expected_exit: 0
 
   - name: "n'importe quel nombre puissance 0 vaut 1"
+    input: 'ft_iterative_power(5, 0)'
     main: |
       #include <stdio.h>
       int ft_iterative_power(int nb, int power);
@@ -38,7 +40,7 @@ tests:
           int res = ft_iterative_power(5, 0);
           if (res != 1)
           {
-              printf("ft_iterative_power(5, 0) = %d, attendu 1\n", res);
+              printf("obtenu : %d\nattendu : 1\n", res);
               return (1);
           }
           return (0);
@@ -46,6 +48,7 @@ tests:
     expected_exit: 0
 
   - name: "0 puissance un nombre positif vaut 0"
+    input: 'ft_iterative_power(0, 5)'
     main: |
       #include <stdio.h>
       int ft_iterative_power(int nb, int power);
@@ -54,7 +57,7 @@ tests:
           int res = ft_iterative_power(0, 5);
           if (res != 0)
           {
-              printf("ft_iterative_power(0, 5) = %d, attendu 0\n", res);
+              printf("obtenu : %d\nattendu : 0\n", res);
               return (1);
           }
           return (0);
@@ -62,6 +65,7 @@ tests:
     expected_exit: 0
 
   - name: "puissance 1 retourne le nombre lui-meme"
+    input: 'ft_iterative_power(7, 1)'
     main: |
       #include <stdio.h>
       int ft_iterative_power(int nb, int power);
@@ -70,7 +74,7 @@ tests:
           int res = ft_iterative_power(7, 1);
           if (res != 7)
           {
-              printf("ft_iterative_power(7, 1) = %d, attendu 7\n", res);
+              printf("obtenu : %d\nattendu : 7\n", res);
               return (1);
           }
           return (0);
@@ -78,6 +82,7 @@ tests:
     expected_exit: 0
 
   - name: "cas simple : 2 puissance 10 vaut 1024"
+    input: 'ft_iterative_power(2, 10)'
     main: |
       #include <stdio.h>
       int ft_iterative_power(int nb, int power);
@@ -86,7 +91,7 @@ tests:
           int res = ft_iterative_power(2, 10);
           if (res != 1024)
           {
-              printf("ft_iterative_power(2, 10) = %d, attendu 1024\n", res);
+              printf("obtenu : %d\nattendu : 1024\n", res);
               return (1);
           }
           return (0);
@@ -94,6 +99,7 @@ tests:
     expected_exit: 0
 
   - name: "base negative, puissance paire (resultat positif)"
+    input: 'ft_iterative_power(-2, 4)'
     main: |
       #include <stdio.h>
       int ft_iterative_power(int nb, int power);
@@ -102,7 +108,7 @@ tests:
           int res = ft_iterative_power(-2, 4);
           if (res != 16)
           {
-              printf("ft_iterative_power(-2, 4) = %d, attendu 16\n", res);
+              printf("obtenu : %d\nattendu : 16\n", res);
               return (1);
           }
           return (0);
@@ -110,6 +116,7 @@ tests:
     expected_exit: 0
 
   - name: "base negative, puissance impaire (resultat negatif)"
+    input: 'ft_iterative_power(-2, 3)'
     main: |
       #include <stdio.h>
       int ft_iterative_power(int nb, int power);
@@ -118,7 +125,7 @@ tests:
           int res = ft_iterative_power(-2, 3);
           if (res != -8)
           {
-              printf("ft_iterative_power(-2, 3) = %d, attendu -8\n", res);
+              printf("obtenu : %d\nattendu : -8\n", res);
               return (1);
           }
           return (0);
@@ -126,6 +133,7 @@ tests:
     expected_exit: 0
 
   - name: "puissance negative retourne 0 (nombre positif)"
+    input: 'ft_iterative_power(5, -1)'
     main: |
       #include <stdio.h>
       int ft_iterative_power(int nb, int power);
@@ -134,7 +142,7 @@ tests:
           int res = ft_iterative_power(5, -1);
           if (res != 0)
           {
-              printf("ft_iterative_power(5, -1) = %d, attendu 0\n", res);
+              printf("obtenu : %d\nattendu : 0\n", res);
               return (1);
           }
           return (0);
@@ -142,6 +150,7 @@ tests:
     expected_exit: 0
 
   - name: "puissance negative retourne 0 (0 puissance negative aussi)"
+    input: 'ft_iterative_power(0, -3)'
     # Cas limite qui combine les deux regles : 0 n'est puissance-0 special
     # QUE quand l'exposant vaut exactement 0. Ici l'exposant est negatif,
     # donc la regle "puissance negative -> 0" doit primer.
@@ -153,7 +162,7 @@ tests:
           int res = ft_iterative_power(0, -3);
           if (res != 0)
           {
-              printf("ft_iterative_power(0, -3) = %d, attendu 0\n", res);
+              printf("obtenu : %d\nattendu : 0\n", res);
               return (1);
           }
           return (0);
@@ -161,6 +170,7 @@ tests:
     expected_exit: 0
 
   - name: "1 puissance grand nombre reste 1"
+    input: 'ft_iterative_power(1, 1000)'
     main: |
       #include <stdio.h>
       int ft_iterative_power(int nb, int power);
@@ -169,7 +179,7 @@ tests:
           int res = ft_iterative_power(1, 1000);
           if (res != 1)
           {
-              printf("ft_iterative_power(1, 1000) = %d, attendu 1\n", res);
+              printf("obtenu : %d\nattendu : 1\n", res);
               return (1);
           }
           return (0);
@@ -177,6 +187,7 @@ tests:
     expected_exit: 0
 
   - name: "puissance negative de grande magnitude retourne 0 sans boucler longtemps"
+    input: 'ft_iterative_power(2, INT_MIN + 1)'
     # Verifie qu'une boucle "while (power != 0) power++;" mal ecrite ne parte
     # pas dans une boucle enorme depuis un tres grand negatif.
     main: |
@@ -188,7 +199,7 @@ tests:
           int res = ft_iterative_power(2, INT_MIN + 1);
           if (res != 0)
           {
-              printf("ft_iterative_power(2, INT_MIN + 1) = %d, attendu 0\n", res);
+              printf("obtenu : %d\nattendu : 0\n", res);
               return (1);
           }
           return (0);

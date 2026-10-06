@@ -17,6 +17,7 @@ prelude: |
 
 tests:
   - name: "chaine simple"
+    input: 'ft_strdup("hello")'
     body: |
       char *s = ft_strdup("hello");
       printf("%s\n", s);
@@ -26,6 +27,7 @@ tests:
     check_memory: true
 
   - name: "chaine vide"
+    input: 'ft_strdup("")'
     body: |
       char *s = ft_strdup("");
       printf("[%s]\n", s);
@@ -35,36 +37,40 @@ tests:
     check_memory: true
 
   - name: "NULL en entree"
+    input: 'ft_strdup(NULL)'
     body: |
       char *s = ft_strdup(NULL);
-      printf("%p\n", (void *)s);
-    expected_stdout: "(nil)\n"
+      printf("%s\n", s ? "un pointeur non NULL" : "NULL");
+    expected_stdout: "NULL\n"
     expected_exit: 0
     check_memory: true
 
   - name: "vraie copie (pas un alias du pointeur source)"
+    input: 'char original[] = "hello"; ft_strdup(original);'
     body: |
       char original[] = "hello";
       char *s = ft_strdup(original);
       s[0] = 'H';
-      printf("%s %s\n", original, s);
+      printf("apres s[0] = 'H' : original = \"%s\", copie = \"%s\"\n", original, s);
       free(s);
-    expected_stdout: "hello Hello\n"
+    expected_stdout: "apres s[0] = 'H' : original = \"hello\", copie = \"Hello\"\n"
     expected_exit: 0
     check_memory: true
 
   - name: "taille allouee exacte (pas de depassement)"
+    input: 'ft_strdup("ab")'
     body: |
       char *s = ft_strdup("ab");
       size_t len = strlen(s);
-      printf("%zu\n", len);
+      printf("longueur %zu\n", len);
       s[len] = 'X';
       free(s);
-    expected_stdout: "2\n"
+    expected_stdout: "longueur 2\n"
     expected_exit: 0
     check_memory: true
 
   - name: "chaine longue (grosse allocation)"
+    input: 'ft_strdup(big)   (big = "abcdefghijklmnopqrstuvwxyzabcd...", 2000 caracteres)'
     body: |
       char big[2001];
       size_t i = 0;
@@ -75,13 +81,14 @@ tests:
       }
       big[2000] = '\0';
       char *s = ft_strdup(big);
-      printf("%d %zu\n", strcmp(big, s), strlen(s));
+      printf("%s, longueur %zu\n", strcmp(big, s) == 0 ? "copie identique" : "copie differente", strlen(s));
       free(s);
-    expected_stdout: "0 2000\n"
+    expected_stdout: "copie identique, longueur 2000\n"
     expected_exit: 0
     check_memory: true
 
   - name: "caracteres speciaux"
+    input: 'ft_strdup("a b\t1 !@# ZZ")'
     body: |
       char *s = ft_strdup("a b\t1 !@# ZZ");
       printf("%s\n", s);

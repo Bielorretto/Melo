@@ -14,6 +14,7 @@ compile:
 tests:
 
   - name: "factorielle de 0 vaut 1"
+    input: 'ft_recursive_factorial(0)'
     main: |
       #include <stdio.h>
       int ft_recursive_factorial(int nb);
@@ -22,7 +23,7 @@ tests:
           int res = ft_recursive_factorial(0);
           if (res != 1)
           {
-              printf("ft_recursive_factorial(0) = %d, attendu 1\n", res);
+              printf("obtenu : %d\nattendu : 1\n", res);
               return (1);
           }
           return (0);
@@ -30,6 +31,7 @@ tests:
     expected_exit: 0
 
   - name: "factorielle de 1 vaut 1"
+    input: 'ft_recursive_factorial(1)'
     main: |
       #include <stdio.h>
       int ft_recursive_factorial(int nb);
@@ -38,7 +40,7 @@ tests:
           int res = ft_recursive_factorial(1);
           if (res != 1)
           {
-              printf("ft_recursive_factorial(1) = %d, attendu 1\n", res);
+              printf("obtenu : %d\nattendu : 1\n", res);
               return (1);
           }
           return (0);
@@ -46,6 +48,7 @@ tests:
     expected_exit: 0
 
   - name: "factorielle de 2 vaut 2"
+    input: 'ft_recursive_factorial(2)'
     main: |
       #include <stdio.h>
       int ft_recursive_factorial(int nb);
@@ -54,7 +57,7 @@ tests:
           int res = ft_recursive_factorial(2);
           if (res != 2)
           {
-              printf("ft_recursive_factorial(2) = %d, attendu 2\n", res);
+              printf("obtenu : %d\nattendu : 2\n", res);
               return (1);
           }
           return (0);
@@ -62,6 +65,7 @@ tests:
     expected_exit: 0
 
   - name: "factorielle de 5 vaut 120"
+    input: 'ft_recursive_factorial(5)'
     main: |
       #include <stdio.h>
       int ft_recursive_factorial(int nb);
@@ -70,7 +74,7 @@ tests:
           int res = ft_recursive_factorial(5);
           if (res != 120)
           {
-              printf("ft_recursive_factorial(5) = %d, attendu 120\n", res);
+              printf("obtenu : %d\nattendu : 120\n", res);
               return (1);
           }
           return (0);
@@ -78,6 +82,7 @@ tests:
     expected_exit: 0
 
   - name: "factorielle de 10 vaut 3628800"
+    input: 'ft_recursive_factorial(10)'
     main: |
       #include <stdio.h>
       int ft_recursive_factorial(int nb);
@@ -86,7 +91,7 @@ tests:
           int res = ft_recursive_factorial(10);
           if (res != 3628800)
           {
-              printf("ft_recursive_factorial(10) = %d, attendu 3628800\n", res);
+              printf("obtenu : %d\nattendu : 3628800\n", res);
               return (1);
           }
           return (0);
@@ -94,6 +99,7 @@ tests:
     expected_exit: 0
 
   - name: "factorielle de 12 (plus grande valeur sans overflow sur un int)"
+    input: 'ft_recursive_factorial(12)'
     # 12! = 479001600, rentre dans un int (max 2147483647).
     # 13! depasse deja INT_MAX, non teste car l'overflow n'est pas a gerer.
     main: |
@@ -104,7 +110,7 @@ tests:
           int res = ft_recursive_factorial(12);
           if (res != 479001600)
           {
-              printf("ft_recursive_factorial(12) = %d, attendu 479001600\n", res);
+              printf("obtenu : %d\nattendu : 479001600\n", res);
               return (1);
           }
           return (0);
@@ -112,6 +118,7 @@ tests:
     expected_exit: 0
 
   - name: "argument invalide : -1 retourne 0"
+    input: 'ft_recursive_factorial(-1)'
     main: |
       #include <stdio.h>
       int ft_recursive_factorial(int nb);
@@ -120,7 +127,7 @@ tests:
           int res = ft_recursive_factorial(-1);
           if (res != 0)
           {
-              printf("ft_recursive_factorial(-1) = %d, attendu 0\n", res);
+              printf("obtenu : %d\nattendu : 0\n", res);
               return (1);
           }
           return (0);
@@ -128,6 +135,7 @@ tests:
     expected_exit: 0
 
   - name: "argument invalide : nombre negatif quelconque retourne 0"
+    input: 'ft_recursive_factorial(-42)'
     main: |
       #include <stdio.h>
       int ft_recursive_factorial(int nb);
@@ -136,7 +144,7 @@ tests:
           int res = ft_recursive_factorial(-42);
           if (res != 0)
           {
-              printf("ft_recursive_factorial(-42) = %d, attendu 0\n", res);
+              printf("obtenu : %d\nattendu : 0\n", res);
               return (1);
           }
           return (0);
@@ -144,6 +152,7 @@ tests:
     expected_exit: 0
 
   - name: "pas de stack overflow sur un negatif eloigne de 0"
+    input: 'ft_recursive_factorial(INT_MIN + 1)'
     # Piege specifique a la version RECURSIVE : une fonction qui ne teste
     # "nb < 0" qu'une fois avant de rappeler ft_recursive_factorial(nb - 1)
     # sans jamais revalider l'invalidite peut recurser des millions de fois
@@ -158,7 +167,7 @@ tests:
           int res = ft_recursive_factorial(INT_MIN + 1);
           if (res != 0)
           {
-              printf("ft_recursive_factorial(INT_MIN + 1) = %d, attendu 0\n", res);
+              printf("obtenu : %d\nattendu : 0\n", res);
               return (1);
           }
           return (0);

@@ -14,6 +14,7 @@ compile:
 tests:
 
   - name: "longueur d'une chaine simple"
+    input: 'ft_strlen("bonjour")'
     main: |
       #include <stdio.h>
       int ft_strlen(char *str);
@@ -24,7 +25,7 @@ tests:
 
           if (res != 7)
           {
-              printf("res = %d, attendu 7\n", res);
+              printf("obtenu : %d\nattendu : 7\n", res);
               return (1);
           }
           return (0);
@@ -32,6 +33,7 @@ tests:
     expected_exit: 0
 
   - name: "chaine vide retourne 0"
+    input: 'ft_strlen("")'
     main: |
       #include <stdio.h>
       int ft_strlen(char *str);
@@ -42,7 +44,7 @@ tests:
 
           if (res != 0)
           {
-              printf("res = %d, attendu 0\n", res);
+              printf("obtenu : %d\nattendu : 0\n", res);
               return (1);
           }
           return (0);
@@ -50,6 +52,7 @@ tests:
     expected_exit: 0
 
   - name: "compte les espaces"
+    input: 'ft_strlen("a b c")'
     main: |
       #include <stdio.h>
       int ft_strlen(char *str);
@@ -60,7 +63,7 @@ tests:
 
           if (res != 5)
           {
-              printf("res = %d, attendu 5\n", res);
+              printf("obtenu : %d\nattendu : 5\n", res);
               return (1);
           }
           return (0);
@@ -68,6 +71,7 @@ tests:
     expected_exit: 0
 
   - name: "compte les caracteres speciaux"
+    input: 'ft_strlen("a\tb\nc")'
     main: |
       #include <stdio.h>
       int ft_strlen(char *str);
@@ -78,7 +82,7 @@ tests:
 
           if (res != 5)
           {
-              printf("res = %d, attendu 5\n", res);
+              printf("obtenu : %d\nattendu : 5\n", res);
               return (1);
           }
           return (0);
@@ -86,6 +90,7 @@ tests:
     expected_exit: 0
 
   - name: "longueur d'une chaine plus longue"
+    input: 'ft_strlen("the quick brown fox")'
     main: |
       #include <stdio.h>
       int ft_strlen(char *str);
@@ -96,7 +101,7 @@ tests:
 
           if (res != 19)
           {
-              printf("res = %d, attendu 19\n", res);
+              printf("obtenu : %d\nattendu : 19\n", res);
               return (1);
           }
           return (0);

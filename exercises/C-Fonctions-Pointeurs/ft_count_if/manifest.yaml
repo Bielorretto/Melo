@@ -14,6 +14,7 @@ compile:
 tests:
 
   - name: "compte les chaines qui commencent par une majuscule"
+    input: 'char *tab[] = {"Bonjour", "monde", "Salut", "ca va"}; ft_count_if(tab, 4, &starts_upper);'
     main: |
       #include <stdio.h>
       int ft_count_if(char **tab, int length, int (*f)(char *));
@@ -30,7 +31,7 @@ tests:
 
           if (res != 2)
           {
-              printf("ft_count_if = %d, attendu 2\n", res);
+              printf("obtenu : %d\nattendu : 2\n", res);
               return (1);
           }
           return (0);
@@ -38,6 +39,7 @@ tests:
     expected_exit: 0
 
   - name: "retourne 0 si aucune correspondance"
+    input: 'char *tab[] = {"abc", "def"}; ft_count_if(tab, 2, &is_digit_str);'
     main: |
       #include <stdio.h>
       int ft_count_if(char **tab, int length, int (*f)(char *));
@@ -54,7 +56,7 @@ tests:
 
           if (res != 0)
           {
-              printf("ft_count_if = %d, attendu 0\n", res);
+              printf("obtenu : %d\nattendu : 0\n", res);
               return (1);
           }
           return (0);
@@ -62,6 +64,7 @@ tests:
     expected_exit: 0
 
   - name: "toutes les chaines correspondent"
+    input: 'char *tab[] = {"a", "b", "c", "d"}; ft_count_if(tab, 4, &always_true);'
     main: |
       #include <stdio.h>
       int ft_count_if(char **tab, int length, int (*f)(char *));
@@ -79,7 +82,7 @@ tests:
 
           if (res != 4)
           {
-              printf("ft_count_if = %d, attendu 4\n", res);
+              printf("obtenu : %d\nattendu : 4\n", res);
               return (1);
           }
           return (0);
@@ -87,6 +90,7 @@ tests:
     expected_exit: 0
 
   - name: "length 0 retourne 0 sans lire le tableau"
+    input: 'char *tab[] = {"x"}; ft_count_if(tab, 0, &track);'
     main: |
       #include <stdio.h>
       int ft_count_if(char **tab, int length, int (*f)(char *));
@@ -107,7 +111,7 @@ tests:
 
           if (calls != 0 || res != 0)
           {
-              printf("calls=%d res=%d (attendu calls=0 res=0)\n", calls, res);
+              printf("obtenu : retour %d, f appelee %d fois\nattendu : retour 0, f appelee 0 fois\n", res, calls);
               return (1);
           }
           return (0);
@@ -115,6 +119,7 @@ tests:
     expected_exit: 0
 
   - name: "chaines vides comptees correctement"
+    input: 'char *tab[] = {"", "a", "", "b", ""}; ft_count_if(tab, 5, &is_empty);'
     main: |
       #include <stdio.h>
       int ft_count_if(char **tab, int length, int (*f)(char *));
@@ -131,7 +136,7 @@ tests:
 
           if (res != 3)
           {
-              printf("ft_count_if = %d, attendu 3\n", res);
+              printf("obtenu : %d\nattendu : 3\n", res);
               return (1);
           }
           return (0);

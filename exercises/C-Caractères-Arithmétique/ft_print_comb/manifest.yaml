@@ -14,6 +14,7 @@ compile:
 tests:
 
   - name: "premiere combinaison et son format (012, 013)"
+    input: 'ft_print_comb()'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -43,7 +44,7 @@ tests:
 
           if (strncmp(buffer, "012, 013", 8) != 0)
           {
-              printf("Debut incorrect, obtenu : \"%.20s\"\n", buffer);
+              printf("obtenu : debut \"%.20s\"\nattendu : debut \"012, 013, 014, 015, \"\n", buffer);
               return (1);
           }
           return (0);
@@ -51,6 +52,7 @@ tests:
     expected_exit: 0
 
   - name: "chaque combinaison fait 3 chiffres sans separateur interne"
+    input: 'ft_print_comb()'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -83,7 +85,7 @@ tests:
               buffer[2] < '0' || buffer[2] > '9' ||
               buffer[3] != ',' || buffer[4] != ' ')
           {
-              printf("Format incorrect, obtenu : \"%.10s\"\n", buffer);
+              printf("obtenu : debut \"%.10s\"\nattendu : 3 chiffres puis \", \" (debut \"012, 013, \")\n", buffer);
               return (1);
           }
           return (0);
@@ -91,6 +93,7 @@ tests:
     expected_exit: 0
 
   - name: "chiffres strictement croissants dans chaque combinaison (jamais 021, jamais 011)"
+    input: 'ft_print_comb()'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -127,7 +130,7 @@ tests:
               int c = buffer[k + 2] - '0';
               if (!(a < b && b < c))
               {
-                  printf("Combinaison non croissante ou chiffre repete trouvee : %c%c%c\n",
+                  printf("obtenu : la combinaison %c%c%c\nattendu : 3 chiffres strictement croissants (012 oui, 021 ou 011 non)\n",
                          buffer[k], buffer[k + 1], buffer[k + 2]);
                   return (1);
               }
@@ -137,6 +140,7 @@ tests:
     expected_exit: 0
 
   - name: "987 absent, 789 present une seule fois"
+    input: 'ft_print_comb()'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -166,12 +170,12 @@ tests:
 
           if (strstr(buffer, "987") != NULL)
           {
-              printf("987 ne devrait jamais apparaitre (ordre decroissant)\n");
+              printf("obtenu : 987 present dans la sortie\nattendu : jamais 987 (uniquement des chiffres croissants)\n");
               return (1);
           }
           if (strstr(buffer, "789") == NULL)
           {
-              printf("789 devrait apparaitre\n");
+              printf("obtenu : 789 absent de la sortie\nattendu : 789 (la derniere combinaison)\n");
               return (1);
           }
           return (0);
@@ -179,6 +183,7 @@ tests:
     expected_exit: 0
 
   - name: "999 absent (chiffre repete interdit)"
+    input: 'ft_print_comb()'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -209,7 +214,8 @@ tests:
           if (strstr(buffer, "999") != NULL || strstr(buffer, "000") != NULL
               || strstr(buffer, "112") != NULL)
           {
-              printf("Une combinaison avec chiffre repete a ete trouvee\n");
+              printf("obtenu : %s present dans la sortie\nattendu : aucune combinaison avec un chiffre repete\n",
+                     strstr(buffer, "999") ? "999" : strstr(buffer, "000") ? "000" : "112");
               return (1);
           }
           return (0);
@@ -217,6 +223,7 @@ tests:
     expected_exit: 0
 
   - name: "derniere combinaison et fin de ligne propre (789)"
+    input: 'ft_print_comb()'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -246,7 +253,7 @@ tests:
 
           if (total < 4 || strcmp(buffer + total - 3, "789") != 0)
           {
-              printf("Fin incorrecte, obtenu : \"%.20s\"\n",
+              printf("obtenu : fin \"%.20s\"\nattendu : fin \"..., 678, 679, 689, 789\" (rien apres 789)\n",
                      buffer + (total > 20 ? total - 20 : 0));
               return (1);
           }
@@ -255,6 +262,7 @@ tests:
     expected_exit: 0
 
   - name: "nombre total de combinaisons (120, donc 119 separateurs)"
+    input: 'ft_print_comb()'
     main: |
       #include <stdio.h>
       #include <unistd.h>
@@ -289,7 +297,7 @@ tests:
           }
           if (count != 119)
           {
-              printf("Nombre de separateurs incorrect : %d (attendu 119)\n", count);
+              printf("obtenu : %d separateurs \", \"\nattendu : 119 separateurs \", \" (120 combinaisons)\n", count);
               return (1);
           }
           return (0);
@@ -297,6 +305,7 @@ tests:
     expected_exit: 0
 
   - name: "sequence complete exacte (comparaison programmatique)"
+    input: 'ft_print_comb()'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -345,9 +354,8 @@ tests:
               size_t k = 0;
               while (expected[k] && buffer[k] && expected[k] == buffer[k])
                   k++;
-              printf("Difference a la position %zu\n", k);
-              printf("attendu  : \"%.30s\"\n", expected + k);
-              printf("obtenu   : \"%.30s\"\n", buffer + k);
+              printf("obtenu : \"%.30s\" (a partir du caractere %zu)\nattendu : \"%.30s\" (a partir du caractere %zu)\n",
+                     buffer + k, k, expected + k, k);
               return (1);
           }
           return (0);

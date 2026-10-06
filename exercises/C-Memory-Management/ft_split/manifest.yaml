@@ -14,6 +14,7 @@ compile:
 tests:
 
   - name: "separateur simple (charset = un espace)"
+    input: 'ft_split("bonjour le monde", " ")'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -31,6 +32,29 @@ tests:
               i++;
           }
           free(res);
+      }
+
+      /* Affiche au plus n mots de res, puis l'element suivant (NULL attendu). */
+      static void print_split(char **res, int n)
+      {
+          int i;
+
+          if (!res)
+          {
+              printf("NULL");
+              return ;
+          }
+          printf("{");
+          i = 0;
+          while (i < n && res[i])
+          {
+              printf("\"%s\", ", res[i]);
+              i++;
+          }
+          if (res[i])
+              printf("\"%s\"... (pas de NULL a la fin)}", res[i]);
+          else
+              printf("NULL}");
       }
 
       int main(void)
@@ -41,15 +65,18 @@ tests:
 
           if (!res)
           {
-              printf("ft_split a retourne NULL\n");
+              printf("obtenu : ");
+              print_split(res, 3);
+              printf("\nattendu : {\"bonjour\", \"le\", \"monde\", NULL}\n");
               return (1);
           }
           while (i < 3)
           {
               if (!res[i] || strcmp(res[i], expected[i]) != 0)
               {
-                  printf("res[%d] = \"%s\", attendu \"%s\"\n",
-                         i, res[i] ? res[i] : "(NULL)", expected[i]);
+                  printf("obtenu : ");
+                  print_split(res, 3);
+                  printf("\nattendu : {\"bonjour\", \"le\", \"monde\", NULL}\n");
                   free_split(res);
                   return (1);
               }
@@ -57,7 +84,9 @@ tests:
           }
           if (res[3] != NULL)
           {
-              printf("le tableau n'est pas termine par NULL apres 3 elements\n");
+              printf("obtenu : ");
+              print_split(res, 3);
+              printf("\nattendu : {\"bonjour\", \"le\", \"monde\", NULL}\n");
               free_split(res);
               return (1);
           }
@@ -68,6 +97,7 @@ tests:
     check_memory: true
 
   - name: "plusieurs caracteres differents dans le charset"
+    input: 'ft_split("a,b;c d", ",; ")'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -85,6 +115,29 @@ tests:
               i++;
           }
           free(res);
+      }
+
+      /* Affiche au plus n mots de res, puis l'element suivant (NULL attendu). */
+      static void print_split(char **res, int n)
+      {
+          int i;
+
+          if (!res)
+          {
+              printf("NULL");
+              return ;
+          }
+          printf("{");
+          i = 0;
+          while (i < n && res[i])
+          {
+              printf("\"%s\", ", res[i]);
+              i++;
+          }
+          if (res[i])
+              printf("\"%s\"... (pas de NULL a la fin)}", res[i]);
+          else
+              printf("NULL}");
       }
 
       int main(void)
@@ -95,15 +148,18 @@ tests:
 
           if (!res)
           {
-              printf("ft_split a retourne NULL\n");
+              printf("obtenu : ");
+              print_split(res, 4);
+              printf("\nattendu : {\"a\", \"b\", \"c\", \"d\", NULL}\n");
               return (1);
           }
           while (i < 4)
           {
               if (!res[i] || strcmp(res[i], expected[i]) != 0)
               {
-                  printf("res[%d] = \"%s\", attendu \"%s\"\n",
-                         i, res[i] ? res[i] : "(NULL)", expected[i]);
+                  printf("obtenu : ");
+                  print_split(res, 4);
+                  printf("\nattendu : {\"a\", \"b\", \"c\", \"d\", NULL}\n");
                   free_split(res);
                   return (1);
               }
@@ -111,7 +167,9 @@ tests:
           }
           if (res[4] != NULL)
           {
-              printf("le tableau n'est pas termine par NULL apres 4 elements\n");
+              printf("obtenu : ");
+              print_split(res, 4);
+              printf("\nattendu : {\"a\", \"b\", \"c\", \"d\", NULL}\n");
               free_split(res);
               return (1);
           }
@@ -122,6 +180,7 @@ tests:
     check_memory: true
 
   - name: "separateurs consecutifs ignores (pas de chaines vides)"
+    input: 'ft_split("un   deux", " ")'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -139,6 +198,29 @@ tests:
               i++;
           }
           free(res);
+      }
+
+      /* Affiche au plus n mots de res, puis l'element suivant (NULL attendu). */
+      static void print_split(char **res, int n)
+      {
+          int i;
+
+          if (!res)
+          {
+              printf("NULL");
+              return ;
+          }
+          printf("{");
+          i = 0;
+          while (i < n && res[i])
+          {
+              printf("\"%s\", ", res[i]);
+              i++;
+          }
+          if (res[i])
+              printf("\"%s\"... (pas de NULL a la fin)}", res[i]);
+          else
+              printf("NULL}");
       }
 
       int main(void)
@@ -149,15 +231,18 @@ tests:
 
           if (!res)
           {
-              printf("ft_split a retourne NULL\n");
+              printf("obtenu : ");
+              print_split(res, 2);
+              printf("\nattendu : {\"un\", \"deux\", NULL}\n");
               return (1);
           }
           while (i < 2)
           {
               if (!res[i] || strcmp(res[i], expected[i]) != 0)
               {
-                  printf("res[%d] = \"%s\", attendu \"%s\"\n",
-                         i, res[i] ? res[i] : "(NULL)", expected[i]);
+                  printf("obtenu : ");
+                  print_split(res, 2);
+                  printf("\nattendu : {\"un\", \"deux\", NULL}\n");
                   free_split(res);
                   return (1);
               }
@@ -165,7 +250,9 @@ tests:
           }
           if (res[2] != NULL)
           {
-              printf("le tableau n'est pas termine par NULL apres 2 elements\n");
+              printf("obtenu : ");
+              print_split(res, 2);
+              printf("\nattendu : {\"un\", \"deux\", NULL}\n");
               free_split(res);
               return (1);
           }
@@ -176,6 +263,7 @@ tests:
     check_memory: true
 
   - name: "separateurs en debut et fin de chaine"
+    input: 'ft_split("  hello  ", " ")'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -195,18 +283,45 @@ tests:
           free(res);
       }
 
+      /* Affiche au plus n mots de res, puis l'element suivant (NULL attendu). */
+      static void print_split(char **res, int n)
+      {
+          int i;
+
+          if (!res)
+          {
+              printf("NULL");
+              return ;
+          }
+          printf("{");
+          i = 0;
+          while (i < n && res[i])
+          {
+              printf("\"%s\", ", res[i]);
+              i++;
+          }
+          if (res[i])
+              printf("\"%s\"... (pas de NULL a la fin)}", res[i]);
+          else
+              printf("NULL}");
+      }
+
       int main(void)
       {
           char **res = ft_split("  hello  ", " ");
 
           if (!res)
           {
-              printf("ft_split a retourne NULL\n");
+              printf("obtenu : ");
+              print_split(res, 1);
+              printf("\nattendu : {\"hello\", NULL}\n");
               return (1);
           }
           if (!res[0] || strcmp(res[0], "hello") != 0 || res[1] != NULL)
           {
-              printf("resultat incorrect pour les separateurs en debut/fin\n");
+              printf("obtenu : ");
+              print_split(res, 1);
+              printf("\nattendu : {\"hello\", NULL}\n");
               free_split(res);
               return (1);
           }
@@ -217,10 +332,34 @@ tests:
     check_memory: true
 
   - name: "chaine uniquement composee de separateurs"
+    input: 'ft_split("   ", " ")'
     main: |
       #include <stdio.h>
       #include <stdlib.h>
       char **ft_split(char *str, char *charset);
+
+      /* Affiche au plus n mots de res, puis l'element suivant (NULL attendu). */
+      static void print_split(char **res, int n)
+      {
+          int i;
+
+          if (!res)
+          {
+              printf("NULL");
+              return ;
+          }
+          printf("{");
+          i = 0;
+          while (i < n && res[i])
+          {
+              printf("\"%s\", ", res[i]);
+              i++;
+          }
+          if (res[i])
+              printf("\"%s\"... (pas de NULL a la fin)}", res[i]);
+          else
+              printf("NULL}");
+      }
 
       int main(void)
       {
@@ -228,12 +367,16 @@ tests:
 
           if (!res)
           {
-              printf("ft_split a retourne NULL, attendu un tableau vide freeable\n");
+              printf("obtenu : ");
+              print_split(res, 0);
+              printf("\nattendu : {NULL}\n");
               return (1);
           }
           if (res[0] != NULL)
           {
-              printf("res[0] devrait etre NULL (aucun mot)\n");
+              printf("obtenu : ");
+              print_split(res, 0);
+              printf("\nattendu : {NULL}\n");
               free(res);
               return (1);
           }
@@ -244,10 +387,34 @@ tests:
     check_memory: true
 
   - name: "chaine vide retourne un tableau vide"
+    input: 'ft_split("", " ")'
     main: |
       #include <stdio.h>
       #include <stdlib.h>
       char **ft_split(char *str, char *charset);
+
+      /* Affiche au plus n mots de res, puis l'element suivant (NULL attendu). */
+      static void print_split(char **res, int n)
+      {
+          int i;
+
+          if (!res)
+          {
+              printf("NULL");
+              return ;
+          }
+          printf("{");
+          i = 0;
+          while (i < n && res[i])
+          {
+              printf("\"%s\", ", res[i]);
+              i++;
+          }
+          if (res[i])
+              printf("\"%s\"... (pas de NULL a la fin)}", res[i]);
+          else
+              printf("NULL}");
+      }
 
       int main(void)
       {
@@ -255,12 +422,16 @@ tests:
 
           if (!res)
           {
-              printf("ft_split a retourne NULL, attendu un tableau vide freeable\n");
+              printf("obtenu : ");
+              print_split(res, 0);
+              printf("\nattendu : {NULL}\n");
               return (1);
           }
           if (res[0] != NULL)
           {
-              printf("res[0] devrait etre NULL (aucun mot)\n");
+              printf("obtenu : ");
+              print_split(res, 0);
+              printf("\nattendu : {NULL}\n");
               free(res);
               return (1);
           }
@@ -271,6 +442,7 @@ tests:
     check_memory: true
 
   - name: "aucun separateur present : un seul mot"
+    input: 'ft_split("bonjour", " ")'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -290,13 +462,38 @@ tests:
           free(res);
       }
 
+      /* Affiche au plus n mots de res, puis l'element suivant (NULL attendu). */
+      static void print_split(char **res, int n)
+      {
+          int i;
+
+          if (!res)
+          {
+              printf("NULL");
+              return ;
+          }
+          printf("{");
+          i = 0;
+          while (i < n && res[i])
+          {
+              printf("\"%s\", ", res[i]);
+              i++;
+          }
+          if (res[i])
+              printf("\"%s\"... (pas de NULL a la fin)}", res[i]);
+          else
+              printf("NULL}");
+      }
+
       int main(void)
       {
           char **res = ft_split("bonjour", " ");
 
           if (!res || !res[0] || strcmp(res[0], "bonjour") != 0 || res[1] != NULL)
           {
-              printf("resultat incorrect pour une chaine sans separateur\n");
+              printf("obtenu : ");
+              print_split(res, 1);
+              printf("\nattendu : {\"bonjour\", NULL}\n");
               if (res)
                   free_split(res);
               return (1);
@@ -308,6 +505,7 @@ tests:
     check_memory: true
 
   - name: "charset vide : aucune separation"
+    input: 'ft_split("bonjour le monde", "")'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -327,13 +525,38 @@ tests:
           free(res);
       }
 
+      /* Affiche au plus n mots de res, puis l'element suivant (NULL attendu). */
+      static void print_split(char **res, int n)
+      {
+          int i;
+
+          if (!res)
+          {
+              printf("NULL");
+              return ;
+          }
+          printf("{");
+          i = 0;
+          while (i < n && res[i])
+          {
+              printf("\"%s\", ", res[i]);
+              i++;
+          }
+          if (res[i])
+              printf("\"%s\"... (pas de NULL a la fin)}", res[i]);
+          else
+              printf("NULL}");
+      }
+
       int main(void)
       {
           char **res = ft_split("bonjour le monde", "");
 
           if (!res || !res[0] || strcmp(res[0], "bonjour le monde") != 0 || res[1] != NULL)
           {
-              printf("resultat incorrect pour un charset vide\n");
+              printf("obtenu : ");
+              print_split(res, 1);
+              printf("\nattendu : {\"bonjour le monde\", NULL}\n");
               if (res)
                   free_split(res);
               return (1);
@@ -345,6 +568,7 @@ tests:
     check_memory: true
 
   - name: "tableau bien termine par NULL (pas de lecture hors bornes)"
+    input: 'ft_split("x y z", " ")'
     main: |
       #include <stdio.h>
       #include <stdlib.h>
@@ -363,6 +587,29 @@ tests:
           free(res);
       }
 
+      /* Affiche au plus n mots de res, puis l'element suivant (NULL attendu). */
+      static void print_split(char **res, int n)
+      {
+          int i;
+
+          if (!res)
+          {
+              printf("NULL");
+              return ;
+          }
+          printf("{");
+          i = 0;
+          while (i < n && res[i])
+          {
+              printf("\"%s\", ", res[i]);
+              i++;
+          }
+          if (res[i])
+              printf("\"%s\"... (pas de NULL a la fin)}", res[i]);
+          else
+              printf("NULL}");
+      }
+
       int main(void)
       {
           char **res = ft_split("x y z", " ");
@@ -370,14 +617,18 @@ tests:
 
           if (!res)
           {
-              printf("ft_split a retourne NULL\n");
+              printf("obtenu : ");
+              print_split(res, 3);
+              printf("\nattendu : {\"x\", \"y\", \"z\", NULL}\n");
               return (1);
           }
           while (res[count])
               count++;
           if (count != 3 || res[count] != NULL)
           {
-              printf("count=%d (attendu 3, avec sentinelle NULL)\n", count);
+              printf("obtenu : ");
+              print_split(res, 3);
+              printf("\nattendu : {\"x\", \"y\", \"z\", NULL}\n");
               free_split(res);
               return (1);
           }

@@ -14,6 +14,7 @@ compile:
 tests:
 
   - name: "plage simple, taille et contenu corrects"
+    input: 'int *range; ft_ultimate_range(&range, 2, 7);'
     main: |
       #include <stdio.h>
       #include <stdlib.h>
@@ -28,8 +29,8 @@ tests:
 
           if (size != 5 || !range)
           {
-              printf("size = %d, range = %p (attendu size=5, range non NULL)\n",
-                     size, (void *)range);
+              printf("obtenu : retour %d, range %s\nattendu : retour 5, range = {2, 3, 4, 5, 6}\n",
+                     size, range ? "non NULL" : "= NULL");
               free(range);
               return (1);
           }
@@ -37,7 +38,13 @@ tests:
           {
               if (range[i] != expected[i])
               {
-                  printf("range[%d] = %d, attendu %d\n", i, range[i], expected[i]);
+                  printf("obtenu : {");
+                  for (int k = 0; k < 5; k++)
+                      printf("%s%d", k ? ", " : "", range[k]);
+                  printf("}\nattendu : {");
+                  for (int k = 0; k < 5; k++)
+                      printf("%s%d", k ? ", " : "", expected[k]);
+                  printf("}\n");
                   free(range);
                   return (1);
               }
@@ -50,6 +57,7 @@ tests:
     check_memory: true
 
   - name: "min egal a max : range vaut NULL et retour 0"
+    input: 'int *range = (int *)1; ft_ultimate_range(&range, 5, 5);'
     main: |
       #include <stdio.h>
       int ft_ultimate_range(int **range, int min, int max);
@@ -61,7 +69,7 @@ tests:
 
           if (size != 0 || range != NULL)
           {
-              printf("size=%d range=%p (attendu size=0 range=NULL)\n", size, (void *)range);
+              printf("obtenu : retour %d, range %s\nattendu : retour 0, range = NULL\n", size, range ? "non NULL" : "= NULL");
               return (1);
           }
           return (0);
@@ -69,6 +77,7 @@ tests:
     expected_exit: 0
 
   - name: "min superieur a max : range vaut NULL et retour 0"
+    input: 'int *range = (int *)1; ft_ultimate_range(&range, 10, 3);'
     main: |
       #include <stdio.h>
       int ft_ultimate_range(int **range, int min, int max);
@@ -80,7 +89,7 @@ tests:
 
           if (size != 0 || range != NULL)
           {
-              printf("size=%d range=%p (attendu size=0 range=NULL)\n", size, (void *)range);
+              printf("obtenu : retour %d, range %s\nattendu : retour 0, range = NULL\n", size, range ? "non NULL" : "= NULL");
               return (1);
           }
           return (0);
@@ -88,6 +97,7 @@ tests:
     expected_exit: 0
 
   - name: "plage avec valeurs negatives"
+    input: 'int *range; ft_ultimate_range(&range, -3, 2);'
     main: |
       #include <stdio.h>
       #include <stdlib.h>
@@ -102,8 +112,8 @@ tests:
 
           if (size != 5 || !range)
           {
-              printf("size = %d, range = %p (attendu size=5, range non NULL)\n",
-                     size, (void *)range);
+              printf("obtenu : retour %d, range %s\nattendu : retour 5, range = {-3, -2, -1, 0, 1}\n",
+                     size, range ? "non NULL" : "= NULL");
               free(range);
               return (1);
           }
@@ -111,7 +121,13 @@ tests:
           {
               if (range[i] != expected[i])
               {
-                  printf("range[%d] = %d, attendu %d\n", i, range[i], expected[i]);
+                  printf("obtenu : {");
+                  for (int k = 0; k < 5; k++)
+                      printf("%s%d", k ? ", " : "", range[k]);
+                  printf("}\nattendu : {");
+                  for (int k = 0; k < 5; k++)
+                      printf("%s%d", k ? ", " : "", expected[k]);
+                  printf("}\n");
                   free(range);
                   return (1);
               }
@@ -124,6 +140,7 @@ tests:
     check_memory: true
 
   - name: "plage d'un seul element"
+    input: 'int *range; ft_ultimate_range(&range, 9, 10);'
     main: |
       #include <stdio.h>
       #include <stdlib.h>
@@ -136,7 +153,10 @@ tests:
 
           if (size != 1 || !range || range[0] != 9)
           {
-              printf("resultat incorrect pour ft_ultimate_range(9, 10)\n");
+              if (!range)
+                  printf("obtenu : retour %d, range = NULL\nattendu : retour 1, range = {9}\n", size);
+              else
+                  printf("obtenu : retour %d, range = {%d}\nattendu : retour 1, range = {9}\n", size, range[0]);
               free(range);
               return (1);
           }

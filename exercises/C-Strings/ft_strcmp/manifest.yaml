@@ -14,6 +14,7 @@ compile:
 tests:
 
   - name: "chaines identiques retournent 0"
+    input: 'ft_strcmp("bonjour", "bonjour")'
     main: |
       #include <stdio.h>
       int ft_strcmp(char *s1, char *s2);
@@ -24,7 +25,7 @@ tests:
 
           if (res != 0)
           {
-              printf("ft_strcmp = %d, attendu 0\n", res);
+              printf("obtenu : %d\nattendu : 0\n", res);
               return (1);
           }
           return (0);
@@ -32,6 +33,7 @@ tests:
     expected_exit: 0
 
   - name: "s1 lexicographiquement plus petite retourne une valeur negative"
+    input: 'ft_strcmp("abc", "abd")'
     main: |
       #include <stdio.h>
       int ft_strcmp(char *s1, char *s2);
@@ -42,7 +44,7 @@ tests:
 
           if (res >= 0)
           {
-              printf("ft_strcmp = %d, attendu une valeur negative\n", res);
+              printf("obtenu : %d\nattendu : une valeur negative\n", res);
               return (1);
           }
           return (0);
@@ -50,6 +52,7 @@ tests:
     expected_exit: 0
 
   - name: "s1 lexicographiquement plus grande retourne une valeur positive"
+    input: 'ft_strcmp("abd", "abc")'
     main: |
       #include <stdio.h>
       int ft_strcmp(char *s1, char *s2);
@@ -60,7 +63,7 @@ tests:
 
           if (res <= 0)
           {
-              printf("ft_strcmp = %d, attendu une valeur positive\n", res);
+              printf("obtenu : %d\nattendu : une valeur positive\n", res);
               return (1);
           }
           return (0);
@@ -68,6 +71,7 @@ tests:
     expected_exit: 0
 
   - name: "une chaine prefixe de l'autre est consideree inferieure"
+    input: 'ft_strcmp("abc", "abcdef"); ft_strcmp("abcdef", "abc")'
     main: |
       #include <stdio.h>
       int ft_strcmp(char *s1, char *s2);
@@ -79,7 +83,7 @@ tests:
 
           if (res1 >= 0 || res2 <= 0)
           {
-              printf("res1=%d res2=%d (attendu res1<0 res2>0)\n", res1, res2);
+              printf("obtenu : %d puis %d\nattendu : une valeur negative puis une valeur positive\n", res1, res2);
               return (1);
           }
           return (0);
@@ -87,6 +91,7 @@ tests:
     expected_exit: 0
 
   - name: "chaines vides sont egales"
+    input: 'ft_strcmp("", "")'
     main: |
       #include <stdio.h>
       int ft_strcmp(char *s1, char *s2);
@@ -97,7 +102,7 @@ tests:
 
           if (res != 0)
           {
-              printf("ft_strcmp = %d, attendu 0\n", res);
+              printf("obtenu : %d\nattendu : 0\n", res);
               return (1);
           }
           return (0);
@@ -105,6 +110,7 @@ tests:
     expected_exit: 0
 
   - name: "une chaine vide est inferieure a une chaine non vide"
+    input: 'ft_strcmp("", "a")'
     main: |
       #include <stdio.h>
       int ft_strcmp(char *s1, char *s2);
@@ -115,7 +121,7 @@ tests:
 
           if (res >= 0)
           {
-              printf("ft_strcmp = %d, attendu une valeur negative\n", res);
+              printf("obtenu : %d\nattendu : une valeur negative\n", res);
               return (1);
           }
           return (0);

@@ -14,6 +14,7 @@ compile:
 tests:
 
   - name: "inverse un tableau de taille impaire"
+    input: 'int tab[5] = {1, 2, 3, 4, 5}; ft_rev_int_tab(tab, 5);'
     main: |
       #include <stdio.h>
       void ft_rev_int_tab(int *tab, int size);
@@ -29,7 +30,13 @@ tests:
           {
               if (tab[i] != expected[i])
               {
-                  printf("tab[%d] = %d, attendu %d\n", i, tab[i], expected[i]);
+                  printf("obtenu : {");
+                  for (int k = 0; k < 5; k++)
+                      printf("%s%d", k ? ", " : "", tab[k]);
+                  printf("}\nattendu : {");
+                  for (int k = 0; k < 5; k++)
+                      printf("%s%d", k ? ", " : "", expected[k]);
+                  printf("}\n");
                   return (1);
               }
               i++;
@@ -39,6 +46,7 @@ tests:
     expected_exit: 0
 
   - name: "inverse un tableau de taille paire"
+    input: 'int tab[4] = {10, 20, 30, 40}; ft_rev_int_tab(tab, 4);'
     main: |
       #include <stdio.h>
       void ft_rev_int_tab(int *tab, int size);
@@ -54,7 +62,13 @@ tests:
           {
               if (tab[i] != expected[i])
               {
-                  printf("tab[%d] = %d, attendu %d\n", i, tab[i], expected[i]);
+                  printf("obtenu : {");
+                  for (int k = 0; k < 4; k++)
+                      printf("%s%d", k ? ", " : "", tab[k]);
+                  printf("}\nattendu : {");
+                  for (int k = 0; k < 4; k++)
+                      printf("%s%d", k ? ", " : "", expected[k]);
+                  printf("}\n");
                   return (1);
               }
               i++;
@@ -64,6 +78,7 @@ tests:
     expected_exit: 0
 
   - name: "tableau d'un seul element reste inchange"
+    input: 'int tab[1] = {99}; ft_rev_int_tab(tab, 1);'
     main: |
       #include <stdio.h>
       void ft_rev_int_tab(int *tab, int size);
@@ -75,7 +90,7 @@ tests:
           ft_rev_int_tab(tab, 1);
           if (tab[0] != 99)
           {
-              printf("tab[0] = %d, attendu 99\n", tab[0]);
+              printf("obtenu : tab[0] = %d\nattendu : tab[0] = 99\n", tab[0]);
               return (1);
           }
           return (0);
@@ -83,6 +98,7 @@ tests:
     expected_exit: 0
 
   - name: "tableau vide (size 0) ne plante pas"
+    input: 'int tab[1] = {77}; ft_rev_int_tab(tab, 0);'
     main: |
       #include <stdio.h>
       void ft_rev_int_tab(int *tab, int size);
@@ -94,7 +110,7 @@ tests:
           ft_rev_int_tab(tab, 0);
           if (tab[0] != 77)
           {
-              printf("tab[0] = %d, attendu 77 (inchange)\n", tab[0]);
+              printf("obtenu : tab[0] = %d\nattendu : tab[0] = 77 (inchange)\n", tab[0]);
               return (1);
           }
           return (0);
@@ -102,6 +118,7 @@ tests:
     expected_exit: 0
 
   - name: "gere les nombres negatifs et les doublons"
+    input: 'int tab[6] = {-1, 5, 5, -3, 0, 2}; ft_rev_int_tab(tab, 6);'
     main: |
       #include <stdio.h>
       void ft_rev_int_tab(int *tab, int size);
@@ -117,7 +134,13 @@ tests:
           {
               if (tab[i] != expected[i])
               {
-                  printf("tab[%d] = %d, attendu %d\n", i, tab[i], expected[i]);
+                  printf("obtenu : {");
+                  for (int k = 0; k < 6; k++)
+                      printf("%s%d", k ? ", " : "", tab[k]);
+                  printf("}\nattendu : {");
+                  for (int k = 0; k < 6; k++)
+                      printf("%s%d", k ? ", " : "", expected[k]);
+                  printf("}\n");
                   return (1);
               }
               i++;

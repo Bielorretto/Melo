@@ -14,6 +14,7 @@ compile:
 tests:
 
   - name: "chaine entierement alphabetique retourne 1"
+    input: 'ft_str_is_alpha("Bonjour")'
     main: |
       #include <stdio.h>
       int ft_str_is_alpha(char *str);
@@ -24,7 +25,7 @@ tests:
 
           if (res != 1)
           {
-              printf("res = %d, attendu 1\n", res);
+              printf("obtenu : %d\nattendu : 1\n", res);
               return (1);
           }
           return (0);
@@ -32,6 +33,7 @@ tests:
     expected_exit: 0
 
   - name: "chaine contenant un chiffre retourne 0"
+    input: 'ft_str_is_alpha("abc123")'
     main: |
       #include <stdio.h>
       int ft_str_is_alpha(char *str);
@@ -42,7 +44,7 @@ tests:
 
           if (res != 0)
           {
-              printf("res = %d, attendu 0\n", res);
+              printf("obtenu : %d\nattendu : 0\n", res);
               return (1);
           }
           return (0);
@@ -50,6 +52,7 @@ tests:
     expected_exit: 0
 
   - name: "chaine contenant un espace retourne 0"
+    input: 'ft_str_is_alpha("hello world")'
     main: |
       #include <stdio.h>
       int ft_str_is_alpha(char *str);
@@ -60,7 +63,7 @@ tests:
 
           if (res != 0)
           {
-              printf("res = %d, attendu 0\n", res);
+              printf("obtenu : %d\nattendu : 0\n", res);
               return (1);
           }
           return (0);
@@ -68,6 +71,7 @@ tests:
     expected_exit: 0
 
   - name: "chaine vide retourne 1"
+    input: 'ft_str_is_alpha("")'
     main: |
       #include <stdio.h>
       int ft_str_is_alpha(char *str);
@@ -78,7 +82,7 @@ tests:
 
           if (res != 1)
           {
-              printf("res = %d, attendu 1\n", res);
+              printf("obtenu : %d\nattendu : 1\n", res);
               return (1);
           }
           return (0);
@@ -86,6 +90,7 @@ tests:
     expected_exit: 0
 
   - name: "chaine avec ponctuation retourne 0"
+    input: 'ft_str_is_alpha("abc!")'
     main: |
       #include <stdio.h>
       int ft_str_is_alpha(char *str);
@@ -96,7 +101,7 @@ tests:
 
           if (res != 0)
           {
-              printf("res = %d, attendu 0\n", res);
+              printf("obtenu : %d\nattendu : 0\n", res);
               return (1);
           }
           return (0);

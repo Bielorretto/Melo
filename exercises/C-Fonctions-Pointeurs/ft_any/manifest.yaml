@@ -14,6 +14,7 @@ compile:
 tests:
 
   - name: "retourne 1 si au moins une chaine correspond"
+    input: 'char *tab[] = {"bonjour", "", "monde", NULL}; ft_any(tab, &is_empty);'
     main: |
       #include <stdio.h>
       int ft_any(char **tab, int (*f)(char *));
@@ -30,7 +31,7 @@ tests:
 
           if (res != 1)
           {
-              printf("ft_any = %d, attendu 1\n", res);
+              printf("obtenu : %d\nattendu : 1\n", res);
               return (1);
           }
           return (0);
@@ -38,6 +39,7 @@ tests:
     expected_exit: 0
 
   - name: "retourne 0 si aucune chaine ne correspond"
+    input: 'char *tab[] = {"a", "b", "c", NULL}; ft_any(tab, &is_empty);'
     main: |
       #include <stdio.h>
       int ft_any(char **tab, int (*f)(char *));
@@ -54,7 +56,7 @@ tests:
 
           if (res != 0)
           {
-              printf("ft_any = %d, attendu 0\n", res);
+              printf("obtenu : %d\nattendu : 0\n", res);
               return (1);
           }
           return (0);
@@ -62,6 +64,7 @@ tests:
     expected_exit: 0
 
   - name: "tableau contenant uniquement le NULL final retourne 0"
+    input: 'char *tab[] = {NULL}; ft_any(tab, &always_true);'
     main: |
       #include <stdio.h>
       int ft_any(char **tab, int (*f)(char *));
@@ -79,7 +82,7 @@ tests:
 
           if (res != 0)
           {
-              printf("ft_any = %d, attendu 0 (tableau vide)\n", res);
+              printf("obtenu : %d\nattendu : 0 (tableau vide)\n", res);
               return (1);
           }
           return (0);
@@ -87,6 +90,7 @@ tests:
     expected_exit: 0
 
   - name: "s'arrete correctement au NULL final (pas de lecture hors bornes)"
+    input: 'char *tab[] = {"un", "deux", "trois", NULL}; ft_any(tab, &count_calls);'
     main: |
       #include <stdio.h>
       int ft_any(char **tab, int (*f)(char *));
@@ -107,7 +111,7 @@ tests:
 
           if (calls != 3 || res != 0)
           {
-              printf("calls=%d res=%d (attendu calls=3 res=0)\n", calls, res);
+              printf("obtenu : retour %d, f appelee %d fois\nattendu : retour 0, f appelee 3 fois (une par chaine, arret au NULL)\n", res, calls);
               return (1);
           }
           return (0);
@@ -115,6 +119,7 @@ tests:
     expected_exit: 0
 
   - name: "une seule chaine correspondante suffit"
+    input: 'char *tab[] = {"a", "b", "xyz", "c", NULL}; ft_any(tab, &starts_with_x);'
     main: |
       #include <stdio.h>
       int ft_any(char **tab, int (*f)(char *));
@@ -131,7 +136,7 @@ tests:
 
           if (res != 1)
           {
-              printf("ft_any = %d, attendu 1\n", res);
+              printf("obtenu : %d\nattendu : 1\n", res);
               return (1);
           }
           return (0);

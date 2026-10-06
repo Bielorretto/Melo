@@ -39,13 +39,17 @@ def check_memory(binary_path: str, args: Optional[List[str]] = None,
 
     output = proc.stderr
 
-    def _extract(pattern: str, text: str) -> int:
-        m = re.search(pattern, text)
-        return int(m.group(1).replace(",", "")) if m else 0
+    def _sum(pattern: str, text: str) -> int:
+        return sum(int(m.replace(",", "")) for m in re.findall(pattern, text))
 
-    definitely_lost = _extract(r"definitely lost:\s*([\d,]+) bytes", output)
-    indirectly_lost = _extract(r"indirectly lost:\s*([\d,]+) bytes", output)
-    errors = _extract(r"ERROR SUMMARY:\s*([\d,]+) errors", output)
+    # Avec --quiet, valgrind n'affiche pas le résumé "definitely lost: X bytes" :
+    # on additionne les blocs perdus un par un, et on compte les erreurs.
+    definitely_lost = _sum(r"([\d,]+) bytes in [\d,]+ blocks are definitely lost", output)
+    indirectly_lost = _sum(r"([\d,]+) bytes in [\d,]+ blocks are indirectly lost", output)
+    errors = len(re.findall(r"==\d+== (?:Invalid |Conditional jump|Use of uninitialised|Mismatched free|"
+                            r"Source and destination overlap|Syscall param)", output))
+    if proc.returncode == 42 and not (definitely_lost or indirectly_lost or errors):
+        errors = 1
 
     clean = definitely_lost == 0 and indirectly_lost == 0 and errors == 0
     return MemoryReport(True, clean, definitely_lost, indirectly_lost, errors, output)

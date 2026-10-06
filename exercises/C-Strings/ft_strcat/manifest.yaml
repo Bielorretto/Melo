@@ -14,6 +14,7 @@ compile:
 tests:
 
   - name: "concatene deux chaines simples"
+    input: 'char dest[30] = "Hello, "; ft_strcat(dest, "World!");'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -26,7 +27,7 @@ tests:
           ft_strcat(dest, "World!");
           if (strcmp(dest, "Hello, World!") != 0)
           {
-              printf("dest = \"%s\", attendu \"Hello, World!\"\n", dest);
+              printf("obtenu : dest = \"%s\"\nattendu : dest = \"Hello, World!\"\n", dest);
               return (1);
           }
           return (0);
@@ -34,6 +35,7 @@ tests:
     expected_exit: 0
 
   - name: "retourne bien dest"
+    input: 'char dest[30] = "abc"; ft_strcat(dest, "def");'
     main: |
       #include <stdio.h>
       char *ft_strcat(char *dest, char *src);
@@ -45,7 +47,7 @@ tests:
 
           if (ret != dest)
           {
-              printf("la fonction ne retourne pas dest\n");
+              printf("obtenu : %s\nattendu : dest (le pointeur recu en parametre)\n", ret == NULL ? "NULL" : "un autre pointeur que dest");
               return (1);
           }
           return (0);
@@ -53,6 +55,7 @@ tests:
     expected_exit: 0
 
   - name: "concatener une chaine vide ne change rien"
+    input: 'char dest[30] = "test"; ft_strcat(dest, "");'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -65,7 +68,7 @@ tests:
           ft_strcat(dest, "");
           if (strcmp(dest, "test") != 0)
           {
-              printf("dest = \"%s\", attendu \"test\"\n", dest);
+              printf("obtenu : dest = \"%s\"\nattendu : dest = \"test\"\n", dest);
               return (1);
           }
           return (0);
@@ -73,6 +76,7 @@ tests:
     expected_exit: 0
 
   - name: "dest vide au depart : resultat egal a src"
+    input: 'char dest[30] = ""; ft_strcat(dest, "Bonjour");'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -85,7 +89,7 @@ tests:
           ft_strcat(dest, "Bonjour");
           if (strcmp(dest, "Bonjour") != 0)
           {
-              printf("dest = \"%s\", attendu \"Bonjour\"\n", dest);
+              printf("obtenu : dest = \"%s\"\nattendu : dest = \"Bonjour\"\n", dest);
               return (1);
           }
           return (0);
@@ -93,6 +97,7 @@ tests:
     expected_exit: 0
 
   - name: "le resultat est bien termine par un octet nul"
+    input: 'char dest[30] = "foo"; ft_strcat(dest, "bar");'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -105,7 +110,7 @@ tests:
           ft_strcat(dest, "bar");
           if (strlen(dest) != 6 || strcmp(dest, "foobar") != 0)
           {
-              printf("dest = \"%s\" (longueur %zu), attendu \"foobar\" (longueur 6)\n",
+              printf("obtenu : dest = \"%s\" (longueur %zu)\nattendu : dest = \"foobar\" (longueur 6)\n",
                      dest, strlen(dest));
               return (1);
           }

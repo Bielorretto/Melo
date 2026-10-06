@@ -16,6 +16,7 @@ prelude: |
 
 tests:
   - name: "mot simple"
+    input: 'char s[] = "salut"; ft_zero(s);'
     body: |
       char s[] = "salut";
       ft_zero(s);
@@ -24,6 +25,7 @@ tests:
     expected_exit: 0
 
   - name: "chaine vide"
+    input: 'char s[] = ""; ft_zero(s);'
     body: |
       char s[] = "";
       ft_zero(s);
@@ -32,6 +34,7 @@ tests:
     expected_exit: 0
 
   - name: "un seul caractere"
+    input: 'char s[] = "a"; ft_zero(s);'
     body: |
       char s[] = "a";
       ft_zero(s);
@@ -40,6 +43,7 @@ tests:
     expected_exit: 0
 
   - name: "chaine avec espaces et chiffres"
+    input: 'char s[] = "a1 b2"; ft_zero(s);'
     body: |
       char s[] = "a1 b2";
       ft_zero(s);
@@ -48,14 +52,16 @@ tests:
     expected_exit: 0
 
   - name: "garde la longueur d'origine (pas de depassement)"
+    input: 'char s[] = "hello"; ft_zero(s);'
     body: |
       char s[] = "hello";
       ft_zero(s);
-      printf("%d\n", (int)strlen(s));
-    expected_stdout: "5\n"
+      printf("longueur %d\n", (int)strlen(s));
+    expected_stdout: "longueur 5\n"
     expected_exit: 0
 
   - name: "s'arrete au null d'origine, ne va pas au-dela"
+    input: 'char s[8] = {''a'', ''b'', ''c'', ''\0'', ''X'', ''Y'', ''Z'', ''\0''}; ft_zero(s);'
     body: |
       char s[8] = {'a', 'b', 'c', '\0', 'X', 'Y', 'Z', '\0'};
       ft_zero(s);

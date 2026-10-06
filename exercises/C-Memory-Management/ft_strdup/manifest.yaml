@@ -14,6 +14,7 @@ compile:
 tests:
 
   - name: "duplique une chaine simple"
+    input: 'char *src = "Hello, 42!"; ft_strdup(src);'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -27,7 +28,10 @@ tests:
 
           if (!dup || strcmp(dup, src) != 0)
           {
-              printf("dup = \"%s\", attendu \"%s\"\n", dup ? dup : "(NULL)", src);
+              if (!dup)
+                  printf("obtenu : dup = NULL\nattendu : dup = \"%s\"\n", src);
+              else
+                  printf("obtenu : dup = \"%s\"\nattendu : dup = \"%s\"\n", dup, src);
               free(dup);
               return (1);
           }
@@ -38,6 +42,7 @@ tests:
     check_memory: true
 
   - name: "duplique une chaine vide"
+    input: 'ft_strdup("")'
     main: |
       #include <stdio.h>
       #include <stdlib.h>
@@ -49,7 +54,10 @@ tests:
 
           if (!dup || dup[0] != '\0')
           {
-              printf("dup n'est pas une chaine vide valide\n");
+              if (!dup)
+                  printf("obtenu : NULL\nattendu : \"\"\n");
+              else
+                  printf("obtenu : \"%s\"\nattendu : \"\"\n", dup);
               free(dup);
               return (1);
           }
@@ -60,6 +68,7 @@ tests:
     check_memory: true
 
   - name: "la copie est independante de l'original"
+    input: 'char src[] = "mutable"; ft_strdup(src);'
     main: |
       #include <stdio.h>
       #include <stdlib.h>
@@ -72,13 +81,13 @@ tests:
 
           if (!dup)
           {
-              printf("ft_strdup a retourne NULL\n");
+              printf("obtenu : NULL\nattendu : \"mutable\"\n");
               return (1);
           }
           src[0] = 'X';
           if (dup[0] != 'm')
           {
-              printf("dup[0] = '%c', attendu 'm' (la copie ne doit pas dependre de l'original)\n", dup[0]);
+              printf("obtenu : dup[0] = '%c'\nattendu : dup[0] = 'm' (la copie ne doit pas dependre de l'original)\n", dup[0]);
               free(dup);
               return (1);
           }
@@ -89,6 +98,7 @@ tests:
     check_memory: true
 
   - name: "gere les caracteres speciaux (retours a la ligne, tabulations)"
+    input: 'char *src = "Line1\nLine2\ttab"; ft_strdup(src);'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -102,7 +112,10 @@ tests:
 
           if (!dup || strcmp(dup, src) != 0)
           {
-              printf("copie incorrecte pour une chaine avec caracteres speciaux\n");
+              if (!dup)
+                  printf("obtenu : NULL\nattendu : \"Line1\\nLine2\\ttab\"\n");
+              else
+                  printf("obtenu : \"%s\"\nattendu : \"Line1\\nLine2\\ttab\"\n", dup);
               free(dup);
               return (1);
           }
@@ -113,6 +126,7 @@ tests:
     check_memory: true
 
   - name: "la chaine dupliquee a la bonne longueur"
+    input: 'char *src = "quarante-deux"; ft_strdup(src);'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -126,7 +140,10 @@ tests:
 
           if (!dup || strlen(dup) != strlen(src))
           {
-              printf("longueur incorrecte\n");
+              if (!dup)
+                  printf("obtenu : NULL\nattendu : longueur 13 (\"quarante-deux\")\n");
+              else
+                  printf("obtenu : longueur %zu\nattendu : longueur 13 (\"quarante-deux\")\n", strlen(dup));
               free(dup);
               return (1);
           }

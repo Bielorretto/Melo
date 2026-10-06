@@ -15,6 +15,7 @@ prelude: |
 
 tests:
   - name: "mot simple"
+    input: 'char s[] = "salut"; ft_strrev(s);'
     body: |
       char s[] = "salut";
       ft_strrev(s);
@@ -23,6 +24,7 @@ tests:
     expected_exit: 0
 
   - name: "chaine vide"
+    input: 'char s[] = ""; ft_strrev(s);'
     body: |
       char s[] = "";
       ft_strrev(s);
@@ -31,6 +33,7 @@ tests:
     expected_exit: 0
 
   - name: "un seul caractere"
+    input: 'char s[] = "a"; ft_strrev(s);'
     body: |
       char s[] = "a";
       ft_strrev(s);
@@ -39,6 +42,7 @@ tests:
     expected_exit: 0
 
   - name: "longueur paire"
+    input: 'char s[] = "abcd"; ft_strrev(s);'
     body: |
       char s[] = "abcd";
       ft_strrev(s);
@@ -47,6 +51,7 @@ tests:
     expected_exit: 0
 
   - name: "longueur impaire"
+    input: 'char s[] = "abcde"; ft_strrev(s);'
     body: |
       char s[] = "abcde";
       ft_strrev(s);
@@ -55,14 +60,16 @@ tests:
     expected_exit: 0
 
   - name: "retourne bien l'adresse du parametre"
+    input: 'char s[] = "hello"; ft_strrev(s);'
     body: |
       char s[] = "hello";
       char *ret = ft_strrev(s);
-      printf("%d\n", ret == s);
-    expected_stdout: "1\n"
+      printf("%s\n", ret == s ? "retour = s" : "retour != s (il faut retourner s)");
+    expected_stdout: "retour = s\n"
     expected_exit: 0
 
   - name: "phrase avec espaces"
+    input: 'char s[] = "bonjour toi"; ft_strrev(s);'
     body: |
       char s[] = "bonjour toi";
       ft_strrev(s);

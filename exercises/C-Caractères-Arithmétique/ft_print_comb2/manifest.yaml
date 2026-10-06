@@ -19,6 +19,7 @@ compile:
 tests:
 
   - name: "premiere combinaison et son format (00 01, 00 02)"
+    input: 'ft_print_comb2()'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -48,7 +49,7 @@ tests:
 
           if (strncmp(buffer, "00 01, 00 02", 12) != 0)
           {
-              printf("Debut incorrect, obtenu : \"%.20s\"\n", buffer);
+              printf("obtenu : debut \"%.20s\"\nattendu : debut \"00 01, 00 02, 00 03,\"\n", buffer);
               return (1);
           }
           return (0);
@@ -56,6 +57,7 @@ tests:
     expected_exit: 0
 
   - name: "zero-padding du deuxieme nombre (00 09, 00 10)"
+    input: 'ft_print_comb2()'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -85,7 +87,10 @@ tests:
 
           if (strstr(buffer, "00 09, 00 10") == NULL)
           {
-              printf("Zero-padding du 2eme nombre incorrect (attendu \"00 09, 00 10\" quelque part)\n");
+              if (strstr(buffer, "00 09"))
+                  printf("obtenu : \"%.12s\"\nattendu : \"00 09, 00 10\" (chaque nombre sur 2 chiffres)\n", strstr(buffer, "00 09"));
+              else
+                  printf("obtenu : \"00 09\" absent de la sortie\nattendu : \"00 09, 00 10\" (chaque nombre sur 2 chiffres)\n");
               return (1);
           }
           return (0);
@@ -93,6 +98,7 @@ tests:
     expected_exit: 0
 
   - name: "transition entre la serie 00 et la serie 01 (00 99, 01 02)"
+    input: 'ft_print_comb2()'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -122,7 +128,10 @@ tests:
 
           if (strstr(buffer, "00 99, 01 02") == NULL)
           {
-              printf("Transition entre series incorrecte (attendu \"00 99, 01 02\" quelque part)\n");
+              if (strstr(buffer, "00 99"))
+                  printf("obtenu : \"%.12s\"\nattendu : \"00 99, 01 02\"\n", strstr(buffer, "00 99"));
+              else
+                  printf("obtenu : \"00 99\" absent de la sortie\nattendu : \"00 99, 01 02\"\n");
               return (1);
           }
           return (0);
@@ -130,6 +139,7 @@ tests:
     expected_exit: 0
 
   - name: "ordre croissant strict (pas de paire inversee ni de doublon)"
+    input: 'ft_print_comb2()'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -159,7 +169,8 @@ tests:
 
           if (strstr(buffer, "00 00") || strstr(buffer, "42 42") || strstr(buffer, "05 03"))
           {
-              printf("Paire invalide detectee (doublon ou ordre inverse)\n");
+              printf("obtenu : la paire \"%s\"\nattendu : uniquement des paires \"a b\" avec a < b\n",
+                     strstr(buffer, "00 00") ? "00 00" : strstr(buffer, "42 42") ? "42 42" : "05 03");
               return (1);
           }
           return (0);
@@ -167,6 +178,7 @@ tests:
     expected_exit: 0
 
   - name: "derniere combinaison et fin de ligne propre (98 99)"
+    input: 'ft_print_comb2()'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -196,13 +208,14 @@ tests:
 
           if (total < 6 || strcmp(buffer + total - 5, "98 99") != 0)
           {
-              printf("Fin incorrecte, obtenu : \"%.20s\"\n",
+              printf("obtenu : fin \"%.20s\"\nattendu : fin \"..., 97 98, 97 99, 98 99\" (rien apres 98 99)\n",
                      buffer + (total > 20 ? total - 20 : 0));
               return (1);
           }
           if (buffer[total - 2] == ',' || buffer[total - 2] == ' ')
           {
-              printf("Virgule ou espace en trop juste avant la fin de ligne\n");
+              printf("obtenu : fin \"%.20s\"\nattendu : fin \"..., 97 98, 97 99, 98 99\" (rien apres 98 99)\n",
+                     buffer + (total > 20 ? total - 20 : 0));
               return (1);
           }
           return (0);
@@ -210,6 +223,7 @@ tests:
     expected_exit: 0
 
   - name: "nombre total de combinaisons (4950 paires, 4949 separateurs)"
+    input: 'ft_print_comb2()'
     main: |
       #include <stdio.h>
       #include <unistd.h>
@@ -244,7 +258,7 @@ tests:
           }
           if (count != 4949)
           {
-              printf("Nombre de separateurs incorrect : %d (attendu 4949)\n", count);
+              printf("obtenu : %d separateurs \", \"\nattendu : 4949 separateurs \", \" (4950 paires)\n", count);
               return (1);
           }
           return (0);
@@ -252,6 +266,7 @@ tests:
     expected_exit: 0
 
   - name: "sequence complete exacte (comparaison programmatique)"
+    input: 'ft_print_comb2()'
     main: |
       #include <stdio.h>
       #include <stdlib.h>
@@ -298,9 +313,8 @@ tests:
               size_t k = 0;
               while (expected[k] && buffer[k] && expected[k] == buffer[k])
                   k++;
-              printf("Difference a la position %zu\n", k);
-              printf("attendu  : \"%.30s\"\n", expected + k);
-              printf("obtenu   : \"%.30s\"\n", buffer + k);
+              printf("obtenu : \"%.30s\" (a partir du caractere %zu)\nattendu : \"%.30s\" (a partir du caractere %zu)\n",
+                     buffer + k, k, expected + k, k);
               return (1);
           }
           return (0);

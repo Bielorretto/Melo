@@ -27,104 +27,111 @@ prelude: |
       free(res);
   }
 
+  /* Affiche le tableau sous la forme {"mot", "mot", NULL}. */
+  static void print_split(char **res)
+  {
+      int i;
+
+      if (!res)
+      {
+          printf("NULL\n");
+          return ;
+      }
+      printf("{");
+      i = 0;
+      while (res[i])
+      {
+          printf("\"%s\", ", res[i]);
+          i++;
+      }
+      printf("NULL}\n");
+  }
+
 tests:
   - name: "mots separes par un espace simple"
     body: |
       char **res = ft_split("bonjour le monde", ' ');
-      int i = 0;
-      while (res[i])
-      {
-          printf("%s\n", res[i]);
-          i++;
-      }
-      free_split(res);
-    expected_stdout: "bonjour\nle\nmonde\n"
+      print_split(res);
+      if (res)
+          free_split(res);
+    input: 'ft_split("bonjour le monde", '' '')'
+    expected_stdout: "{\"bonjour\", \"le\", \"monde\", NULL}\n"
     expected_exit: 0
     check_memory: true
 
   - name: "separateurs consecutifs ignores"
     body: |
       char **res = ft_split("un   deux     trois", ' ');
-      int i = 0;
-      while (res[i])
-      {
-          printf("[%s]\n", res[i]);
-          i++;
-      }
-      free_split(res);
-    expected_stdout: "[un]\n[deux]\n[trois]\n"
+      print_split(res);
+      if (res)
+          free_split(res);
+    input: 'ft_split("un   deux     trois", '' '')'
+    expected_stdout: "{\"un\", \"deux\", \"trois\", NULL}\n"
     expected_exit: 0
     check_memory: true
 
   - name: "separateurs en debut et fin"
     body: |
       char **res = ft_split("   hello world   ", ' ');
-      int i = 0;
-      while (res[i])
-      {
-          printf("[%s]\n", res[i]);
-          i++;
-      }
-      free_split(res);
-    expected_stdout: "[hello]\n[world]\n"
+      print_split(res);
+      if (res)
+          free_split(res);
+    input: 'ft_split("   hello world   ", '' '')'
+    expected_stdout: "{\"hello\", \"world\", NULL}\n"
     expected_exit: 0
     check_memory: true
 
   - name: "chaine uniquement composee de separateurs"
     body: |
       char **res = ft_split("     ", ' ');
-      printf("%d\n", res[0] == NULL);
-      free_split(res);
-    expected_stdout: "1\n"
+      print_split(res);
+      if (res)
+          free_split(res);
+    input: 'ft_split("     ", '' '')'
+    expected_stdout: "{NULL}\n"
     expected_exit: 0
     check_memory: true
 
   - name: "chaine vide"
     body: |
       char **res = ft_split("", ' ');
-      printf("%d\n", res[0] == NULL);
-      free_split(res);
-    expected_stdout: "1\n"
+      print_split(res);
+      if (res)
+          free_split(res);
+    input: 'ft_split("", '' '')'
+    expected_stdout: "{NULL}\n"
     expected_exit: 0
     check_memory: true
 
   - name: "aucun separateur present (un seul mot)"
     body: |
       char **res = ft_split("bonjour", ' ');
-      int i = 0;
-      while (res[i])
-      {
-          printf("%s\n", res[i]);
-          i++;
-      }
-      printf("%d\n", res[1] == NULL);
-      free_split(res);
-    expected_stdout: "bonjour\n1\n"
+      print_split(res);
+      if (res)
+          free_split(res);
+    input: 'ft_split("bonjour", '' '')'
+    expected_stdout: "{\"bonjour\", NULL}\n"
     expected_exit: 0
     check_memory: true
 
   - name: "separateur different d'un espace"
     body: |
       char **res = ft_split("a,b,,c", ',');
-      int i = 0;
-      while (res[i])
-      {
-          printf("[%s]\n", res[i]);
-          i++;
-      }
-      free_split(res);
-    expected_stdout: "[a]\n[b]\n[c]\n"
+      print_split(res);
+      if (res)
+          free_split(res);
+    input: 'ft_split("a,b,,c", '','')'
+    expected_stdout: "{\"a\", \"b\", \"c\", NULL}\n"
     expected_exit: 0
     check_memory: true
 
   - name: "tableau bien termine par NULL (pas de lecture hors bornes)"
     body: |
       char **res = ft_split("x y z", ' ');
-      int count = 0;
-      while (res[count])
-          count++;
-      printf("%d %d\n", count, res[count] == NULL);
-      free_split(res);
-    expected_stdout: "3 1\n"
+      print_split(res);
+      if (res)
+          free_split(res);
+    input: 'ft_split("x y z", '' '')'
+    expected_stdout: "{\"x\", \"y\", \"z\", NULL}\n"
     expected_exit: 0
     check_memory: true

@@ -45,6 +45,7 @@ tests:
     expected_exit: 0
 
   - name: "ne compte pas au-dela du premier null"
+    input: 'char s[6] = {''a'', ''b'', ''\0'', ''c'', ''d'', ''\0''}; ft_strlen(s)'
     body: |
       char s[6] = {'a', 'b', '\0', 'c', 'd', '\0'};
       printf("%d\n", ft_strlen(s));
@@ -52,6 +53,7 @@ tests:
     expected_exit: 0
 
   - name: "chaine longue"
+    input: 'ft_strlen(big)   (big = "abcdefghijklmnopqrstuvwxyzabcd...", 3000 caracteres)'
     body: |
       char big[3001];
       int i = 0;

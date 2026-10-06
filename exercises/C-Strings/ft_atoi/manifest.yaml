@@ -14,6 +14,7 @@ compile:
 tests:
 
   - name: "nombre simple sans espaces ni signes"
+    input: 'ft_atoi("1234")'
     main: |
       #include <stdio.h>
       int ft_atoi(char *str);
@@ -24,7 +25,7 @@ tests:
 
           if (res != 1234)
           {
-              printf("ft_atoi = %d, attendu 1234\n", res);
+              printf("obtenu : %d\nattendu : 1234\n", res);
               return (1);
           }
           return (0);
@@ -32,6 +33,7 @@ tests:
     expected_exit: 0
 
   - name: "espaces en tete ignores"
+    input: 'ft_atoi("   42")'
     main: |
       #include <stdio.h>
       int ft_atoi(char *str);
@@ -42,7 +44,7 @@ tests:
 
           if (res != 42)
           {
-              printf("ft_atoi = %d, attendu 42\n", res);
+              printf("obtenu : %d\nattendu : 42\n", res);
               return (1);
           }
           return (0);
@@ -50,6 +52,7 @@ tests:
     expected_exit: 0
 
   - name: "signe negatif simple"
+    input: 'ft_atoi("-42")'
     main: |
       #include <stdio.h>
       int ft_atoi(char *str);
@@ -60,7 +63,7 @@ tests:
 
           if (res != -42)
           {
-              printf("ft_atoi = %d, attendu -42\n", res);
+              printf("obtenu : %d\nattendu : -42\n", res);
               return (1);
           }
           return (0);
@@ -68,6 +71,7 @@ tests:
     expected_exit: 0
 
   - name: "exemple du sujet : signes multiples et lettres apres les chiffres"
+    input: 'ft_atoi(" --+-+1234ab567")'
     main: |
       #include <stdio.h>
       int ft_atoi(char *str);
@@ -78,7 +82,7 @@ tests:
 
           if (res != -1234)
           {
-              printf("ft_atoi = %d, attendu -1234\n", res);
+              printf("obtenu : %d\nattendu : -1234\n", res);
               return (1);
           }
           return (0);
@@ -86,6 +90,7 @@ tests:
     expected_exit: 0
 
   - name: "arret au premier caractere non numerique"
+    input: 'ft_atoi("567abc")'
     main: |
       #include <stdio.h>
       int ft_atoi(char *str);
@@ -96,7 +101,7 @@ tests:
 
           if (res != 567)
           {
-              printf("ft_atoi = %d, attendu 567\n", res);
+              printf("obtenu : %d\nattendu : 567\n", res);
               return (1);
           }
           return (0);
@@ -104,6 +109,7 @@ tests:
     expected_exit: 0
 
   - name: "nombre pair de signes moins donne un resultat positif"
+    input: 'ft_atoi("--42")'
     main: |
       #include <stdio.h>
       int ft_atoi(char *str);
@@ -114,7 +120,7 @@ tests:
 
           if (res != 42)
           {
-              printf("ft_atoi = %d, attendu 42\n", res);
+              printf("obtenu : %d\nattendu : 42\n", res);
               return (1);
           }
           return (0);
@@ -122,6 +128,7 @@ tests:
     expected_exit: 0
 
   - name: "chaine sans chiffres retourne 0"
+    input: 'ft_atoi("abc")'
     main: |
       #include <stdio.h>
       int ft_atoi(char *str);
@@ -132,7 +139,7 @@ tests:
 
           if (res != 0)
           {
-              printf("ft_atoi = %d, attendu 0\n", res);
+              printf("obtenu : %d\nattendu : 0\n", res);
               return (1);
           }
           return (0);
@@ -140,6 +147,7 @@ tests:
     expected_exit: 0
 
   - name: "chaine vide retourne 0"
+    input: 'ft_atoi("")'
     main: |
       #include <stdio.h>
       int ft_atoi(char *str);
@@ -150,7 +158,7 @@ tests:
 
           if (res != 0)
           {
-              printf("ft_atoi = %d, attendu 0\n", res);
+              printf("obtenu : %d\nattendu : 0\n", res);
               return (1);
           }
           return (0);
@@ -158,6 +166,7 @@ tests:
     expected_exit: 0
 
   - name: "signes plus multiples n'affectent pas le signe"
+    input: 'ft_atoi("+++42")'
     main: |
       #include <stdio.h>
       int ft_atoi(char *str);
@@ -168,7 +177,7 @@ tests:
 
           if (res != 42)
           {
-              printf("ft_atoi = %d, attendu 42\n", res);
+              printf("obtenu : %d\nattendu : 42\n", res);
               return (1);
           }
           return (0);

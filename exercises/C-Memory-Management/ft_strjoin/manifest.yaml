@@ -14,6 +14,7 @@ compile:
 tests:
 
   - name: "joint plusieurs chaines avec un separateur"
+    input: 'char *strs[] = {"un", "deux", "trois"}; ft_strjoin(3, strs, ", ");'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -27,7 +28,10 @@ tests:
 
           if (!res || strcmp(res, "un, deux, trois") != 0)
           {
-              printf("res = \"%s\", attendu \"un, deux, trois\"\n", res ? res : "(NULL)");
+              if (!res)
+                  printf("obtenu : NULL\nattendu : \"un, deux, trois\"\n");
+              else
+                  printf("obtenu : \"%s\"\nattendu : \"un, deux, trois\"\n", res);
               free(res);
               return (1);
           }
@@ -38,6 +42,7 @@ tests:
     check_memory: true
 
   - name: "un seul element ne contient pas le separateur"
+    input: 'char *strs[] = {"seul"}; ft_strjoin(1, strs, "-");'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -51,7 +56,10 @@ tests:
 
           if (!res || strcmp(res, "seul") != 0)
           {
-              printf("res = \"%s\", attendu \"seul\"\n", res ? res : "(NULL)");
+              if (!res)
+                  printf("obtenu : NULL\nattendu : \"seul\"\n");
+              else
+                  printf("obtenu : \"%s\"\nattendu : \"seul\"\n", res);
               free(res);
               return (1);
           }
@@ -62,6 +70,7 @@ tests:
     check_memory: true
 
   - name: "size 0 retourne une chaine vide non NULL"
+    input: 'char *strs[] = {"peu importe"}; ft_strjoin(0, strs, ",");'
     main: |
       #include <stdio.h>
       #include <stdlib.h>
@@ -74,12 +83,12 @@ tests:
 
           if (!res)
           {
-              printf("ft_strjoin(0, ...) a retourne NULL, attendu une chaine vide freeable\n");
+              printf("obtenu : NULL\nattendu : \"\" (chaine vide allouee)\n");
               return (1);
           }
           if (res[0] != '\0')
           {
-              printf("res n'est pas vide : \"%s\"\n", res);
+              printf("obtenu : \"%s\"\nattendu : \"\" (chaine vide allouee)\n", res);
               free(res);
               return (1);
           }
@@ -90,6 +99,7 @@ tests:
     check_memory: true
 
   - name: "separateur vide concatene simplement"
+    input: 'char *strs[] = {"a", "b", "c"}; ft_strjoin(3, strs, "");'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -103,7 +113,10 @@ tests:
 
           if (!res || strcmp(res, "abc") != 0)
           {
-              printf("res = \"%s\", attendu \"abc\"\n", res ? res : "(NULL)");
+              if (!res)
+                  printf("obtenu : NULL\nattendu : \"abc\"\n");
+              else
+                  printf("obtenu : \"%s\"\nattendu : \"abc\"\n", res);
               free(res);
               return (1);
           }
@@ -114,6 +127,7 @@ tests:
     check_memory: true
 
   - name: "chaines vides dans le tableau sont gerees correctement"
+    input: 'char *strs[] = {"", "x", "", "y"}; ft_strjoin(4, strs, "-");'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -127,7 +141,10 @@ tests:
 
           if (!res || strcmp(res, "-x--y") != 0)
           {
-              printf("res = \"%s\", attendu \"-x--y\"\n", res ? res : "(NULL)");
+              if (!res)
+                  printf("obtenu : NULL\nattendu : \"-x--y\"\n");
+              else
+                  printf("obtenu : \"%s\"\nattendu : \"-x--y\"\n", res);
               free(res);
               return (1);
           }

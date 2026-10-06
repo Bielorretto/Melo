@@ -15,6 +15,7 @@ prelude: |
 
 tests:
   - name: "mot simple"
+    input: 'char s[] = "salut"; ft_reverse(s);'
     body: |
       char s[] = "salut";
       ft_reverse(s);
@@ -23,6 +24,7 @@ tests:
     expected_exit: 0
 
   - name: "chaine vide"
+    input: 'char s[] = ""; ft_reverse(s);'
     body: |
       char s[] = "";
       ft_reverse(s);
@@ -31,6 +33,7 @@ tests:
     expected_exit: 0
 
   - name: "un seul caractere"
+    input: 'char s[] = "a"; ft_reverse(s);'
     body: |
       char s[] = "a";
       ft_reverse(s);
@@ -39,6 +42,7 @@ tests:
     expected_exit: 0
 
   - name: "longueur paire"
+    input: 'char s[] = "abcd"; ft_reverse(s);'
     body: |
       char s[] = "abcd";
       ft_reverse(s);
@@ -47,6 +51,7 @@ tests:
     expected_exit: 0
 
   - name: "longueur impaire (caractere central inchange)"
+    input: 'char s[] = "abcde"; ft_reverse(s);'
     body: |
       char s[] = "abcde";
       ft_reverse(s);
@@ -55,6 +60,7 @@ tests:
     expected_exit: 0
 
   - name: "phrase avec espaces"
+    input: 'char s[] = "bonjour toi"; ft_reverse(s);'
     body: |
       char s[] = "bonjour toi";
       ft_reverse(s);
@@ -63,6 +69,7 @@ tests:
     expected_exit: 0
 
   - name: "double appel revient a l'original"
+    input: 'char s[] = "hello"; ft_reverse(s); ft_reverse(s);'
     body: |
       char s[] = "hello";
       ft_reverse(s);

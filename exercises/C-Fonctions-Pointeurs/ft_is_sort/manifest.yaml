@@ -14,6 +14,7 @@ compile:
 tests:
 
   - name: "tableau croissant est trie"
+    input: 'int tab[5] = {1, 2, 3, 4, 5}; ft_is_sort(tab, 5, &cmp_int);'
     main: |
       #include <stdio.h>
       int ft_is_sort(int *tab, int length, int (*f)(int, int));
@@ -30,7 +31,7 @@ tests:
 
           if (res != 1)
           {
-              printf("ft_is_sort = %d, attendu 1\n", res);
+              printf("obtenu : %d\nattendu : 1\n", res);
               return (1);
           }
           return (0);
@@ -38,6 +39,7 @@ tests:
     expected_exit: 0
 
   - name: "tableau decroissant est trie"
+    input: 'int tab[5] = {5, 4, 3, 2, 1}; ft_is_sort(tab, 5, &cmp_int);'
     main: |
       #include <stdio.h>
       int ft_is_sort(int *tab, int length, int (*f)(int, int));
@@ -54,7 +56,7 @@ tests:
 
           if (res != 1)
           {
-              printf("ft_is_sort = %d, attendu 1\n", res);
+              printf("obtenu : %d\nattendu : 1\n", res);
               return (1);
           }
           return (0);
@@ -62,6 +64,7 @@ tests:
     expected_exit: 0
 
   - name: "tableau non trie retourne 0"
+    input: 'int tab[5] = {1, 3, 2, 5, 4}; ft_is_sort(tab, 5, &cmp_int);'
     main: |
       #include <stdio.h>
       int ft_is_sort(int *tab, int length, int (*f)(int, int));
@@ -78,7 +81,7 @@ tests:
 
           if (res != 0)
           {
-              printf("ft_is_sort = %d, attendu 0\n", res);
+              printf("obtenu : %d\nattendu : 0\n", res);
               return (1);
           }
           return (0);
@@ -86,6 +89,7 @@ tests:
     expected_exit: 0
 
   - name: "tableau avec elements egaux reste trie"
+    input: 'int tab[5] = {2, 2, 2, 2, 2}; ft_is_sort(tab, 5, &cmp_int);'
     main: |
       #include <stdio.h>
       int ft_is_sort(int *tab, int length, int (*f)(int, int));
@@ -102,7 +106,7 @@ tests:
 
           if (res != 1)
           {
-              printf("ft_is_sort = %d, attendu 1\n", res);
+              printf("obtenu : %d\nattendu : 1\n", res);
               return (1);
           }
           return (0);
@@ -110,6 +114,7 @@ tests:
     expected_exit: 0
 
   - name: "tableau vide ou d'un seul element est considere trie"
+    input: 'int tab[1] = {42}; ft_is_sort(tab, 1, &cmp_int); ft_is_sort(tab, 0, &cmp_int);'
     main: |
       #include <stdio.h>
       int ft_is_sort(int *tab, int length, int (*f)(int, int));
@@ -127,7 +132,7 @@ tests:
 
           if (res1 != 1 || res2 != 1)
           {
-              printf("res1=%d res2=%d (attendu res1=1 res2=1)\n", res1, res2);
+              printf("obtenu : %d (taille 1) puis %d (taille 0)\nattendu : 1 (taille 1) puis 1 (taille 0)\n", res1, res2);
               return (1);
           }
           return (0);
@@ -135,6 +140,7 @@ tests:
     expected_exit: 0
 
   - name: "utilise reellement la fonction de comparaison fournie"
+    input: 'int tab[5] = {-1, 2, -3, 4, -5}; ft_is_sort(tab, 5, &cmp_abs);'
     main: |
       #include <stdio.h>
       #include <stdlib.h>
@@ -152,8 +158,7 @@ tests:
 
           if (res != 1)
           {
-              printf("ft_is_sort = %d, attendu 1 (trie par valeur absolue croissante)\n", res);
-              printf("ft_is_sort semble ignorer la fonction de comparaison fournie\n");
+              printf("obtenu : %d\nattendu : 1 (trie selon f, par valeur absolue croissante : il faut utiliser f)\n", res);
               return (1);
           }
           return (0);

@@ -14,6 +14,7 @@ compile:
 tests:
 
   - name: "affiche exactement 'a' et rien d'autre"
+    input: 'ft_print_a()'
     main: |
       #include <unistd.h>
       void ft_print_a(void);
@@ -26,6 +27,7 @@ tests:
     expected_exit: 0
 
   - name: "pas de retour a la ligne en trop"
+    input: 'ft_print_a()'
     # Verifie qu'il n'y a ni espace ni \n apres le 'a' (le sujet dit
     # explicitement "et rien d'autre").
     main: |
@@ -52,7 +54,8 @@ tests:
 
           if (n != 1 || buffer[0] != 'a')
           {
-              printf("Sortie incorrecte : %zd octet(s), attendu exactement 1 'a'\n", n);
+              buffer[n > 0 ? n : 0] = '\0';
+              printf("obtenu : \"%s\" (%zd octet(s))\nattendu : \"a\" (1 octet, sans retour a la ligne)\n", buffer, n);
               return (1);
           }
           return (0);
@@ -60,6 +63,7 @@ tests:
     expected_exit: 0
 
   - name: "appels multiples n'affichent pas d'etat residuel"
+    input: 'ft_print_a(); ft_print_a(); ft_print_a();'
     main: |
       #include <unistd.h>
       void ft_print_a(void);

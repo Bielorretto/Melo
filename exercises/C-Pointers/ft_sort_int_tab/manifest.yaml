@@ -14,6 +14,7 @@ compile:
 tests:
 
   - name: "trie un tableau en desordre"
+    input: 'int tab[6] = {5, 3, 8, 1, 9, 2}; ft_sort_int_tab(tab, 6);'
     main: |
       #include <stdio.h>
       void ft_sort_int_tab(int *tab, int size);
@@ -29,7 +30,13 @@ tests:
           {
               if (tab[i] != expected[i])
               {
-                  printf("tab[%d] = %d, attendu %d\n", i, tab[i], expected[i]);
+                  printf("obtenu : {");
+                  for (int k = 0; k < 6; k++)
+                      printf("%s%d", k ? ", " : "", tab[k]);
+                  printf("}\nattendu : {");
+                  for (int k = 0; k < 6; k++)
+                      printf("%s%d", k ? ", " : "", expected[k]);
+                  printf("}\n");
                   return (1);
               }
               i++;
@@ -39,6 +46,7 @@ tests:
     expected_exit: 0
 
   - name: "tableau deja trie reste trie"
+    input: 'int tab[5] = {1, 2, 3, 4, 5}; ft_sort_int_tab(tab, 5);'
     main: |
       #include <stdio.h>
       void ft_sort_int_tab(int *tab, int size);
@@ -54,7 +62,13 @@ tests:
           {
               if (tab[i] != expected[i])
               {
-                  printf("tab[%d] = %d, attendu %d\n", i, tab[i], expected[i]);
+                  printf("obtenu : {");
+                  for (int k = 0; k < 5; k++)
+                      printf("%s%d", k ? ", " : "", tab[k]);
+                  printf("}\nattendu : {");
+                  for (int k = 0; k < 5; k++)
+                      printf("%s%d", k ? ", " : "", expected[k]);
+                  printf("}\n");
                   return (1);
               }
               i++;
@@ -64,6 +78,7 @@ tests:
     expected_exit: 0
 
   - name: "tableau trie en ordre decroissant"
+    input: 'int tab[5] = {9, 7, 5, 3, 1}; ft_sort_int_tab(tab, 5);'
     main: |
       #include <stdio.h>
       void ft_sort_int_tab(int *tab, int size);
@@ -79,7 +94,13 @@ tests:
           {
               if (tab[i] != expected[i])
               {
-                  printf("tab[%d] = %d, attendu %d\n", i, tab[i], expected[i]);
+                  printf("obtenu : {");
+                  for (int k = 0; k < 5; k++)
+                      printf("%s%d", k ? ", " : "", tab[k]);
+                  printf("}\nattendu : {");
+                  for (int k = 0; k < 5; k++)
+                      printf("%s%d", k ? ", " : "", expected[k]);
+                  printf("}\n");
                   return (1);
               }
               i++;
@@ -89,6 +110,7 @@ tests:
     expected_exit: 0
 
   - name: "gere les doublons"
+    input: 'int tab[6] = {4, 2, 4, 1, 2, 4}; ft_sort_int_tab(tab, 6);'
     main: |
       #include <stdio.h>
       void ft_sort_int_tab(int *tab, int size);
@@ -104,7 +126,13 @@ tests:
           {
               if (tab[i] != expected[i])
               {
-                  printf("tab[%d] = %d, attendu %d\n", i, tab[i], expected[i]);
+                  printf("obtenu : {");
+                  for (int k = 0; k < 6; k++)
+                      printf("%s%d", k ? ", " : "", tab[k]);
+                  printf("}\nattendu : {");
+                  for (int k = 0; k < 6; k++)
+                      printf("%s%d", k ? ", " : "", expected[k]);
+                  printf("}\n");
                   return (1);
               }
               i++;
@@ -114,6 +142,7 @@ tests:
     expected_exit: 0
 
   - name: "tableau d'un seul element ou vide ne plante pas"
+    input: 'int tab[1] = {42}; ft_sort_int_tab(tab, 1); ft_sort_int_tab(tab, 0);'
     main: |
       #include <stdio.h>
       void ft_sort_int_tab(int *tab, int size);
@@ -125,13 +154,13 @@ tests:
           ft_sort_int_tab(tab, 1);
           if (tab[0] != 42)
           {
-              printf("tab[0] = %d, attendu 42\n", tab[0]);
+              printf("obtenu : tab[0] = %d\nattendu : tab[0] = 42\n", tab[0]);
               return (1);
           }
           ft_sort_int_tab(tab, 0);
           if (tab[0] != 42)
           {
-              printf("tab[0] = %d, attendu 42 apres tri de taille 0\n", tab[0]);
+              printf("obtenu : tab[0] = %d\nattendu : tab[0] = 42 apres tri de taille 0\n", tab[0]);
               return (1);
           }
           return (0);
@@ -139,6 +168,7 @@ tests:
     expected_exit: 0
 
   - name: "gere les nombres negatifs"
+    input: 'int tab[5] = {3, -1, -5, 0, 2}; ft_sort_int_tab(tab, 5);'
     main: |
       #include <stdio.h>
       void ft_sort_int_tab(int *tab, int size);
@@ -154,7 +184,13 @@ tests:
           {
               if (tab[i] != expected[i])
               {
-                  printf("tab[%d] = %d, attendu %d\n", i, tab[i], expected[i]);
+                  printf("obtenu : {");
+                  for (int k = 0; k < 5; k++)
+                      printf("%s%d", k ? ", " : "", tab[k]);
+                  printf("}\nattendu : {");
+                  for (int k = 0; k < 5; k++)
+                      printf("%s%d", k ? ", " : "", expected[k]);
+                  printf("}\n");
                   return (1);
               }
               i++;

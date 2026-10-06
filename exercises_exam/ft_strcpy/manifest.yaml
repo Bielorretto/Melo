@@ -16,6 +16,7 @@ prelude: |
 
 tests:
   - name: "mot simple"
+    input: 'char buf[20]; ft_strcpy(buf, "hello");'
     body: |
       char buf[20];
       ft_strcpy(buf, "hello");
@@ -24,6 +25,7 @@ tests:
     expected_exit: 0
 
   - name: "chaine vide"
+    input: 'char buf[20]; ft_strcpy(buf, "");'
     body: |
       char buf[20];
       ft_strcpy(buf, "");
@@ -32,14 +34,16 @@ tests:
     expected_exit: 0
 
   - name: "retourne bien l'adresse de dest"
+    input: 'char buf[20]; ft_strcpy(buf, "hello");'
     body: |
       char buf[20];
       char *ret = ft_strcpy(buf, "hello");
-      printf("%d\n", ret == buf);
-    expected_stdout: "1\n"
+      printf("%s\n", ret == buf ? "retour = dest" : "retour != dest (il faut retourner dest)");
+    expected_stdout: "retour = dest\n"
     expected_exit: 0
 
   - name: "copie le null terminator (pas de residu apres)"
+    input: 'char buf[20] = "XXXXXXXXXXXXXXXXXXXX"; ft_strcpy(buf, "ab");'
     body: |
       char buf[20];
       int i;
@@ -50,11 +54,15 @@ tests:
           i++;
       }
       ft_strcpy(buf, "ab");
-      printf("%d\n", buf[2] == '\0');
-    expected_stdout: "1\n"
+      if (buf[2] == '\0')
+          printf("buf[2] = '\\0'\n");
+      else
+          printf("buf[2] = '%c'\n", buf[2]);
+    expected_stdout: "buf[2] = '\\0'\n"
     expected_exit: 0
 
   - name: "ne touche pas au-dela du null de src"
+    input: 'char buf[20] = "ZZZZZZZZZZZZZZZZZZZZ"; ft_strcpy(buf, "ab");'
     body: |
       char buf[20];
       int i;
@@ -65,11 +73,12 @@ tests:
           i++;
       }
       ft_strcpy(buf, "ab");
-      printf("%c\n", buf[3]);
-    expected_stdout: "Z\n"
+      printf("buf[3] = '%c'\n", buf[3] ? buf[3] : '0');
+    expected_stdout: "buf[3] = 'Z'\n"
     expected_exit: 0
 
   - name: "chaine longue"
+    input: 'char dest[301]; ft_strcpy(dest, src);   (src = "abcdefghijklmnopqrstuvwxyzabcd...", 300 caracteres)'
     body: |
       char src[301];
       char dest[301];
@@ -82,11 +91,12 @@ tests:
       }
       src[300] = '\0';
       ft_strcpy(dest, src);
-      printf("%d\n", strcmp(src, dest) == 0);
-    expected_stdout: "1\n"
+      printf("%s\n", strcmp(src, dest) == 0 ? "dest identique a src" : "dest different de src");
+    expected_stdout: "dest identique a src\n"
     expected_exit: 0
 
   - name: "caracteres speciaux"
+    input: 'char buf[20]; ft_strcpy(buf, "a 1\t!@#");'
     body: |
       char buf[20];
       ft_strcpy(buf, "a 1\t!@#");

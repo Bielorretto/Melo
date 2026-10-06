@@ -21,6 +21,7 @@ tests:
     expected_exit: 0
 
   - name: "pas de retour a la ligne en trop"
+    input: 'ft_print_reverse_alphabet()'
     body: |
       ft_print_reverse_alphabet();
       write(1, "|FIN", 4);

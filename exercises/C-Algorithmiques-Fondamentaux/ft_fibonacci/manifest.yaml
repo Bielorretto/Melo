@@ -14,6 +14,7 @@ compile:
 tests:
 
   - name: "indice 0 vaut 0"
+    input: 'ft_fibonacci(0)'
     main: |
       #include <stdio.h>
       int ft_fibonacci(int index);
@@ -22,7 +23,7 @@ tests:
           int res = ft_fibonacci(0);
           if (res != 0)
           {
-              printf("ft_fibonacci(0) = %d, attendu 0\n", res);
+              printf("obtenu : %d\nattendu : 0\n", res);
               return (1);
           }
           return (0);
@@ -30,6 +31,7 @@ tests:
     expected_exit: 0
 
   - name: "indice 1 vaut 1"
+    input: 'ft_fibonacci(1)'
     main: |
       #include <stdio.h>
       int ft_fibonacci(int index);
@@ -38,7 +40,7 @@ tests:
           int res = ft_fibonacci(1);
           if (res != 1)
           {
-              printf("ft_fibonacci(1) = %d, attendu 1\n", res);
+              printf("obtenu : %d\nattendu : 1\n", res);
               return (1);
           }
           return (0);
@@ -46,6 +48,7 @@ tests:
     expected_exit: 0
 
   - name: "indice 2 vaut 1 (0 + 1)"
+    input: 'ft_fibonacci(2)'
     main: |
       #include <stdio.h>
       int ft_fibonacci(int index);
@@ -54,7 +57,7 @@ tests:
           int res = ft_fibonacci(2);
           if (res != 1)
           {
-              printf("ft_fibonacci(2) = %d, attendu 1\n", res);
+              printf("obtenu : %d\nattendu : 1\n", res);
               return (1);
           }
           return (0);
@@ -62,6 +65,7 @@ tests:
     expected_exit: 0
 
   - name: "indice 3 vaut 2"
+    input: 'ft_fibonacci(3)'
     main: |
       #include <stdio.h>
       int ft_fibonacci(int index);
@@ -70,7 +74,7 @@ tests:
           int res = ft_fibonacci(3);
           if (res != 2)
           {
-              printf("ft_fibonacci(3) = %d, attendu 2\n", res);
+              printf("obtenu : %d\nattendu : 2\n", res);
               return (1);
           }
           return (0);
@@ -78,6 +82,7 @@ tests:
     expected_exit: 0
 
   - name: "indice 4 vaut 3"
+    input: 'ft_fibonacci(4)'
     main: |
       #include <stdio.h>
       int ft_fibonacci(int index);
@@ -86,7 +91,7 @@ tests:
           int res = ft_fibonacci(4);
           if (res != 3)
           {
-              printf("ft_fibonacci(4) = %d, attendu 3\n", res);
+              printf("obtenu : %d\nattendu : 3\n", res);
               return (1);
           }
           return (0);
@@ -94,6 +99,7 @@ tests:
     expected_exit: 0
 
   - name: "indice 10 vaut 55"
+    input: 'ft_fibonacci(10)'
     main: |
       #include <stdio.h>
       int ft_fibonacci(int index);
@@ -102,7 +108,7 @@ tests:
           int res = ft_fibonacci(10);
           if (res != 55)
           {
-              printf("ft_fibonacci(10) = %d, attendu 55\n", res);
+              printf("obtenu : %d\nattendu : 55\n", res);
               return (1);
           }
           return (0);
@@ -110,6 +116,7 @@ tests:
     expected_exit: 0
 
   - name: "indice 20 vaut 6765"
+    input: 'ft_fibonacci(20)'
     main: |
       #include <stdio.h>
       int ft_fibonacci(int index);
@@ -118,7 +125,7 @@ tests:
           int res = ft_fibonacci(20);
           if (res != 6765)
           {
-              printf("ft_fibonacci(20) = %d, attendu 6765\n", res);
+              printf("obtenu : %d\nattendu : 6765\n", res);
               return (1);
           }
           return (0);
@@ -126,6 +133,7 @@ tests:
     expected_exit: 0
 
   - name: "indice negatif : -1 retourne -1"
+    input: 'ft_fibonacci(-1)'
     main: |
       #include <stdio.h>
       int ft_fibonacci(int index);
@@ -134,7 +142,7 @@ tests:
           int res = ft_fibonacci(-1);
           if (res != -1)
           {
-              printf("ft_fibonacci(-1) = %d, attendu -1\n", res);
+              printf("obtenu : %d\nattendu : -1\n", res);
               return (1);
           }
           return (0);
@@ -142,6 +150,7 @@ tests:
     expected_exit: 0
 
   - name: "indice negatif quelconque retourne -1"
+    input: 'ft_fibonacci(-42)'
     main: |
       #include <stdio.h>
       int ft_fibonacci(int index);
@@ -150,7 +159,7 @@ tests:
           int res = ft_fibonacci(-42);
           if (res != -1)
           {
-              printf("ft_fibonacci(-42) = %d, attendu -1\n", res);
+              printf("obtenu : %d\nattendu : -1\n", res);
               return (1);
           }
           return (0);
@@ -158,6 +167,7 @@ tests:
     expected_exit: 0
 
   - name: "pas de stack overflow sur un indice tres negatif"
+    input: 'ft_fibonacci(INT_MIN + 1)'
     # Meme piege que sur ft_recursive_power / ft_recursive_factorial : si le
     # test "index < 0" n'est verifie qu'au tout premier appel, une fonction
     # recursive mal ecrite peut ne jamais atteindre son cas de base et faire
@@ -171,7 +181,7 @@ tests:
           int res = ft_fibonacci(INT_MIN + 1);
           if (res != -1)
           {
-              printf("ft_fibonacci(INT_MIN + 1) = %d, attendu -1\n", res);
+              printf("obtenu : %d\nattendu : -1\n", res);
               return (1);
           }
           return (0);
@@ -180,6 +190,7 @@ tests:
     check_memory: false
 
   - name: "temps d'execution raisonnable pour un indice modere (pas de memoisation requise mais pas de blocage)"
+    input: 'ft_fibonacci(30)'
     # ft_fibonacci(30) implique environ 2.7 millions d'appels recursifs avec
     # l'implementation naive (sans memoisation), ce qui reste executable en
     # quelques centaines de ms sur une machine normale. Ce test verifie juste
@@ -193,7 +204,7 @@ tests:
           int res = ft_fibonacci(30);
           if (res != 832040)
           {
-              printf("ft_fibonacci(30) = %d, attendu 832040\n", res);
+              printf("obtenu : %d\nattendu : 832040\n", res);
               return (1);
           }
           return (0);

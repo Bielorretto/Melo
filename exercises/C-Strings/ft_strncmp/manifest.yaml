@@ -14,6 +14,7 @@ compile:
 tests:
 
   - name: "compare seulement les n premiers caracteres (identiques au-dela)"
+    input: 'ft_strncmp("bonjour", "bonsoir", 3)'
     main: |
       #include <stdio.h>
       int ft_strncmp(char *s1, char *s2, unsigned int n);
@@ -24,7 +25,7 @@ tests:
 
           if (res != 0)
           {
-              printf("ft_strncmp = %d, attendu 0\n", res);
+              printf("obtenu : %d\nattendu : 0\n", res);
               return (1);
           }
           return (0);
@@ -32,6 +33,7 @@ tests:
     expected_exit: 0
 
   - name: "difference detectee dans la limite n"
+    input: 'ft_strncmp("bonjour", "bonsoir", 4)'
     main: |
       #include <stdio.h>
       int ft_strncmp(char *s1, char *s2, unsigned int n);
@@ -42,7 +44,7 @@ tests:
 
           if (res >= 0)
           {
-              printf("ft_strncmp = %d, attendu une valeur negative ('j' < 's')\n", res);
+              printf("obtenu : %d\nattendu : une valeur negative ('j' < 's')\n", res);
               return (1);
           }
           return (0);
@@ -50,6 +52,7 @@ tests:
     expected_exit: 0
 
   - name: "n=0 retourne toujours 0"
+    input: 'ft_strncmp("abc", "xyz", 0)'
     main: |
       #include <stdio.h>
       int ft_strncmp(char *s1, char *s2, unsigned int n);
@@ -60,7 +63,7 @@ tests:
 
           if (res != 0)
           {
-              printf("ft_strncmp = %d, attendu 0\n", res);
+              printf("obtenu : %d\nattendu : 0\n", res);
               return (1);
           }
           return (0);
@@ -68,6 +71,7 @@ tests:
     expected_exit: 0
 
   - name: "n plus grand que les deux chaines egales retourne 0"
+    input: 'ft_strncmp("abc", "abc", 10)'
     main: |
       #include <stdio.h>
       int ft_strncmp(char *s1, char *s2, unsigned int n);
@@ -78,7 +82,7 @@ tests:
 
           if (res != 0)
           {
-              printf("ft_strncmp = %d, attendu 0\n", res);
+              printf("obtenu : %d\nattendu : 0\n", res);
               return (1);
           }
           return (0);
@@ -86,6 +90,7 @@ tests:
     expected_exit: 0
 
   - name: "prefixe identique dans la limite n malgre des longueurs differentes"
+    input: 'ft_strncmp("abc", "abcdef", 3)'
     main: |
       #include <stdio.h>
       int ft_strncmp(char *s1, char *s2, unsigned int n);
@@ -96,7 +101,7 @@ tests:
 
           if (res != 0)
           {
-              printf("ft_strncmp = %d, attendu 0\n", res);
+              printf("obtenu : %d\nattendu : 0\n", res);
               return (1);
           }
           return (0);

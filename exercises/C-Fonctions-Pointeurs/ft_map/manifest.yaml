@@ -14,6 +14,7 @@ compile:
 tests:
 
   - name: "double chaque element, ordre conserve"
+    input: 'int tab[5] = {1, 2, 3, 4, 5}; ft_map(tab, 5, &double_val);'
     main: |
       #include <stdio.h>
       #include <stdlib.h>
@@ -33,14 +34,20 @@ tests:
 
           if (!res)
           {
-              printf("ft_map a retourne NULL\n");
+              printf("obtenu : NULL\nattendu : un nouveau tableau alloue avec malloc\n");
               return (1);
           }
           while (i < 5)
           {
               if (res[i] != expected[i])
               {
-                  printf("res[%d] = %d, attendu %d\n", i, res[i], expected[i]);
+                  printf("obtenu : {");
+                  for (int k = 0; k < 5; k++)
+                      printf("%s%d", k ? ", " : "", res[k]);
+                  printf("}\nattendu : {");
+                  for (int k = 0; k < 5; k++)
+                      printf("%s%d", k ? ", " : "", expected[k]);
+                  printf("}\n");
                   free(res);
                   return (1);
               }
@@ -53,6 +60,7 @@ tests:
     check_memory: true
 
   - name: "le tableau original n'est pas modifie"
+    input: 'int tab[3] = {2, 3, 4}; ft_map(tab, 3, &square);'
     main: |
       #include <stdio.h>
       #include <stdlib.h>
@@ -70,12 +78,12 @@ tests:
 
           if (!res)
           {
-              printf("ft_map a retourne NULL\n");
+              printf("obtenu : NULL\nattendu : un nouveau tableau alloue avec malloc\n");
               return (1);
           }
           if (tab[0] != 2 || tab[1] != 3 || tab[2] != 4)
           {
-              printf("le tableau original a ete modifie\n");
+              printf("obtenu : tab = {%d, %d, %d} (modifie)\nattendu : tab = {2, 3, 4} (inchange, le resultat va dans un nouveau tableau)\n", tab[0], tab[1], tab[2]);
               free(res);
               return (1);
           }
@@ -86,6 +94,7 @@ tests:
     check_memory: true
 
   - name: "gere correctement les nombres negatifs"
+    input: 'int tab[3] = {-5, 0, 7}; ft_map(tab, 3, &negate);'
     main: |
       #include <stdio.h>
       #include <stdlib.h>
@@ -105,14 +114,20 @@ tests:
 
           if (!res)
           {
-              printf("ft_map a retourne NULL\n");
+              printf("obtenu : NULL\nattendu : un nouveau tableau alloue avec malloc\n");
               return (1);
           }
           while (i < 3)
           {
               if (res[i] != expected[i])
               {
-                  printf("res[%d] = %d, attendu %d\n", i, res[i], expected[i]);
+                  printf("obtenu : {");
+                  for (int k = 0; k < 3; k++)
+                      printf("%s%d", k ? ", " : "", res[k]);
+                  printf("}\nattendu : {");
+                  for (int k = 0; k < 3; k++)
+                      printf("%s%d", k ? ", " : "", expected[k]);
+                  printf("}\n");
                   free(res);
                   return (1);
               }
@@ -125,6 +140,7 @@ tests:
     check_memory: true
 
   - name: "fonction identite sur un seul element"
+    input: 'int tab[1] = {42}; ft_map(tab, 1, &identity);'
     main: |
       #include <stdio.h>
       #include <stdlib.h>
@@ -142,7 +158,10 @@ tests:
 
           if (!res || res[0] != 42)
           {
-              printf("resultat incorrect pour un seul element\n");
+              if (!res)
+                  printf("obtenu : NULL\nattendu : {42}\n");
+              else
+                  printf("obtenu : {%d}\nattendu : {42}\n", res[0]);
               free(res);
               return (1);
           }
@@ -153,6 +172,7 @@ tests:
     check_memory: true
 
   - name: "pas de fuite memoire sur un tableau plus grand"
+    input: 'int tab[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}; ft_map(tab, 10, &inc);'
     main: |
       #include <stdio.h>
       #include <stdlib.h>
@@ -177,7 +197,7 @@ tests:
           res = ft_map(tab, 10, &inc);
           if (!res)
           {
-              printf("ft_map a retourne NULL\n");
+              printf("obtenu : NULL\nattendu : un nouveau tableau alloue avec malloc\n");
               return (1);
           }
           i = 0;
@@ -185,7 +205,13 @@ tests:
           {
               if (res[i] != i + 1)
               {
-                  printf("res[%d] = %d, attendu %d\n", i, res[i], i + 1);
+                  printf("obtenu : {");
+                  for (int k = 0; k < 10; k++)
+                      printf("%s%d", k ? ", " : "", res[k]);
+                  printf("}\nattendu : {");
+                  for (int k = 0; k < 10; k++)
+                      printf("%s%d", k ? ", " : "", k + 1);
+                  printf("}\n");
                   free(res);
                   return (1);
               }

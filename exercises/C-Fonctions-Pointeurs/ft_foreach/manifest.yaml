@@ -14,6 +14,7 @@ compile:
 tests:
 
   - name: "chaque element est visite et cumule correctement"
+    input: 'int tab[5] = {1, 2, 3, 4, 5}; ft_foreach(tab, 5, &record);'
     main: |
       #include <stdio.h>
       void ft_foreach(int *tab, int length, void (*f)(int));
@@ -35,7 +36,8 @@ tests:
           ft_foreach(tab, 5, &record);
           if (g_calls != 5 || g_sum != 15 || g_last != 5)
           {
-              printf("calls=%d sum=%d last=%d (attendu calls=5 sum=15 last=5)\n",
+              printf("obtenu : f appelee %d fois, somme des valeurs recues %d, derniere valeur %d\n"
+                     "attendu : f appelee 5 fois, somme des valeurs recues 15, derniere valeur 5\n",
                      g_calls, g_sum, g_last);
               return (1);
           }
@@ -44,6 +46,7 @@ tests:
     expected_exit: 0
 
   - name: "l'ordre du tableau est respecte"
+    input: 'int tab[4] = {10, 20, 30, 40}; ft_foreach(tab, 4, &record_seq);'
     main: |
       #include <stdio.h>
       void ft_foreach(int *tab, int length, void (*f)(int));
@@ -63,7 +66,10 @@ tests:
           ft_foreach(tab, 4, &record_seq);
           if (idx != 4 || seq[0] != 10 || seq[1] != 20 || seq[2] != 30 || seq[3] != 40)
           {
-              printf("ordre incorrect ou nombre d'appels incorrect (idx=%d)\n", idx);
+              printf("obtenu : f appelee %d fois, valeurs recues {", idx);
+              for (int k = 0; k < idx && k < 4; k++)
+                  printf("%s%d", k ? ", " : "", seq[k]);
+              printf("}\nattendu : f appelee 4 fois, valeurs recues {10, 20, 30, 40}\n");
               return (1);
           }
           return (0);
@@ -71,6 +77,7 @@ tests:
     expected_exit: 0
 
   - name: "length 0 ne declenche aucun appel"
+    input: 'int tab[1] = {42}; ft_foreach(tab, 0, &inc);'
     main: |
       #include <stdio.h>
       void ft_foreach(int *tab, int length, void (*f)(int));
@@ -89,7 +96,7 @@ tests:
           ft_foreach(tab, 0, &inc);
           if (calls != 0)
           {
-              printf("calls = %d, attendu 0\n", calls);
+              printf("obtenu : calls = %d\nattendu : calls = 0\n", calls);
               return (1);
           }
           return (0);
@@ -97,6 +104,7 @@ tests:
     expected_exit: 0
 
   - name: "gere correctement les nombres negatifs"
+    input: 'int tab[3] = {-5, 10, -3}; ft_foreach(tab, 3, &addv);'
     main: |
       #include <stdio.h>
       void ft_foreach(int *tab, int length, void (*f)(int));
@@ -114,7 +122,7 @@ tests:
           ft_foreach(tab, 3, &addv);
           if (sum != 2)
           {
-              printf("sum = %d, attendu 2\n", sum);
+              printf("obtenu : somme des valeurs recues par f = %d\nattendu : somme des valeurs recues par f = 2\n", sum);
               return (1);
           }
           return (0);
@@ -122,6 +130,7 @@ tests:
     expected_exit: 0
 
   - name: "tableau a un seul element"
+    input: 'int tab[1] = {99}; ft_foreach(tab, 1, &set);'
     main: |
       #include <stdio.h>
       void ft_foreach(int *tab, int length, void (*f)(int));
@@ -141,7 +150,7 @@ tests:
           ft_foreach(tab, 1, &set);
           if (calls != 1 || val != 99)
           {
-              printf("calls=%d val=%d (attendu calls=1 val=99)\n", calls, val);
+              printf("obtenu : f appelee %d fois, valeur recue %d\nattendu : f appelee 1 fois, valeur recue 99\n", calls, val);
               return (1);
           }
           return (0);

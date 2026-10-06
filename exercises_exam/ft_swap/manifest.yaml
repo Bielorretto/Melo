@@ -15,56 +15,62 @@ prelude: |
 
 tests:
   - name: "echange simple"
+    input: 'int x = 4; int y = 5; ft_swap(&x, &y);'
     body: |
       int x = 4;
       int y = 5;
       ft_swap(&x, &y);
-      printf("%d %d\n", x, y);
-    expected_stdout: "5 4\n"
+      printf("x = %d, y = %d\n", x, y);
+    expected_stdout: "x = 5, y = 4\n"
     expected_exit: 0
 
   - name: "valeurs negatives"
+    input: 'int x = -10; int y = 20; ft_swap(&x, &y);'
     body: |
       int x = -10;
       int y = 20;
       ft_swap(&x, &y);
-      printf("%d %d\n", x, y);
-    expected_stdout: "20 -10\n"
+      printf("x = %d, y = %d\n", x, y);
+    expected_stdout: "x = 20, y = -10\n"
     expected_exit: 0
 
   - name: "meme valeur des deux cotes"
+    input: 'int x = 7; int y = 7; ft_swap(&x, &y);'
     body: |
       int x = 7;
       int y = 7;
       ft_swap(&x, &y);
-      printf("%d %d\n", x, y);
-    expected_stdout: "7 7\n"
+      printf("x = %d, y = %d\n", x, y);
+    expected_stdout: "x = 7, y = 7\n"
     expected_exit: 0
 
   - name: "zero et negatif"
+    input: 'int x = 0; int y = -1; ft_swap(&x, &y);'
     body: |
       int x = 0;
       int y = -1;
       ft_swap(&x, &y);
-      printf("%d %d\n", x, y);
-    expected_stdout: "-1 0\n"
+      printf("x = %d, y = %d\n", x, y);
+    expected_stdout: "x = -1, y = 0\n"
     expected_exit: 0
 
   - name: "grandes valeurs (bornes int)"
+    input: 'int x = 2147483647; int y = -2147483647; ft_swap(&x, &y);'
     body: |
       int x = 2147483647;
       int y = -2147483647;
       ft_swap(&x, &y);
-      printf("%d %d\n", x, y);
-    expected_stdout: "-2147483647 2147483647\n"
+      printf("x = %d, y = %d\n", x, y);
+    expected_stdout: "x = -2147483647, y = 2147483647\n"
     expected_exit: 0
 
   - name: "double appel revient a l'etat initial"
+    input: 'int x = 1; int y = 2; ft_swap(&x, &y); ft_swap(&x, &y);'
     body: |
       int x = 1;
       int y = 2;
       ft_swap(&x, &y);
       ft_swap(&x, &y);
-      printf("%d %d\n", x, y);
-    expected_stdout: "1 2\n"
+      printf("x = %d, y = %d\n", x, y);
+    expected_stdout: "x = 1, y = 2\n"
     expected_exit: 0

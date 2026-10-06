@@ -14,6 +14,7 @@ compile:
 tests:
 
   - name: "met en majuscule la premiere lettre de chaque mot"
+    input: 'char str[30] = "bonjour tout le monde"; ft_strcapitalize(str);'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -26,7 +27,7 @@ tests:
           ft_strcapitalize(str);
           if (strcmp(str, "Bonjour Tout Le Monde") != 0)
           {
-              printf("str = \"%s\", attendu \"Bonjour Tout Le Monde\"\n", str);
+              printf("obtenu : str = \"%s\"\nattendu : str = \"Bonjour Tout Le Monde\"\n", str);
               return (1);
           }
           return (0);
@@ -34,6 +35,7 @@ tests:
     expected_exit: 0
 
   - name: "met en minuscule le reste des lettres du mot"
+    input: 'char str[30] = "tout LE monde"; ft_strcapitalize(str);'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -46,7 +48,7 @@ tests:
           ft_strcapitalize(str);
           if (strcmp(str, "Tout Le Monde") != 0)
           {
-              printf("str = \"%s\", attendu \"Tout Le Monde\"\n", str);
+              printf("obtenu : str = \"%s\"\nattendu : str = \"Tout Le Monde\"\n", str);
               return (1);
           }
           return (0);
@@ -54,6 +56,7 @@ tests:
     expected_exit: 0
 
   - name: "les separateurs non alphanumeriques delimitent les mots"
+    input: 'char str[30] = "hello-world_test"; ft_strcapitalize(str);'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -66,7 +69,7 @@ tests:
           ft_strcapitalize(str);
           if (strcmp(str, "Hello-World_Test") != 0)
           {
-              printf("str = \"%s\", attendu \"Hello-World_Test\"\n", str);
+              printf("obtenu : str = \"%s\"\nattendu : str = \"Hello-World_Test\"\n", str);
               return (1);
           }
           return (0);
@@ -74,6 +77,7 @@ tests:
     expected_exit: 0
 
   - name: "les chiffres restent rattaches au mot courant sans etre modifies"
+    input: 'char str[30] = "abc123def"; ft_strcapitalize(str);'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -86,7 +90,7 @@ tests:
           ft_strcapitalize(str);
           if (strcmp(str, "Abc123def") != 0)
           {
-              printf("str = \"%s\", attendu \"Abc123def\"\n", str);
+              printf("obtenu : str = \"%s\"\nattendu : str = \"Abc123def\"\n", str);
               return (1);
           }
           return (0);
@@ -94,6 +98,7 @@ tests:
     expected_exit: 0
 
   - name: "un chiffre en debut de mot n'entraine pas de majuscule sur la lettre suivante"
+    input: 'char str[10] = "42words"; ft_strcapitalize(str);'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -106,7 +111,7 @@ tests:
           ft_strcapitalize(str);
           if (strcmp(str, "42words") != 0)
           {
-              printf("str = \"%s\", attendu \"42words\"\n", str);
+              printf("obtenu : str = \"%s\"\nattendu : str = \"42words\"\n", str);
               return (1);
           }
           return (0);
@@ -114,6 +119,7 @@ tests:
     expected_exit: 0
 
   - name: "exemple exact du sujet"
+    input: 'char str[60] = "hello, how are you doing? 42words forty-two; fifty+and+one"; ft_strcapitalize(str);'
     main: |
       #include <stdio.h>
       #include <string.h>
@@ -136,6 +142,7 @@ tests:
     expected_exit: 0
 
   - name: "retourne bien le pointeur str"
+    input: 'char str[10] = "test"; ft_strcapitalize(str);'
     main: |
       #include <stdio.h>
       char *ft_strcapitalize(char *str);
@@ -147,7 +154,7 @@ tests:
 
           if (ret != str)
           {
-              printf("la fonction ne retourne pas str\n");
+              printf("obtenu : %s\nattendu : str (le pointeur recu en parametre)\n", ret == NULL ? "NULL" : "un autre pointeur que str");
               return (1);
           }
           return (0);
@@ -155,6 +162,7 @@ tests:
     expected_exit: 0
 
   - name: "chaine vide reste vide"
+    input: 'char str[5] = ""; ft_strcapitalize(str);'
     main: |
       #include <stdio.h>
       char *ft_strcapitalize(char *str);
@@ -166,7 +174,7 @@ tests:
           ft_strcapitalize(str);
           if (str[0] != '\0')
           {
-              printf("str n'est pas restee vide\n");
+              printf("obtenu : str = \"%s\"\nattendu : str = \"\"\n", str);
               return (1);
           }
           return (0);
