@@ -1,0 +1,52 @@
+name: repeat_alpha
+tags: ["common_core", "exam_CC_00"]
+own_main: true
+
+sources:
+  - repeat_alpha.c
+
+compile:
+  compiler: cc
+  flags: ["-Wall", "-Wextra", "-Werror"]
+  extra: []
+
+tests:
+  - name: "mot simple minuscule"
+    args: ["abc"]
+    expected_stdout: "abbccc\n"
+    expected_exit: 0
+
+  - name: "casse mixte et ponctuation (exemple du sujet)"
+    args: ["Alex."]
+    expected_stdout: "Alllllllllllleeeeexxxxxxxxxxxxxxxxxxxxxxxx.\n"
+    expected_exit: 0
+
+  - name: "espaces et chiffres laissés tels quels (exemple du sujet)"
+    args: ["abacadaba 42!"]
+    expected_stdout: "abbacccaddddabba 42!\n"
+    expected_exit: 0
+
+  - name: "majuscule répétée 26 fois"
+    args: ["aA"]
+    expected_stdout: "aA\n"
+    expected_exit: 0
+
+  - name: "aucun caractère alphabétique"
+    args: ["123!"]
+    expected_stdout: "123!\n"
+    expected_exit: 0
+
+  - name: "aucun argument"
+    args: []
+    expected_stdout: "\n"
+    expected_exit: 0
+
+  - name: "chaîne vide"
+    args: [""]
+    expected_stdout: "\n"
+    expected_exit: 0
+
+  - name: "deux arguments (pas 1 seul)"
+    args: ["a", "b"]
+    expected_stdout: "\n"
+    expected_exit: 0

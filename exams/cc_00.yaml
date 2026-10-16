@@ -1,0 +1,39 @@
+title: "Common Core 00"
+icon: "🎓"
+track: "common_core"
+
+levels:
+  1:
+    - first_word
+    - fizzbuzz
+    - ft_putstr
+    - ft_strcpy
+    - ft_strlen
+    - ft_swap
+    - repeat_alpha
+    - rev_print
+    - rot_13
+    - rotone
+    - search_and_replace
+    - ulstr
+  2:
+    - alpha_mirror
+    - ft_atoi
+    - ft_strcmp
+    - ft_strdup
+    - ft_strrev
+    - inter
+    - is_power_of_2
+    - last_word
+    - union
+    - wdmatch
+  3:
+    - ft_list_size
+    - ft_range
+  4:
+    - ft_itoa
+    - ft_list_foreach
+    - ft_list_remove_if
+    - ft_split
+    - sort_int_tab
+    - sort_list

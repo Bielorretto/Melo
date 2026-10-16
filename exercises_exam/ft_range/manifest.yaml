@@ -1,0 +1,158 @@
+name: ft_range
+tags: ["common_core", "exam_CC_00"]
+
+sources:
+  - ft_range.c
+
+compile:
+  compiler: cc
+  flags:
+    - -Wall
+    - -Wextra
+    - -Werror
+
+tests:
+
+  - name: "plage simple croissante"
+    input: 'ft_range(0, 5)'
+    main: |
+      #include <stdio.h>
+      #include <stdlib.h>
+      int *ft_range(int min, int max);
+
+      int main(void)
+      {
+          int *res = ft_range(0, 5);
+          int expected[5] = {0, 1, 2, 3, 4};
+          int i = 0;
+
+          if (!res)
+          {
+              printf("obtenu : NULL\nattendu : {0, 1, 2, 3, 4}\n");
+              return (1);
+          }
+          while (i < 5)
+          {
+              if (res[i] != expected[i])
+              {
+                  printf("obtenu : {");
+                  for (int k = 0; k < 5; k++)
+                      printf("%s%d", k ? ", " : "", res[k]);
+                  printf("}\nattendu : {");
+                  for (int k = 0; k < 5; k++)
+                      printf("%s%d", k ? ", " : "", expected[k]);
+                  printf("}\n");
+                  free(res);
+                  return (1);
+              }
+              i++;
+          }
+          free(res);
+          return (0);
+      }
+    expected_exit: 0
+    check_memory: true
+
+  - name: "min egal a max retourne NULL"
+    input: 'ft_range(5, 5)'
+    main: |
+      #include <stdio.h>
+      int *ft_range(int min, int max);
+
+      int main(void)
+      {
+          int *res = ft_range(5, 5);
+
+          if (res != NULL)
+          {
+              printf("obtenu : un tableau (non NULL)\nattendu : NULL\n");
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "min superieur a max retourne NULL"
+    input: 'ft_range(10, 3)'
+    main: |
+      #include <stdio.h>
+      int *ft_range(int min, int max);
+
+      int main(void)
+      {
+          int *res = ft_range(10, 3);
+
+          if (res != NULL)
+          {
+              printf("obtenu : un tableau (non NULL)\nattendu : NULL\n");
+              return (1);
+          }
+          return (0);
+      }
+    expected_exit: 0
+
+  - name: "plage avec valeurs negatives"
+    input: 'ft_range(-3, 3)'
+    main: |
+      #include <stdio.h>
+      #include <stdlib.h>
+      int *ft_range(int min, int max);
+
+      int main(void)
+      {
+          int *res = ft_range(-3, 3);
+          int expected[6] = {-3, -2, -1, 0, 1, 2};
+          int i = 0;
+
+          if (!res)
+          {
+              printf("obtenu : NULL\nattendu : {-3, -2, -1, 0, 1, 2}\n");
+              return (1);
+          }
+          while (i < 6)
+          {
+              if (res[i] != expected[i])
+              {
+                  printf("obtenu : {");
+                  for (int k = 0; k < 6; k++)
+                      printf("%s%d", k ? ", " : "", res[k]);
+                  printf("}\nattendu : {");
+                  for (int k = 0; k < 6; k++)
+                      printf("%s%d", k ? ", " : "", expected[k]);
+                  printf("}\n");
+                  free(res);
+                  return (1);
+              }
+              i++;
+          }
+          free(res);
+          return (0);
+      }
+    expected_exit: 0
+    check_memory: true
+
+  - name: "plage d'un seul element"
+    input: 'ft_range(7, 8)'
+    main: |
+      #include <stdio.h>
+      #include <stdlib.h>
+      int *ft_range(int min, int max);
+
+      int main(void)
+      {
+          int *res = ft_range(7, 8);
+
+          if (!res || res[0] != 7)
+          {
+              if (!res)
+                  printf("obtenu : NULL\nattendu : {7}\n");
+              else
+                  printf("obtenu : {%d}\nattendu : {7}\n", res[0]);
+              free(res);
+              return (1);
+          }
+          free(res);
+          return (0);
+      }
+    expected_exit: 0
+    check_memory: true

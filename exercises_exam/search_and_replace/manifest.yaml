@@ -1,0 +1,62 @@
+name: search_and_replace
+tags: ["common_core", "exam_CC_00"]
+own_main: true
+
+sources:
+  - search_and_replace.c
+
+compile:
+  compiler: cc
+  flags: ["-Wall", "-Wextra", "-Werror"]
+  extra: []
+
+tests:
+  - name: "remplacement simple (exemple du sujet)"
+    args: ["Papache est un sabre", "a", "o"]
+    expected_stdout: "Popoche est un sobre\n"
+    expected_exit: 0
+
+  - name: "2e argument de plusieurs lettres (exemple du sujet)"
+    args: ["zaz", "art", "zul"]
+    expected_stdout: "\n"
+    expected_exit: 0
+
+  - name: "lettre absente : on réaffiche la chaîne (exemple du sujet)"
+    args: ["zaz", "r", "u"]
+    expected_stdout: "zaz\n"
+    expected_exit: 0
+
+  - name: "trop d'arguments (exemple du sujet)"
+    args: ["jacob", "a", "b", "c", "e"]
+    expected_stdout: "\n"
+    expected_exit: 0
+
+  - name: "remplacement en conservant la casse (exemple du sujet)"
+    args: ["ZoZ eT Dovid oiME le METol.", "o", "a"]
+    expected_stdout: "ZaZ eT David aiME le METal.\n"
+    expected_exit: 0
+
+  - name: "espace final conservé (exemple du sujet)"
+    args: ["wNcOre Un ExEmPle Pas Facilw a Ecrirw ", "w", "e"]
+    expected_stdout: "eNcOre Un ExEmPle Pas Facile a Ecrire \n"
+    expected_exit: 0
+
+  - name: "aucun argument"
+    args: []
+    expected_stdout: "\n"
+    expected_exit: 0
+
+  - name: "un seul argument"
+    args: ["abc"]
+    expected_stdout: "\n"
+    expected_exit: 0
+
+  - name: "2e argument vide"
+    args: ["abc", "", "x"]
+    expected_stdout: "\n"
+    expected_exit: 0
+
+  - name: "3e argument de plusieurs lettres"
+    args: ["abc", "b", "xy"]
+    expected_stdout: "\n"
+    expected_exit: 0

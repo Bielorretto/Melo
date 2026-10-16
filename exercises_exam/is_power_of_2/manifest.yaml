@@ -1,0 +1,46 @@
+name: is_power_of_2
+tags: ["common_core", "exam_CC_00"]
+
+sources:
+  - is_power_of_2.c
+
+compile:
+  compiler: cc
+  flags: ["-Wall", "-Wextra", "-Werror"]
+  extra: []
+
+prelude: |
+  #include <stdio.h>
+  int is_power_of_2(unsigned int n);
+
+tests:
+  - name: "petites valeurs (0, 1, 2, 3, 4)"
+    input: 'is_power_of_2(0, 1, 2, 3, 4)'
+    body: |
+      printf("%d\n", is_power_of_2(0));
+      printf("%d\n", is_power_of_2(1));
+      printf("%d\n", is_power_of_2(2));
+      printf("%d\n", is_power_of_2(3));
+      printf("%d\n", is_power_of_2(4));
+    expected_stdout: "0\n1\n1\n0\n1\n"
+    expected_exit: 0
+
+  - name: "puissances et non-puissances"
+    input: 'is_power_of_2(8, 16, 1024, 1023, 1025)'
+    body: |
+      printf("%d\n", is_power_of_2(8));
+      printf("%d\n", is_power_of_2(16));
+      printf("%d\n", is_power_of_2(1024));
+      printf("%d\n", is_power_of_2(1023));
+      printf("%d\n", is_power_of_2(1025));
+    expected_stdout: "1\n1\n1\n0\n0\n"
+    expected_exit: 0
+
+  - name: "grandes valeurs (2^31, UINT_MAX, UINT_MAX - 1)"
+    input: 'is_power_of_2(2147483648u, 4294967295u, 4294967294u)'
+    body: |
+      printf("%d\n", is_power_of_2(2147483648u));
+      printf("%d\n", is_power_of_2(4294967295u));
+      printf("%d\n", is_power_of_2(4294967294u));
+    expected_stdout: "1\n0\n0\n"
+    expected_exit: 0

@@ -1,0 +1,47 @@
+name: ulstr
+tags: ["common_core", "exam_CC_00"]
+own_main: true
+
+sources:
+  - ulstr.c
+
+compile:
+  compiler: cc
+  flags: ["-Wall", "-Wextra", "-Werror"]
+  extra: []
+
+tests:
+  - name: "phrase longue avec apostrophes (exemple du sujet)"
+    args: ["L'eSPrit nE peUt plUs pRogResSer s'Il staGne et sI peRsIsTent VAnIte et auto-justification."]
+    expected_stdout: "l'EspRIT Ne PEuT PLuS PrOGrESsER S'iL STAgNE ET Si PErSiStENT vaNiTE ET AUTO-JUSTIFICATION.\n"
+    expected_exit: 0
+
+  - name: "espaces finales conservées (exemple du sujet)"
+    args: ["S'enTOuRer dE sECreT eSt uN sIGnE De mAnQuE De coNNaiSSanCe.  "]
+    expected_stdout: "s'ENtoUrER De SecREt EsT Un SigNe dE MaNqUe dE COnnAIssANcE.  \n"
+    expected_exit: 0
+
+  - name: "chiffres et ponctuation inchangés (exemple du sujet)"
+    args: ["3:21 Ba  tOut  moUn ki Ka di KE m'en Ka fe fot"]
+    expected_stdout: "3:21 bA  ToUT  MOuN KI kA DI ke M'EN kA FE FOT\n"
+    expected_exit: 0
+
+  - name: "deux mots"
+    args: ["Hello World"]
+    expected_stdout: "hELLO wORLD\n"
+    expected_exit: 0
+
+  - name: "aucun argument"
+    args: []
+    expected_stdout: "\n"
+    expected_exit: 0
+
+  - name: "chaîne vide"
+    args: [""]
+    expected_stdout: "\n"
+    expected_exit: 0
+
+  - name: "deux arguments (pas 1 seul)"
+    args: ["a", "b"]
+    expected_stdout: "\n"
+    expected_exit: 0

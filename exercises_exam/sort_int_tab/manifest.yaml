@@ -1,0 +1,101 @@
+name: sort_int_tab
+tags: ["common_core", "exam_CC_00"]
+
+sources:
+  - sort_int_tab.c
+
+compile:
+  compiler: cc
+  flags: ["-Wall", "-Wextra", "-Werror"]
+  extra: []
+
+prelude: |
+  #include <stdio.h>
+  void sort_int_tab(int *tab, unsigned int size);
+
+tests:
+  - name: "trie un tableau en désordre"
+    input: 'int tab[6] = {5, 3, 8, 1, 9, 2}; sort_int_tab(tab, 6);'
+    body: |
+      int tab[6] = {5, 3, 8, 1, 9, 2};
+      unsigned int i = 0;
+
+      sort_int_tab(tab, 6);
+      while (i < 6)
+      {
+          printf("%d\n", tab[i]);
+          i++;
+      }
+    expected_stdout: "1\n2\n3\n5\n8\n9\n"
+    expected_exit: 0
+
+  - name: "tableau déjà trié reste trié"
+    input: 'int tab[5] = {1, 2, 3, 4, 5}; sort_int_tab(tab, 5);'
+    body: |
+      int tab[5] = {1, 2, 3, 4, 5};
+      unsigned int i = 0;
+
+      sort_int_tab(tab, 5);
+      while (i < 5)
+      {
+          printf("%d\n", tab[i]);
+          i++;
+      }
+    expected_stdout: "1\n2\n3\n4\n5\n"
+    expected_exit: 0
+
+  - name: "tableau trié en ordre décroissant"
+    input: 'int tab[5] = {9, 7, 5, 3, 1}; sort_int_tab(tab, 5);'
+    body: |
+      int tab[5] = {9, 7, 5, 3, 1};
+      unsigned int i = 0;
+
+      sort_int_tab(tab, 5);
+      while (i < 5)
+      {
+          printf("%d\n", tab[i]);
+          i++;
+      }
+    expected_stdout: "1\n3\n5\n7\n9\n"
+    expected_exit: 0
+
+  - name: "les doublons sont conservés"
+    input: 'int tab[6] = {4, 2, 4, 1, 2, 4}; sort_int_tab(tab, 6);'
+    body: |
+      int tab[6] = {4, 2, 4, 1, 2, 4};
+      unsigned int i = 0;
+
+      sort_int_tab(tab, 6);
+      while (i < 6)
+      {
+          printf("%d\n", tab[i]);
+          i++;
+      }
+    expected_stdout: "1\n2\n2\n4\n4\n4\n"
+    expected_exit: 0
+
+  - name: "un seul élément et taille 0 ne plantent pas"
+    input: 'int tab[1] = {42}; sort_int_tab(tab, 1); sort_int_tab(tab, 0);'
+    body: |
+      int tab[1] = {42};
+
+      sort_int_tab(tab, 1);
+      sort_int_tab(tab, 0);
+      printf("%d\n", tab[0]);
+    expected_stdout: "42\n"
+    expected_exit: 0
+
+  - name: "nombres négatifs et bornes INT_MIN / INT_MAX"
+    input: 'int tab[4] = {INT_MAX, 0, -1, INT_MIN}; sort_int_tab(tab, 4);'
+    body: |
+      int tab[4] = {-2147483647 - 1, 2147483647, 0, -1};
+      unsigned int i = 0;
+
+      sort_int_tab(tab, 4);
+      while (i < 4)
+      {
+          printf("%d\n", tab[i]);
+          i++;
+      }
+    expected_stdout: "-2147483648\n-1\n0\n2147483647\n"
+    expected_exit: 0

@@ -35,19 +35,47 @@ def _load_exams(exams_root: Path) -> Dict[str, dict]:
         data = yaml.safe_load(path.read_text(encoding="utf-8"))
         data.setdefault("title", path.stem)
         data.setdefault("icon", "🚵")
+        data.setdefault("track", "piscine")
         exams[path.stem] = data
     return exams
 
 
-def _choose_exam(exams: Dict[str, dict]) -> dict:
-    ordered = list(exams.values())
+def _track_label(track: str) -> str:
+    return track.replace("_", " ").title()
+
+
+def _choose_track(exams: Dict[str, dict]) -> str:
+    tracks = sorted({data["track"] for data in exams.values()},
+                    key=lambda t: (t != "piscine", t))
+    while True:
+        lines = "\n".join(
+            f"[cyan]{i}[/]. {_track_label(t)}"
+            for i, t in enumerate(tracks, start=1)
+        )
+        console.print(Panel(lines, title="🏊 Tracks disponibles", border_style="blue",
+                             expand=False, padding=(0, 2)))
+        choice = console.input("[cyan]>[/] choix (numéro, q pour quitter) : ").strip()
+
+        if choice.lower() in ("q", "quit", "exit"):
+            console.print("[yellow]À bientôt ![/]")
+            sys.exit(0)
+
+        if not choice.isdigit() or not (1 <= int(choice) <= len(tracks)):
+            console.print("[red]Choix invalide.[/]")
+            continue
+
+        return tracks[int(choice) - 1]
+
+
+def _choose_exam(exams: Dict[str, dict], track: str) -> dict:
+    ordered = [data for data in exams.values() if data["track"] == track]
     while True:
         lines = "\n".join(
             f"[cyan]{i}[/]. {data['icon']} {data['title']}"
             for i, data in enumerate(ordered, start=1)
         )
-        console.print(Panel(lines, title="🏔️🏔️Exams disponibles🏔️🏔️", border_style="blue",
-                             expand=False, padding=(0, 2)))
+        console.print(Panel(lines, title=f"🏔️🏔️{_track_label(track)} — exams🏔️🏔️",
+                             border_style="blue", expand=False, padding=(0, 2)))
         choice = console.input("[cyan]>[/] choix (numéro, q pour quitter) : ").strip()
 
         if choice.lower() in ("q", "quit", "exit"):
@@ -134,7 +162,8 @@ def run_interactive_exam(exams_root: Path, exercises_exam_root: Path,
         console.print(f"[red]Aucun exam trouvé dans {exams_root} (*.yaml attendus).[/]")
         return
 
-    exam = _choose_exam(exams)
+    track = _choose_track(exams)
+    exam = _choose_exam(exams, track)
     level = _choose_starting_level(exam)
 
     pool = exam["levels"][level]

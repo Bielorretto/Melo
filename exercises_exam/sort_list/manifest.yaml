@@ -1,0 +1,251 @@
+name: sort_list
+tags: ["common_core", "exam_CC_00"]
+
+sources:
+  - sort_list.c
+
+compile:
+  compiler: cc
+  flags: ["-Wall", "-Wextra", "-Werror"]
+  extra: []
+
+tests:
+  - name: "tri croissant"
+    input: 'liste {3, 1, 2}, cmp = ascending'
+    main: |
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include "list.h"
+      t_list *sort_list(t_list *lst, int (*cmp)(int, int));
+
+      int ascending(int a, int b)
+      {
+          return (a <= b);
+      }
+
+      void print_list(t_list *lst)
+      {
+          while (lst)
+          {
+              printf("%d ", *(int *)lst->data);
+              lst = lst->next;
+          }
+          printf("\n");
+      }
+
+      void free_list(t_list *lst)
+      {
+          t_list *tmp;
+
+          while (lst)
+          {
+              tmp = lst->next;
+              free(lst);
+              lst = tmp;
+          }
+      }
+
+      int main(void)
+      {
+          int v1 = 3, v2 = 1, v3 = 2;
+          t_list *a = malloc(sizeof(t_list));
+          t_list *b = malloc(sizeof(t_list));
+          t_list *c = malloc(sizeof(t_list));
+
+          a->data = &v1; a->next = b;
+          b->data = &v2; b->next = c;
+          c->data = &v3; c->next = NULL;
+          a = sort_list(a, ascending);
+          print_list(a);
+          free_list(a);
+          return (0);
+      }
+    expected_stdout: "1 2 3 \n"
+    expected_exit: 0
+    check_memory: true
+
+  - name: "tri décroissant"
+    input: 'liste {1, 3, 2}, cmp = descending'
+    main: |
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include "list.h"
+      t_list *sort_list(t_list *lst, int (*cmp)(int, int));
+
+      int descending(int a, int b)
+      {
+          return (a >= b);
+      }
+
+      void print_list(t_list *lst)
+      {
+          while (lst)
+          {
+              printf("%d ", *(int *)lst->data);
+              lst = lst->next;
+          }
+          printf("\n");
+      }
+
+      void free_list(t_list *lst)
+      {
+          t_list *tmp;
+
+          while (lst)
+          {
+              tmp = lst->next;
+              free(lst);
+              lst = tmp;
+          }
+      }
+
+      int main(void)
+      {
+          int v1 = 1, v2 = 3, v3 = 2;
+          t_list *a = malloc(sizeof(t_list));
+          t_list *b = malloc(sizeof(t_list));
+          t_list *c = malloc(sizeof(t_list));
+
+          a->data = &v1; a->next = b;
+          b->data = &v2; b->next = c;
+          c->data = &v3; c->next = NULL;
+          a = sort_list(a, descending);
+          print_list(a);
+          free_list(a);
+          return (0);
+      }
+    expected_stdout: "3 2 1 \n"
+    expected_exit: 0
+    check_memory: true
+
+  - name: "liste vide (NULL)"
+    input: 'sort_list(NULL, ascending)'
+    main: |
+      #include <stdio.h>
+      #include "list.h"
+      t_list *sort_list(t_list *lst, int (*cmp)(int, int));
+
+      int ascending(int a, int b)
+      {
+          return (a <= b);
+      }
+
+      int main(void)
+      {
+          t_list *a = sort_list(NULL, ascending);
+
+          if (a != NULL)
+          {
+              printf("obtenu : une liste (non NULL)\nattendu : NULL\n");
+              return (1);
+          }
+          printf("ok\n");
+          return (0);
+      }
+    expected_stdout: "ok\n"
+    expected_exit: 0
+
+  - name: "un seul élément"
+    input: 'liste {7}, cmp = ascending'
+    main: |
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include "list.h"
+      t_list *sort_list(t_list *lst, int (*cmp)(int, int));
+
+      int ascending(int a, int b)
+      {
+          return (a <= b);
+      }
+
+      void print_list(t_list *lst)
+      {
+          while (lst)
+          {
+              printf("%d ", *(int *)lst->data);
+              lst = lst->next;
+          }
+          printf("\n");
+      }
+
+      void free_list(t_list *lst)
+      {
+          t_list *tmp;
+
+          while (lst)
+          {
+              tmp = lst->next;
+              free(lst);
+              lst = tmp;
+          }
+      }
+
+      int main(void)
+      {
+          int v = 7;
+          t_list *a = malloc(sizeof(t_list));
+
+          a->data = &v;
+          a->next = NULL;
+          a = sort_list(a, ascending);
+          print_list(a);
+          free_list(a);
+          return (0);
+      }
+    expected_stdout: "7 \n"
+    expected_exit: 0
+    check_memory: true
+
+  - name: "les doublons sont conservés"
+    input: 'liste {2, 1, 2}, cmp = ascending'
+    main: |
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include "list.h"
+      t_list *sort_list(t_list *lst, int (*cmp)(int, int));
+
+      int ascending(int a, int b)
+      {
+          return (a <= b);
+      }
+
+      void print_list(t_list *lst)
+      {
+          while (lst)
+          {
+              printf("%d ", *(int *)lst->data);
+              lst = lst->next;
+          }
+          printf("\n");
+      }
+
+      void free_list(t_list *lst)
+      {
+          t_list *tmp;
+
+          while (lst)
+          {
+              tmp = lst->next;
+              free(lst);
+              lst = tmp;
+          }
+      }
+
+      int main(void)
+      {
+          int v1 = 2, v2 = 1, v3 = 2;
+          t_list *a = malloc(sizeof(t_list));
+          t_list *b = malloc(sizeof(t_list));
+          t_list *c = malloc(sizeof(t_list));
+
+          a->data = &v1; a->next = b;
+          b->data = &v2; b->next = c;
+          c->data = &v3; c->next = NULL;
+          a = sort_list(a, ascending);
+          print_list(a);
+          free_list(a);
+          return (0);
+      }
+    expected_stdout: "1 2 2 \n"
+    expected_exit: 0
+    check_memory: true

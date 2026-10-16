@@ -1,0 +1,47 @@
+name: rev_print
+tags: ["common_core", "exam_CC_00"]
+own_main: true
+
+sources:
+  - rev_print.c
+
+compile:
+  compiler: cc
+  flags: ["-Wall", "-Wextra", "-Werror"]
+  extra: []
+
+tests:
+  - name: "mot simple (exemple du sujet)"
+    args: ["zaz"]
+    expected_stdout: "zaz\n"
+    expected_exit: 0
+
+  - name: "phrase avec espaces et casse (exemple du sujet)"
+    args: ["dub0 a POIL"]
+    expected_stdout: "LIOP a 0bud\n"
+    expected_exit: 0
+
+  - name: "espaces conservés en miroir"
+    args: ["  spaced  "]
+    expected_stdout: "  decaps  \n"
+    expected_exit: 0
+
+  - name: "un seul caractère"
+    args: ["a"]
+    expected_stdout: "a\n"
+    expected_exit: 0
+
+  - name: "aucun argument"
+    args: []
+    expected_stdout: "\n"
+    expected_exit: 0
+
+  - name: "chaîne vide"
+    args: [""]
+    expected_stdout: "\n"
+    expected_exit: 0
+
+  - name: "deux arguments (pas 1 seul)"
+    args: ["a", "b"]
+    expected_stdout: "\n"
+    expected_exit: 0

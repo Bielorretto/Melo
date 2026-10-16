@@ -1,0 +1,79 @@
+name: ft_list_size
+tags: ["common_core", "exam_CC_00"]
+
+sources:
+  - ft_list_size.c
+  - ft_list.h
+
+compile:
+  compiler: cc
+  flags: ["-Wall", "-Wextra", "-Werror"]
+  extra: []
+
+tests:
+  - name: "liste vide (NULL)"
+    input: 'ft_list_size(NULL)'
+    main: |
+      #include <stdio.h>
+      #include "ft_list.h"
+      int ft_list_size(t_list *begin_list);
+
+      int main(void)
+      {
+          printf("%d\n", ft_list_size(NULL));
+          return (0);
+      }
+    expected_stdout: "0\n"
+    expected_exit: 0
+
+  - name: "liste d'un élément"
+    input: 'liste de 1 élément'
+    main: |
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include "ft_list.h"
+      int ft_list_size(t_list *begin_list);
+
+      int main(void)
+      {
+          t_list *a = malloc(sizeof(t_list));
+
+          a->data = NULL;
+          a->next = NULL;
+          printf("%d\n", ft_list_size(a));
+          free(a);
+          return (0);
+      }
+    expected_stdout: "1\n"
+    expected_exit: 0
+    check_memory: true
+
+  - name: "liste de trois éléments"
+    input: 'liste de 3 éléments'
+    main: |
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include "ft_list.h"
+      int ft_list_size(t_list *begin_list);
+
+      int main(void)
+      {
+          t_list *a = malloc(sizeof(t_list));
+          t_list *b = malloc(sizeof(t_list));
+          t_list *c = malloc(sizeof(t_list));
+
+          a->data = NULL;
+          a->next = b;
+          b->data = NULL;
+          b->next = c;
+          c->data = NULL;
+          c->next = NULL;
+          printf("%d\n", ft_list_size(a));
+          free(a);
+          free(b);
+          free(c);
+          return (0);
+      }
+    expected_stdout: "3\n"
+    expected_exit: 0
+    check_memory: true

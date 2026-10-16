@@ -1,0 +1,57 @@
+name: last_word
+tags: ["common_core", "exam_CC_00"]
+own_main: true
+
+sources:
+  - last_word.c
+
+compile:
+  compiler: cc
+  flags: ["-Wall", "-Wextra", "-Werror"]
+  extra: []
+
+tests:
+  - name: "deux mots (exemple du sujet)"
+    args: ["FOR PONY"]
+    expected_stdout: "PONY\n"
+    expected_exit: 0
+
+  - name: "espaces multiples entre les mots (exemple du sujet)"
+    args: ["this        ...       is sparta, then again, maybe    not"]
+    expected_stdout: "not\n"
+    expected_exit: 0
+
+  - name: "que des espaces (aucun mot) (exemple du sujet)"
+    args: ["   "]
+    expected_stdout: "\n"
+    expected_exit: 0
+
+  - name: "deux paramètres (pas 1 seul) (exemple du sujet)"
+    args: ["a", "b"]
+    expected_stdout: "\n"
+    expected_exit: 0
+
+  - name: "espaces en début et fin, virgule dans le mot (exemple du sujet)"
+    args: ["  lorem,ipsum  "]
+    expected_stdout: "lorem,ipsum\n"
+    expected_exit: 0
+
+  - name: "un seul mot"
+    args: ["hello"]
+    expected_stdout: "hello\n"
+    expected_exit: 0
+
+  - name: "tabulations comme séparateurs"
+    args: ["\ttab\tsep\t"]
+    expected_stdout: "sep\n"
+    expected_exit: 0
+
+  - name: "aucun argument"
+    args: []
+    expected_stdout: "\n"
+    expected_exit: 0
+
+  - name: "chaîne vide"
+    args: [""]
+    expected_stdout: "\n"
+    expected_exit: 0

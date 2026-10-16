@@ -1,0 +1,99 @@
+name: ft_list_foreach
+tags: ["common_core", "exam_CC_00"]
+
+sources:
+  - ft_list_foreach.c
+  - ft_list.h
+
+compile:
+  compiler: cc
+  flags: ["-Wall", "-Wextra", "-Werror"]
+  extra: []
+
+tests:
+  - name: "applique f à chaque élément"
+    input: 'liste {1, 2, 3}, f = print_int'
+    main: |
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include "ft_list.h"
+      void ft_list_foreach(t_list *begin_list, void (*f)(void *));
+
+      void print_int(void *data)
+      {
+          printf("%d ", *(int *)data);
+      }
+
+      int main(void)
+      {
+          int v1 = 1, v2 = 2, v3 = 3;
+          t_list *a = malloc(sizeof(t_list));
+          t_list *b = malloc(sizeof(t_list));
+          t_list *c = malloc(sizeof(t_list));
+
+          a->data = &v1;
+          a->next = b;
+          b->data = &v2;
+          b->next = c;
+          c->data = &v3;
+          c->next = NULL;
+          ft_list_foreach(a, print_int);
+          printf("\n");
+          free(a);
+          free(b);
+          free(c);
+          return (0);
+      }
+    expected_stdout: "1 2 3 \n"
+    expected_exit: 0
+    check_memory: true
+
+  - name: "liste vide (NULL) ne plante pas"
+    input: 'ft_list_foreach(NULL, print_int)'
+    main: |
+      #include <stdio.h>
+      #include "ft_list.h"
+      void ft_list_foreach(t_list *begin_list, void (*f)(void *));
+
+      void print_int(void *data)
+      {
+          printf("%d ", *(int *)data);
+      }
+
+      int main(void)
+      {
+          ft_list_foreach(NULL, print_int);
+          printf("\n");
+          return (0);
+      }
+    expected_stdout: "\n"
+    expected_exit: 0
+
+  - name: "un seul élément"
+    input: 'liste {42}, f = print_int'
+    main: |
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include "ft_list.h"
+      void ft_list_foreach(t_list *begin_list, void (*f)(void *));
+
+      void print_int(void *data)
+      {
+          printf("%d ", *(int *)data);
+      }
+
+      int main(void)
+      {
+          int v = 42;
+          t_list *a = malloc(sizeof(t_list));
+
+          a->data = &v;
+          a->next = NULL;
+          ft_list_foreach(a, print_int);
+          printf("\n");
+          free(a);
+          return (0);
+      }
+    expected_stdout: "42 \n"
+    expected_exit: 0
+    check_memory: true

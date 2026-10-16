@@ -1,0 +1,47 @@
+name: rot_13
+tags: ["common_core", "exam_CC_00"]
+own_main: true
+
+sources:
+  - rot_13.c
+
+compile:
+  compiler: cc
+  flags: ["-Wall", "-Wextra", "-Werror"]
+  extra: []
+
+tests:
+  - name: "mot simple (exemple du sujet)"
+    args: ["abc"]
+    expected_stdout: "nop\n"
+    expected_exit: 0
+
+  - name: "phrase avec ponctuation et casse mixte (exemple du sujet)"
+    args: ["My horse is Amazing."]
+    expected_stdout: "Zl ubefr vf Nznmvat.\n"
+    expected_exit: 0
+
+  - name: "z et Z bouclent, chiffres inchangés (exemple du sujet)"
+    args: ["AkjhZ zLKIJz , 23y "]
+    expected_stdout: "NxwuM mYXVWm , 23l \n"
+    expected_exit: 0
+
+  - name: "doublure rot_13 = identité"
+    args: ["Zz"]
+    expected_stdout: "Mm\n"
+    expected_exit: 0
+
+  - name: "aucun argument"
+    args: []
+    expected_stdout: "\n"
+    expected_exit: 0
+
+  - name: "chaîne vide"
+    args: [""]
+    expected_stdout: "\n"
+    expected_exit: 0
+
+  - name: "deux arguments (pas 1 seul)"
+    args: ["a", "b"]
+    expected_stdout: "\n"
+    expected_exit: 0
