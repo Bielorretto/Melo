@@ -1,0 +1,65 @@
+name: ft_strncmp
+prelude: |
+  #include "melo.h"
+  static inline int check_cmp(const char *call, int got, int exp)
+  {
+      if (melo_sign(got) != melo_sign(exp))
+      {
+          printf("obtenu : %s = %d (%s)\nattendu : %s (%s)\n", call, got, melo_sign_txt(got), melo_sign_txt(exp), exp == 0 ? "égal" : "différent");
+          return (1);
+      }
+      return (0);
+  }
+test_defaults:
+  expected_exit: 0
+tests:
+- name: chaînes égales
+  input: ft_strncmp("hello", "hello", 5)
+  body: |
+    if (check_cmp("ft_strncmp(\"hello\", \"hello\", 5)", ft_strncmp("hello", "hello", 5), 0))
+        return (1);
+- name: différence avant n (signe comme strncmp)
+  input: ft_strncmp("abcd", "abce", 4) et l'inverse
+  body: |
+    if (check_cmp("ft_strncmp(\"abcd\", \"abce\", 4)", ft_strncmp("abcd", "abce", 4), strncmp("abcd", "abce", 4)))
+        return (1);
+    if (check_cmp("ft_strncmp(\"abce\", \"abcd\", 4)", ft_strncmp("abce", "abcd", 4), strncmp("abce", "abcd", 4)))
+        return (1);
+- name: 'différence après n : 0'
+  input: ft_strncmp("abcd", "abce", 3)
+  body: |
+    if (check_cmp("ft_strncmp(\"abcd\", \"abce\", 3)", ft_strncmp("abcd", "abce", 3), 0))
+        return (1);
+- name: 'n = 0 : 0'
+  input: ft_strncmp("abc", "xyz", 0)
+  body: |
+    if (check_cmp("ft_strncmp(\"abc\", \"xyz\", 0)", ft_strncmp("abc", "xyz", 0), 0))
+        return (1);
+- name: une chaîne préfixe de l'autre
+  input: ft_strncmp("abc", "abcd", 4) et ft_strncmp("abcd", "abc", 10)
+  body: |
+    if (check_cmp("ft_strncmp(\"abc\", \"abcd\", 4)", ft_strncmp("abc", "abcd", 4), -1))
+        return (1);
+    if (check_cmp("ft_strncmp(\"abcd\", \"abc\", 10)", ft_strncmp("abcd", "abc", 10), 1))
+        return (1);
+- name: s'arrête au \0 même si n est plus grand
+  input: ft_strncmp("ab\0x", "ab\0y", 5)
+  body: |
+    if (check_cmp("ft_strncmp(\"ab\\0x\", \"ab\\0y\", 5)", ft_strncmp("ab\0x", "ab\0y", 5), 0))
+        return (1);
+- name: compare en unsigned char (octets > 127)
+  input: ft_strncmp("\200", "\0", 1) et ft_strncmp("test\200", "test\0", 6)
+  body: |
+    if (check_cmp("ft_strncmp(\"\\200\", \"\\0\", 1)", ft_strncmp("\200", "\0", 1), 1))
+        return (1);
+    if (check_cmp("ft_strncmp(\"test\\200\", \"test\\0\", 6)", ft_strncmp("test\200", "test\0", 6), 1))
+        return (1);
+    if (check_cmp("ft_strncmp(\"a\", \"\\377\", 1)", ft_strncmp("a", "\377", 1), -1))
+        return (1);
+- name: chaînes vides
+  input: ft_strncmp("", "", 5) et ft_strncmp("", "a", 1)
+  body: |
+    if (check_cmp("ft_strncmp(\"\", \"\", 5)", ft_strncmp("", "", 5), 0))
+        return (1);
+    if (check_cmp("ft_strncmp(\"\", \"a\", 1)", ft_strncmp("", "a", 1), -1))
+        return (1);

@@ -1,0 +1,38 @@
+name: ft_tolower
+prelude: |
+  #include "melo.h"
+test_defaults:
+  expected_exit: 0
+tests:
+- name: convertit les 26 lettres ('A' -> 'a' ...)
+  input: ft_tolower(c) pour les 26 lettres
+  body: |
+    for (int i = 0; i < 26; i++)
+    {
+        int c = 'A' + i;
+        int exp = 'a' + i;
+        if (ft_tolower(c) != exp)
+        {
+            printf("obtenu : ft_tolower('%c') = %d\nattendu : ft_tolower('%c') = %d ('%c')\n", c, ft_tolower(c), c, exp, exp);
+            return (1);
+        }
+    }
+- name: ne change pas les autres caractères
+  input: ft_tolower(c) pour c dans {'a', 'z', '0', '@', '[', '{', ' ', 0}
+  body: |
+    int tab[] = {'a', 'z', '0', '@', '[', '{', ' ', 0};
+    for (size_t i = 0; i < sizeof(tab) / sizeof(*tab); i++)
+        if (ft_tolower(tab[i]) != tab[i])
+        {
+            printf("obtenu : ft_tolower(%d) = %d\nattendu : ft_tolower(%d) = %d\n", tab[i], ft_tolower(tab[i]), tab[i], tab[i]);
+            return (1);
+        }
+- name: même résultat que tolower pour EOF et 0 à 255
+  input: ft_tolower(c) pour c de -1 à 255
+  body: |
+    for (int c = -1; c <= 255; c++)
+        if (ft_tolower(c) != tolower(c))
+        {
+            printf("obtenu : ft_tolower(%d) = %d\nattendu : ft_tolower(%d) = %d\n", c, ft_tolower(c), c, tolower(c));
+            return (1);
+        }

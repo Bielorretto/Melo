@@ -1,0 +1,51 @@
+name: ft_memset
+prelude: |
+  #include "melo.h"
+test_defaults:
+  expected_exit: 0
+  check_memory: true
+tests:
+- name: remplit n octets et ne touche pas au reste
+  input: ft_memset(buf = "xxxxxxxxxx", 'A', 5)
+  body: |
+    char buf[11] = "xxxxxxxxxx";
+    ft_memset(buf, 'A', 5);
+    if (memcmp(buf, "AAAAAxxxxx", 11) != 0)
+        return (melo_ko_m(buf, "AAAAAxxxxx", 10));
+- name: renvoie le pointeur b
+  input: ft_memset(buf, 'A', 5) == buf
+  body: |
+    char buf[10];
+    void *r = ft_memset(buf, 'A', 5);
+    if (r != buf)
+        return (melo_ko_ptr(buf, 10, r, buf));
+- name: c est converti en unsigned char
+  input: ft_memset(buf, 300, 4) et ft_memset(buf, -1, 4)
+  body: |
+    unsigned char buf[4];
+    ft_memset(buf, 300, 4);
+    for (int i = 0; i < 4; i++)
+        if (buf[i] != 44)
+            return (melo_ko_txt("octet != 44 avec c = 300", "4 octets à (unsigned char)300 = 44 (',')"));
+    ft_memset(buf, -1, 4);
+    for (int i = 0; i < 4; i++)
+        if (buf[i] != 255)
+            return (melo_ko_txt("octet != 255 avec c = -1", "4 octets à (unsigned char)-1 = 255"));
+- name: n = 0 ne modifie rien
+  input: ft_memset(buf = "abc", 'X', 0)
+  body: |
+    char buf[4] = "abc";
+    ft_memset(buf, 'X', 0);
+    if (strcmp(buf, "abc") != 0)
+        return (melo_ko_s(buf, "abc"));
+- name: même résultat que memset sur 1000 octets
+  input: ft_memset(buf, 'z', 1000) vs memset
+  body: |
+    char a[1000];
+    char b[1000];
+    for (int i = 0; i < 1000; i++)
+        a[i] = b[i] = (char)i;
+    ft_memset(a + 3, 'z', 990);
+    memset(b + 3, 'z', 990);
+    if (memcmp(a, b, 1000) != 0)
+        return (melo_ko_txt("contenu différent de memset", "même contenu que memset"));

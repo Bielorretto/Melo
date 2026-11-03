@@ -16,12 +16,28 @@ EXERCISES_ROOT = ROOT / "exercises"
 EXERCISES_EXAM_ROOT = ROOT / "exercises_exam"
 EXAMS_ROOT = ROOT / "exams"
 RENDU_ROOT = ROOT / "rendu"
+PROJECTS_ROOT = ROOT / "projects"
 
 
 def cmd_test(args):
     student_dir = Path(args.student_dir).resolve() if args.student_dir else ROOT.parent
 
     exercise = args.exercise
+    if exercise is None:
+        from core.project import detect_project
+        project = detect_project(PROJECTS_ROOT, student_dir)
+        if project:
+            print(f"Projet détecté automatiquement : {project}\n")
+            exercise = project
+
+    if exercise is not None:
+        from core.project import find_project, run_project
+        found = find_project(PROJECTS_ROOT, exercise)
+        if found:
+            project_dir, only = found
+            ok = run_project(project_dir, student_dir, only, timeout=args.timeout, strict=args.strict)
+            sys.exit(0 if ok else 1)
+
     if exercise is None:
         from core.runner import detect_module
         try:
@@ -52,6 +68,13 @@ def cmd_list(args):
         exo_dir = manifest_path.parent
         exo_name = exo_dir.relative_to(EXERCISES_ROOT).as_posix()
         print(f"  - {exo_name}")
+
+    from core.project import list_project_targets
+    targets = list_project_targets(PROJECTS_ROOT)
+    if targets:
+        print("\nProjets Common Core (./cli.py test <cible> <dossier>) :")
+        for t in targets:
+            print(f"  - {t}")
 
 
 def cmd_exam(args):
@@ -138,10 +161,13 @@ def main():
 
     p_test = sub.add_parser("test", help="teste un exercice")
     p_test.add_argument("exercise", nargs="?", default=None,
-                         help="nom de l'exercice ou du module (défaut : détection automatique)")
+                         help="exercice, module ou projet (ex. libft, libft/ft_split, libft/makefile) ; défaut : détection automatique")
     p_test.add_argument("student_dir", nargs="?", default=None,
                          help="dossier du rendu (défaut : dossier parent de Meloweo/)")
     p_test.add_argument("--timeout", type=int, default=5)
+    p_test.add_argument("--strict", action="store_true",
+                        help="projets (libft) : ajoute les vérifications plus sévères que la moulinette "
+                             "(échecs de malloc, helpers static, make re)")
     p_test.set_defaults(func=cmd_test)
 
     p_list = sub.add_parser("list", help="liste les exercices disponibles")

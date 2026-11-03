@@ -1,0 +1,76 @@
+name: ft_strlcat
+prelude: |
+  #include "melo.h"
+test_defaults:
+  expected_exit: 0
+  check_memory: true
+tests:
+- name: concatène quand il y a la place
+  input: dst = "abc" ; ft_strlcat(dst, "def", 20)
+  body: |
+    char dst[20] = "abc";
+    size_t r = ft_strlcat(dst, "def", 20);
+    if (strcmp(dst, "abcdef") != 0)
+        return (melo_ko_s(dst, "abcdef"));
+    if (r != 6)
+        return (melo_ko_i(r, 6));
+- name: tronque pour que dst fasse size - 1 caractères
+  input: dst = "abc" ; ft_strlcat(dst, "defgh", 6)
+  body: |
+    char dst[20] = "abc";
+    size_t r = ft_strlcat(dst, "defgh", 6);
+    if (strcmp(dst, "abcde") != 0)
+        return (melo_ko_s(dst, "abcde"));
+    if (r != 8)
+        return (melo_ko_txt("mauvaise valeur de retour", "8 (longueur de dst + longueur de src)"));
+- name: 'size <= longueur de dst : dst intact, renvoie size + longueur de src'
+  input: dst = "abcdef" ; ft_strlcat(dst, "xyz", 3)
+  body: |
+    char dst[20] = "abcdef";
+    size_t r = ft_strlcat(dst, "xyz", 3);
+    if (strcmp(dst, "abcdef") != 0)
+        return (melo_ko_s(dst, "abcdef"));
+    if (r != 6)
+        return (melo_ko_i(r, 6));
+- name: 'size = 0 : renvoie la longueur de src'
+  input: dst = "abc" ; ft_strlcat(dst, "hello", 0)
+  body: |
+    char dst[20] = "abc";
+    size_t r = ft_strlcat(dst, "hello", 0);
+    if (strcmp(dst, "abc") != 0)
+        return (melo_ko_s(dst, "abc"));
+    if (r != 5)
+        return (melo_ko_i(r, 5));
+- name: remplit exactement le buffer
+  input: dst = "ab" ; ft_strlcat(dst, "cd", 5)
+  body: |
+    char dst[5] = "ab";
+    size_t r = ft_strlcat(dst, "cd", 5);
+    if (strcmp(dst, "abcd") != 0)
+        return (melo_ko_s(dst, "abcd"));
+    if (r != 4)
+        return (melo_ko_i(r, 4));
+- name: dst vide et src vide
+  input: ft_strlcat("", "abc", 10) puis ft_strlcat("abc", "", 10)
+  body: |
+    char a[10] = "";
+    char b[10] = "abc";
+    size_t r1 = ft_strlcat(a, "abc", 10);
+    size_t r2 = ft_strlcat(b, "", 10);
+    if (strcmp(a, "abc") != 0)
+        return (melo_ko_s(a, "abc"));
+    if (r1 != 3)
+        return (melo_ko_i(r1, 3));
+    if (strcmp(b, "abc") != 0)
+        return (melo_ko_s(b, "abc"));
+    if (r2 != 3)
+        return (melo_ko_i(r2, 3));
+- name: n'écrit jamais au-delà de size
+  input: dst = "ab" (buffer rempli de 'Z') ; ft_strlcat(dst, "cdefgh", 5)
+  body: |
+    char dst[10];
+    memset(dst, 'Z', 10);
+    memcpy(dst, "ab", 3);
+    ft_strlcat(dst, "cdefgh", 5);
+    if (memcmp(dst, "abcd\0ZZZZZ", 10) != 0)
+        return (melo_ko_m(dst, "abcd\0ZZZZZ", 10));

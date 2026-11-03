@@ -1,0 +1,51 @@
+name: ft_memcpy
+prelude: |
+  #include "melo.h"
+test_defaults:
+  expected_exit: 0
+  check_memory: true
+tests:
+- name: copie n octets
+  input: ft_memcpy(dst, "hello", 6)
+  body: |
+    char dst[10] = "xxxxxxxxx";
+    ft_memcpy(dst, "hello", 6);
+    if (memcmp(dst, "hello\0xxx", 10) != 0)
+        return (melo_ko_m(dst, "hello\0xxx", 10));
+- name: renvoie dst
+  input: ft_memcpy(dst, src, 3) == dst
+  body: |
+    char dst[4];
+    void *r = ft_memcpy(dst, "abc", 3);
+    if (r != dst)
+        return (melo_ko_ptr(dst, 4, r, dst));
+- name: ne s'arrête pas aux \0
+  input: ft_memcpy(dst, "a\0b\0c", 5)
+  body: |
+    char dst[5] = "xxxx";
+    ft_memcpy(dst, "a\0b\0c", 5);
+    if (memcmp(dst, "a\0b\0c", 5) != 0)
+        return (melo_ko_m(dst, "a\0b\0c", 5));
+- name: n = 0 ne modifie rien
+  input: ft_memcpy(dst, "abc", 0)
+  body: |
+    char dst[4] = "xyz";
+    void *r = ft_memcpy(dst, "abc", 0);
+    if (strcmp(dst, "xyz") != 0)
+        return (melo_ko_s(dst, "xyz"));
+    if (r != dst)
+        return (melo_ko_ptr(dst, 4, r, dst));
+- name: même résultat que memcpy sur 1000 octets (dont octets > 127)
+  input: ft_memcpy(dst, src, 1000)
+  body: |
+    unsigned char src[1000];
+    unsigned char a[1000];
+    unsigned char b[1000];
+    for (int i = 0; i < 1000; i++)
+        src[i] = (unsigned char)(i * 7);
+    memset(a, 0, 1000);
+    memset(b, 0, 1000);
+    ft_memcpy(a, src, 1000);
+    memcpy(b, src, 1000);
+    if (memcmp(a, b, 1000) != 0)
+        return (melo_ko_txt("contenu différent de memcpy", "même contenu que memcpy"));

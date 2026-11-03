@@ -185,3 +185,49 @@ Pour chaque test, le programme :
 4. compare avec `expected_stdout`,
 5. vérifie `expected_exit`,
 6. indique si le test passe ou échoue.
+
+
+# 📚 Common Core : Libft
+
+Le mode `test` sait aussi tester une **libft complète** (sujet v1.3) : les 43 fonctions et toutes les règles du sujet.
+
+### Lancer les tests
+
+```bash
+./cli.py test libft ~/chemin/vers/libft             # tout
+./cli.py test libft/ft_split ~/chemin/vers/libft    # une seule fonction
+./cli.py test libft/makefile ~/chemin/vers/libft    # une seule section
+./cli.py list                                       # toutes les cibles possibles
+./cli.py test libft ~/chemin/vers/libft --strict    # + vérifications plus sévères que la moulinette
+```
+
+Sans chemin, Melo teste son dossier parent : si Melo est cloné dans ta libft, `./cli.py test libft` suffit.
+
+Par défaut, Melo teste comme la moulinette.
+`--strict` ajoute des vérifications qu'elle ne fait pas mais qu'un correcteur peut demander :
+échecs de malloc simulés, helpers en `static`, `make re`.
+
+### Ce qui est testé
+
+| Section | Vérifications |
+|---------|---------------|
+| `rendu` | fichiers obligatoires, tout à la racine, aucun fichier en trop, chaque `.c` compile avec `-Wall -Wextra -Werror`, pas de `restrict` |
+| `makefile` | `make` crée `libft.a`, règles `$(NAME) all clean fclean re`, `cc` + flags, `ar` (pas `libtool`), pas de relink, aucun `.c` inutilisé, `clean`, `fclean` (+ `re` en `--strict`) |
+| `header` | `libft.h` compile seul, protégé contre la double inclusion, `t_list` conforme, prototypes exacts du sujet |
+| `symboles` | toutes les fonctions présentes, pas de variable globale, helpers en `static` (`--strict`), seules les fonctions externes autorisées par le sujet (`nm`) |
+| `norme` | `norminette` sur tous les `.c` et `.h` (ignoré si non installée) |
+| `readme` | première ligne en italique, sections Description / Instructions / Resources, usage de l'IA décrit |
+| `ft_*` | comportement de chaque fonction comparé au sujet ou à la vraie libc, cas limites, fuites et erreurs mémoire (valgrind), **échecs de malloc simulés** en `--strict` (la fonction doit renvoyer NULL sans fuite) |
+
+Le Makefile est testé sur une copie : ton dossier n'est jamais modifié.
+Les fonctions sont testées avec une lib compilée par Melo, donc un Makefile cassé n'empêche pas de tester les fonctions.
+
+⚠️ La simulation d'échec de malloc utilise `ld --wrap` : Linux uniquement.
+
+### Où sont les tests
+
+```text
+projects/libft/project.yaml        # prototypes, fonctions autorisées, fichiers attendus
+projects/libft/includes/           # helpers C des tests (melo.h, melo_malloc.h)
+projects/libft/part1|2|3/ft_*/manifest.yaml
+```

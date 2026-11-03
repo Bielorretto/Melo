@@ -1,0 +1,73 @@
+name: ft_strdup
+prelude: |
+  #include "melo.h"
+  #include "melo_malloc.h"
+test_defaults:
+  expected_exit: 0
+  check_memory: true
+  link_flags:
+  - -Wl,--wrap=malloc
+tests:
+- name: copie la chaîne
+  input: ft_strdup("hello world")
+  body: |
+    char *r = ft_strdup("hello world");
+    if (!r || strcmp(r, "hello world") != 0)
+    {
+        melo_ko_s(r, "hello world");
+        free(r);
+        return (1);
+    }
+    free(r);
+- name: nouvelle zone mémoire (pas le même pointeur)
+  input: ft_strdup(s) != s
+  body: |
+    char s[] = "abc";
+    char *r = ft_strdup(s);
+    if (r == s)
+        return (melo_ko_txt("le même pointeur que s", "une nouvelle zone allouée"));
+    s[0] = 'X';
+    if (!r || strcmp(r, "abc") != 0)
+    {
+        melo_ko_s(r, "abc");
+        free(r);
+        return (1);
+    }
+    free(r);
+- name: chaîne vide
+  input: ft_strdup("")
+  body: |
+    char *r = ft_strdup("");
+    if (!r || r[0] != '\0')
+    {
+        melo_ko_s(r, "");
+        free(r);
+        return (1);
+    }
+    free(r);
+- name: longue chaîne (5000 caractères)
+  input: ft_strdup(5000 x 'z')
+  body: |
+    static char s[5001];
+    memset(s, 'z', 5000);
+    char *r = ft_strdup(s);
+    if (!r || strcmp(r, s) != 0)
+    {
+        melo_ko_s(r, s);
+        free(r);
+        return (1);
+    }
+    free(r);
+- name: 'malloc qui échoue : NULL'
+  strict: true
+  input: ft_strdup("abc") avec malloc qui renvoie NULL
+  body: |
+    melo_fail_at(0);
+    char *r = ft_strdup("abc");
+    melo_stop();
+    if (r)
+    {
+        melo_ko_s(r, NULL);
+        free(r);
+        return (1);
+    }

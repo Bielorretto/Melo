@@ -1,0 +1,63 @@
+name: ft_striteri
+prelude: |
+  #include "melo.h"
+  static int g_calls = 0;
+  static unsigned int g_idx[64];
+  static char *g_addr[64];
+
+  static inline void record(unsigned int i, char *c)
+  {
+      if (g_calls < 64)
+      {
+          g_idx[g_calls] = i;
+          g_addr[g_calls] = c;
+      }
+      g_calls++;
+  }
+
+  static inline void upper_even(unsigned int i, char *c)
+  {
+      if (i % 2 == 0)
+          *c = (char)toupper((unsigned char)*c);
+  }
+test_defaults:
+  expected_exit: 0
+  check_memory: true
+tests:
+- name: modifie la chaîne sur place via l'adresse
+  input: ft_striteri(s = "abcdef", f met en majuscule les index pairs)
+  body: |
+    char s[] = "abcdef";
+    ft_striteri(s, upper_even);
+    if (strcmp(s, "AbCdEf") != 0)
+        return (melo_ko_s(s, "AbCdEf"));
+- name: f appelée une fois par caractère avec l'index et l'adresse
+  input: ft_striteri(s = "hello", f)
+  body: |
+    char s[] = "hello";
+    ft_striteri(s, record);
+    if (g_calls != 5)
+    {
+        printf("obtenu : f appelée %d fois\nattendu : f appelée 5 fois\n", g_calls);
+        return (1);
+    }
+    for (unsigned int i = 0; i < 5; i++)
+    {
+        if (g_idx[i] != i)
+        {
+            printf("obtenu : appel n°%u avec l'index %u\nattendu : index %u\n", i + 1, g_idx[i], i);
+            return (1);
+        }
+        if (g_addr[i] != s + i)
+        {
+            printf("obtenu : appel n°%u avec une adresse qui n'est pas &s[%u]\nattendu : &s[%u]\n", i + 1, i, i);
+            return (1);
+        }
+    }
+- name: 'chaîne vide : f jamais appelée'
+  input: ft_striteri("", f)
+  body: |
+    char s[] = "";
+    ft_striteri(s, record);
+    if (g_calls != 0)
+        return (melo_ko_txt("f appelée", "f jamais appelée"));

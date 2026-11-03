@@ -1,0 +1,73 @@
+name: ft_calloc
+prelude: |
+  #include "melo.h"
+  #include "melo_malloc.h"
+test_defaults:
+  expected_exit: 0
+  check_memory: true
+  link_flags:
+  - -Wl,--wrap=malloc
+tests:
+- name: alloue nmemb * size octets à 0
+  input: ft_calloc(10, sizeof(int))
+  body: |
+    int *p = ft_calloc(10, sizeof(int));
+    if (!p)
+        return (melo_ko_txt("NULL", "un pointeur sur 40 octets à 0"));
+    for (int i = 0; i < 10; i++)
+        if (p[i] != 0)
+        {
+            printf("obtenu : p[%d] = %d\nattendu : p[%d] = 0\n", i, p[i], i);
+            free(p);
+            return (1);
+        }
+    free(p);
+- name: la zone allouée est utilisable entièrement
+  input: ft_calloc(1000, 1) puis écriture des 1000 octets
+  body: |
+    char *p = ft_calloc(1000, 1);
+    if (!p)
+        return (melo_ko_txt("NULL", "un pointeur sur 1000 octets"));
+    for (int i = 0; i < 1000; i++)
+        if (p[i] != 0)
+        {
+            printf("obtenu : p[%d] = %d\nattendu : p[%d] = 0\n", i, p[i], i);
+            free(p);
+            return (1);
+        }
+    memset(p, 'a', 1000);
+    free(p);
+- name: 'nmemb ou size à 0 : pointeur unique qu''on peut free'
+  input: ft_calloc(0, 0), ft_calloc(0, 5), ft_calloc(5, 0)
+  body: |
+    void *a = ft_calloc(0, 0);
+    void *b = ft_calloc(0, 5);
+    void *c = ft_calloc(5, 0);
+    if (!a || !b || !c)
+        return (melo_ko_txt("NULL", "un pointeur non NULL que free() accepte (consigne du sujet)"));
+    if (a == b || b == c || a == c)
+        return (melo_ko_txt("le même pointeur pour deux appels", "un pointeur unique par appel"));
+    free(a);
+    free(b);
+    free(c);
+- name: 'dépassement nmemb * size : NULL comme calloc'
+  input: ft_calloc(SIZE_MAX / 2 + 2, 2)
+  body: |
+    void *p = ft_calloc(SIZE_MAX / 2 + 2, 2);
+    if (p)
+    {
+        free(p);
+        return (melo_ko_txt("un pointeur (nmemb * size a débordé sans être détecté)", "NULL"));
+    }
+- name: 'malloc qui échoue : NULL'
+  strict: true
+  input: ft_calloc(4, 4) avec malloc qui renvoie NULL
+  body: |
+    melo_fail_at(0);
+    void *p = ft_calloc(4, 4);
+    melo_stop();
+    if (p)
+    {
+        free(p);
+        return (melo_ko_txt("un pointeur", "NULL"));
+    }

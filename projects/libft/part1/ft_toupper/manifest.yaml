@@ -1,0 +1,38 @@
+name: ft_toupper
+prelude: |
+  #include "melo.h"
+test_defaults:
+  expected_exit: 0
+tests:
+- name: convertit les 26 lettres ('a' -> 'A' ...)
+  input: ft_toupper(c) pour les 26 lettres
+  body: |
+    for (int i = 0; i < 26; i++)
+    {
+        int c = 'a' + i;
+        int exp = 'A' + i;
+        if (ft_toupper(c) != exp)
+        {
+            printf("obtenu : ft_toupper('%c') = %d\nattendu : ft_toupper('%c') = %d ('%c')\n", c, ft_toupper(c), c, exp, exp);
+            return (1);
+        }
+    }
+- name: ne change pas les autres caractères
+  input: ft_toupper(c) pour c dans {'A', 'Z', '0', '@', '[', '{', ' ', 0}
+  body: |
+    int tab[] = {'A', 'Z', '0', '@', '[', '{', ' ', 0};
+    for (size_t i = 0; i < sizeof(tab) / sizeof(*tab); i++)
+        if (ft_toupper(tab[i]) != tab[i])
+        {
+            printf("obtenu : ft_toupper(%d) = %d\nattendu : ft_toupper(%d) = %d\n", tab[i], ft_toupper(tab[i]), tab[i], tab[i]);
+            return (1);
+        }
+- name: même résultat que toupper pour EOF et 0 à 255
+  input: ft_toupper(c) pour c de -1 à 255
+  body: |
+    for (int c = -1; c <= 255; c++)
+        if (ft_toupper(c) != toupper(c))
+        {
+            printf("obtenu : ft_toupper(%d) = %d\nattendu : ft_toupper(%d) = %d\n", c, ft_toupper(c), c, toupper(c));
+            return (1);
+        }

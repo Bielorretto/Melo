@@ -1,0 +1,60 @@
+name: ft_putchar_fd
+prelude: |
+  #include "melo.h"
+  static inline int check_fd(const char *got, size_t got_len, const char *exp, size_t exp_len)
+  {
+      if (got_len != exp_len || memcmp(got, exp, exp_len) != 0)
+      {
+          printf("obtenu : ");
+          melo_m(got, got_len);
+          printf("\nattendu : ");
+          melo_m(exp, exp_len);
+          printf("\n");
+          return (1);
+      }
+      return (0);
+  }
+test_defaults:
+  expected_exit: 0
+tests:
+- name: écrit sur la sortie standard (fd 1)
+  input: ft_putchar_fd('a', 1)
+  body: |
+    ft_putchar_fd('a', 1);
+  expected_stdout: a
+- name: écrit sur le fd donné
+  input: ft_putchar_fd('Z', fd)
+  body: |
+    int fds[2];
+    char buf[8192];
+    if (melo_cap_begin(fds) != 0)
+        return (melo_ko_txt("pipe() a échoué", "pipe() OK"));
+    ft_putchar_fd('Z', fds[1]);
+    size_t n = melo_cap_end(fds, buf, sizeof(buf));
+    if (check_fd(buf, n, "Z", strlen("Z")))
+        return (1);
+- name: plusieurs caractères à la suite
+  input: ft_putchar_fd pour 'a', 'b', '\n'
+  body: |2
+            int fds[2];
+            char buf[8192];
+            if (melo_cap_begin(fds) != 0)
+                return (melo_ko_txt("pipe() a échoué", "pipe() OK"));
+            ft_putchar_fd('a', fds[1]);
+    ft_putchar_fd('b', fds[1]);
+    ft_putchar_fd('\n', fds[1]);
+            size_t n = melo_cap_end(fds, buf, sizeof(buf));
+            if (check_fd(buf, n, "ab\n", strlen("ab\n")))
+                return (1);
+- name: octet non ASCII et '\0' (1 octet chacun)
+  input: ft_putchar_fd('\351', fd) ; ft_putchar_fd('\0', fd)
+  body: |2
+            int fds[2];
+            char buf[8192];
+            if (melo_cap_begin(fds) != 0)
+                return (melo_ko_txt("pipe() a échoué", "pipe() OK"));
+            ft_putchar_fd('\351', fds[1]);
+    ft_putchar_fd('\0', fds[1]);
+            size_t n = melo_cap_end(fds, buf, sizeof(buf));
+            if (check_fd(buf, n, "\351\0", 2))
+                return (1);

@@ -1,0 +1,57 @@
+name: ft_atoi
+prelude: |
+  #include "melo.h"
+  static inline int check(const char *s)
+  {
+      if (ft_atoi(s) != atoi(s))
+      {
+          printf("obtenu : ft_atoi(");
+          melo_s(s);
+          printf(") = %d\nattendu : %d (comme atoi)\n", ft_atoi(s), atoi(s));
+          return (1);
+      }
+      return (0);
+  }
+test_defaults:
+  expected_exit: 0
+tests:
+- name: nombres simples
+  input: ft_atoi(s) pour s dans {"42", "0", "7", "123456"}
+  body: |
+    if (check("42") || check("0") || check("7") || check("123456"))
+        return (1);
+- name: un seul signe + ou -
+  input: ft_atoi(s) pour s dans {"-42", "+42", "-0", "+0"}
+  body: |
+    if (check("-42") || check("+42") || check("-0") || check("+0"))
+        return (1);
+- name: espaces au début (' ', \t, \n, \v, \f, \r)
+  input: ft_atoi(s) pour s dans {"   42", "\t\n\v\f\r 42", " \t -7"}
+  body: |
+    if (check("   42") || check("\t\n\v\f\r 42") || check(" \t -7"))
+        return (1);
+- name: 'plusieurs signes : 0'
+  input: ft_atoi(s) pour s dans {"+-42", "-+42", "--42", "++42"}
+  body: |
+    if (check("+-42") || check("-+42") || check("--42") || check("++42"))
+        return (1);
+- name: s'arrête au premier caractère non chiffre
+  input: ft_atoi(s) pour s dans {"42abc", "12 34", "0012x", "-5-5"}
+  body: |
+    if (check("42abc") || check("12 34") || check("0012x") || check("-5-5"))
+        return (1);
+- name: 'pas de chiffre au début : 0'
+  input: ft_atoi(s) pour s dans {"abc42", "", "   ", "- 42", "\e42"}
+  body: |
+    if (check("abc42") || check("") || check("   ") || check("- 42") || check("\e42"))
+        return (1);
+- name: INT_MAX et INT_MIN
+  input: ft_atoi(s) pour s dans {"2147483647", "-2147483648"}
+  body: |
+    if (check("2147483647") || check("-2147483648"))
+        return (1);
+- name: zéros en tête
+  input: ft_atoi(s) pour s dans {"0000123", "-000042"}
+  body: |
+    if (check("0000123") || check("-000042"))
+        return (1);

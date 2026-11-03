@@ -1,0 +1,135 @@
+name: ft_lstnew
+prelude: |
+  #include "melo.h"
+  #include "melo_malloc.h"
+
+  static int g_del_calls = 0;
+
+  /* Crée une liste de n noeuds avec malloc réel ; contenus = "0", "1", ... (alloués). */
+  static inline t_list *make_list(int n)
+  {
+      t_list *head = NULL;
+      t_list **tail = &head;
+      for (int i = 0; i < n; i++)
+      {
+          t_list *node = __real_malloc(sizeof(t_list));
+          char *s = __real_malloc(12);
+          sprintf(s, "%d", i);
+          node->content = s;
+          node->next = NULL;
+          *tail = node;
+          tail = &node->next;
+      }
+      return (head);
+  }
+
+  static inline void free_list(t_list *l)
+  {
+      while (l)
+      {
+          t_list *next = l->next;
+          free(l->content);
+          free(l);
+          l = next;
+      }
+  }
+
+  static inline void del_count(void *p)
+  {
+      g_del_calls++;
+      free(p);
+  }
+
+  static inline void print_list(t_list *l)
+  {
+      int n = 0;
+      printf("[");
+      while (l && n < 10)
+      {
+          melo_s(l->content);
+          if (l->next)
+              printf(" -> ");
+          l = l->next;
+          n++;
+      }
+      if (l)
+          printf(" ...");
+      printf("]");
+  }
+
+  /* Compare les contenus (chaînes) à exp[] ; nb = longueur attendue. */
+  static inline int check_list(t_list *l, const char **exp, int nb)
+  {
+      t_list *cur = l;
+      int i = 0;
+      while (cur && i < nb && cur->content && strcmp(cur->content, exp[i]) == 0)
+      {
+          cur = cur->next;
+          i++;
+      }
+      if (i == nb && cur == NULL)
+          return (0);
+      printf("obtenu : ");
+      print_list(l);
+      printf("\nattendu : [");
+      for (int k = 0; k < nb; k++)
+      {
+          printf("\"%s\"", exp[k]);
+          if (k + 1 < nb)
+              printf(" -> ");
+      }
+      printf("]\n");
+      return (1);
+  }
+test_defaults:
+  expected_exit: 0
+  check_memory: true
+  link_flags:
+  - -Wl,--wrap=malloc
+tests:
+- name: content initialisé et next à NULL
+  input: ft_lstnew("hello")
+  body: |
+    char s[] = "hello";
+    t_list *n = ft_lstnew(s);
+    if (!n)
+        return (melo_ko_txt("NULL", "un nouveau noeud"));
+    if (n->content != s)
+        return (melo_ko_txt("content ne pointe pas sur le paramètre", "content == le pointeur donné"));
+    if (n->next != NULL)
+        return (melo_ko_txt("next n'est pas NULL", "next == NULL"));
+    free(n);
+- name: content NULL accepté
+  input: ft_lstnew(NULL)
+  body: |
+    t_list *n = ft_lstnew(NULL);
+    if (!n)
+        return (melo_ko_txt("NULL", "un nouveau noeud avec content == NULL"));
+    if (n->content != NULL || n->next != NULL)
+        return (melo_ko_txt("content ou next pas NULL", "content == NULL et next == NULL"));
+    free(n);
+- name: 'deux appels : deux noeuds différents'
+  input: ft_lstnew(a) et ft_lstnew(b)
+  body: |
+    int a = 1;
+    int b = 2;
+    t_list *x = ft_lstnew(&a);
+    t_list *y = ft_lstnew(&b);
+    if (!x || !y || x == y)
+        return (melo_ko_txt("même noeud ou NULL", "deux noeuds distincts"));
+    if (*(int *)x->content != 1 || *(int *)y->content != 2)
+        return (melo_ko_txt("contenus mélangés", "x->content == &a et y->content == &b"));
+    free(x);
+    free(y);
+- name: 'malloc qui échoue : NULL'
+  strict: true
+  input: ft_lstnew("x") avec malloc qui renvoie NULL
+  body: |
+    melo_fail_at(0);
+    t_list *n = ft_lstnew("x");
+    melo_stop();
+    if (n)
+    {
+        free(n);
+        return (melo_ko_txt("un noeud", "NULL"));
+    }

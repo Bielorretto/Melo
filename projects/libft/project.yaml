@@ -1,0 +1,76 @@
+# Projet Common Core : Libft (sujet v1.3)
+# Utilisé par core/project.py : ./cli.py test libft <dossier_du_rendu>
+
+name: libft
+header: libft.h
+library: libft.a
+
+compile:
+  compiler: cc
+  flags: ["-Wall", "-Wextra", "-Werror"]
+
+# Fichiers obligatoires à la racine du dépôt.
+required_files: [Makefile, libft.h, README.md]
+# Tout fichier rendu doit correspondre à un de ces motifs ("Turning in unused files is forbidden").
+allowed_files: [Makefile, libft.h, README.md, "ft_*.c", .gitignore]
+
+# Règles imposées : $(NAME) est ajoutée automatiquement.
+makefile_rules: [all, clean, fclean, re]
+
+readme:
+  first_line: 'This activity has been created as part of the 42 curriculum by'
+  sections: [Description, Instructions, Resources]
+
+# Fonctions externes autorisées pour un fichier qui ne contient pas de fonction du sujet.
+default_allowed: [malloc, free, write]
+
+# Prototype exact du sujet + fonctions externes autorisées.
+# "prototype" peut être une liste : n'importe laquelle est acceptée.
+functions:
+  # --- Part 1 : libc ---
+  ft_isalpha:  {prototype: "int ft_isalpha(int c)", allowed: []}
+  ft_isdigit:  {prototype: "int ft_isdigit(int c)", allowed: []}
+  ft_isalnum:  {prototype: "int ft_isalnum(int c)", allowed: []}
+  ft_isascii:  {prototype: "int ft_isascii(int c)", allowed: []}
+  ft_isprint:  {prototype: "int ft_isprint(int c)", allowed: []}
+  ft_strlen:   {prototype: "size_t ft_strlen(const char *s)", allowed: []}
+  ft_memset:   {prototype: "void *ft_memset(void *b, int c, size_t len)", allowed: []}
+  ft_bzero:    {prototype: "void ft_bzero(void *s, size_t n)", allowed: []}
+  ft_memcpy:   {prototype: "void *ft_memcpy(void *dst, const void *src, size_t n)", allowed: []}
+  ft_memmove:  {prototype: "void *ft_memmove(void *dst, const void *src, size_t len)", allowed: []}
+  ft_strlcpy:  {prototype: "size_t ft_strlcpy(char *dst, const char *src, size_t size)", allowed: []}
+  ft_strlcat:  {prototype: "size_t ft_strlcat(char *dst, const char *src, size_t size)", allowed: []}
+  ft_toupper:  {prototype: "int ft_toupper(int c)", allowed: []}
+  ft_tolower:  {prototype: "int ft_tolower(int c)", allowed: []}
+  ft_strchr:   {prototype: "char *ft_strchr(const char *s, int c)", allowed: []}
+  ft_strrchr:  {prototype: "char *ft_strrchr(const char *s, int c)", allowed: []}
+  ft_strncmp:  {prototype: "int ft_strncmp(const char *s1, const char *s2, size_t n)", allowed: []}
+  ft_memchr:   {prototype: "void *ft_memchr(const void *s, int c, size_t n)", allowed: []}
+  ft_memcmp:   {prototype: "int ft_memcmp(const void *s1, const void *s2, size_t n)", allowed: []}
+  ft_strnstr:  {prototype: "char *ft_strnstr(const char *big, const char *little, size_t len)", allowed: []}
+  ft_atoi:     {prototype: "int ft_atoi(const char *nptr)", allowed: []}
+  ft_calloc:   {prototype: "void *ft_calloc(size_t nmemb, size_t size)", allowed: [malloc]}
+  ft_strdup:   {prototype: "char *ft_strdup(const char *s)", allowed: [malloc]}
+  # --- Part 2 : fonctions additionnelles ---
+  ft_substr:   {prototype: "char *ft_substr(char const *s, unsigned int start, size_t len)", allowed: [malloc]}
+  ft_strjoin:  {prototype: "char *ft_strjoin(char const *s1, char const *s2)", allowed: [malloc]}
+  ft_strtrim:  {prototype: "char *ft_strtrim(char const *s1, char const *set)", allowed: [malloc]}
+  ft_split:    {prototype: "char **ft_split(char const *s, char c)", allowed: [malloc, free]}
+  ft_itoa:     {prototype: "char *ft_itoa(int n)", allowed: [malloc]}
+  ft_strmapi:  {prototype: "char *ft_strmapi(char const *s, char (*f)(unsigned int, char))", allowed: [malloc]}
+  ft_striteri: {prototype: "void ft_striteri(char *s, void (*f)(unsigned int, char *))", allowed: []}
+  ft_putchar_fd: {prototype: "void ft_putchar_fd(char c, int fd)", allowed: [write]}
+  ft_putstr_fd:  {prototype: "void ft_putstr_fd(char *s, int fd)", allowed: [write]}
+  ft_putendl_fd: {prototype: "void ft_putendl_fd(char *s, int fd)", allowed: [write]}
+  ft_putnbr_fd:  {prototype: "void ft_putnbr_fd(int n, int fd)", allowed: [write]}
+  # --- Part 3 : listes chaînées ---
+  ft_lstnew:       {prototype: "t_list *ft_lstnew(void *content)", allowed: [malloc]}
+  ft_lstadd_front: {prototype: "void ft_lstadd_front(t_list **lst, t_list *new)", allowed: []}
+  # Le sujet v1.3 dit unsigned int ; les versions précédentes disaient int : les deux sont acceptés.
+  ft_lstsize:      {prototype: ["unsigned int ft_lstsize(t_list *lst)", "int ft_lstsize(t_list *lst)"], allowed: []}
+  ft_lstlast:      {prototype: "t_list *ft_lstlast(t_list *lst)", allowed: []}
+  ft_lstadd_back:  {prototype: "void ft_lstadd_back(t_list **lst, t_list *new)", allowed: []}
+  ft_lstdelone:    {prototype: "void ft_lstdelone(t_list *lst, void (*del)(void *))", allowed: [free]}
+  ft_lstclear:     {prototype: "void ft_lstclear(t_list **lst, void (*del)(void *))", allowed: [free]}
+  ft_lstiter:      {prototype: "void ft_lstiter(t_list *lst, void (*f)(void *))", allowed: []}
+  ft_lstmap:       {prototype: "t_list *ft_lstmap(t_list *lst, void *(*f)(void *), void (*del)(void *))", allowed: [malloc, free]}

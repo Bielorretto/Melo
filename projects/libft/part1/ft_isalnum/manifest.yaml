@@ -1,0 +1,43 @@
+name: ft_isalnum
+prelude: |
+  #include "melo.h"
+test_defaults:
+  expected_exit: 0
+tests:
+- name: renvoie exactement 1 pour une lettre ou un chiffre
+  input: ft_isalnum(c) pour c dans {'a', 'Z', '0', '9'}
+  body: |
+    int tab[] = {'a', 'Z', '0', '9'};
+    for (size_t i = 0; i < sizeof(tab) / sizeof(*tab); i++)
+        if (ft_isalnum(tab[i]) != 1)
+        {
+            printf("obtenu : ft_isalnum(%d) = %d\nattendu : ft_isalnum(%d) = 1\n", tab[i], ft_isalnum(tab[i]), tab[i]);
+            return (1);
+        }
+- name: renvoie 0 pour les autres caractères
+  input: ft_isalnum(c) pour c dans {'/', ':', '@', '[', '`', '{', ' '}
+  body: |
+    int tab[] = {'/', ':', '@', '[', '`', '{', ' '};
+    for (size_t i = 0; i < sizeof(tab) / sizeof(*tab); i++)
+        if (ft_isalnum(tab[i]) != 0)
+        {
+            printf("obtenu : ft_isalnum(%d) = %d\nattendu : ft_isalnum(%d) = 0\n", tab[i], ft_isalnum(tab[i]), tab[i]);
+            return (1);
+        }
+- name: même résultat que isalnum de 0 à 255, et seulement 1 ou 0
+  input: ft_isalnum(c) pour c de 0 à 255
+  body: |
+    for (int c = 0; c <= 255; c++)
+    {
+        int exp = isalnum(c) ? 1 : 0;
+        if (ft_isalnum(c) != exp)
+        {
+            printf("obtenu : ft_isalnum(%d) = %d\nattendu : ft_isalnum(%d) = %d\n", c, ft_isalnum(c), c, exp);
+            return (1);
+        }
+    }
+- name: EOF (-1) renvoie 0
+  input: ft_isalnum(EOF)
+  body: |
+    if (ft_isalnum(EOF) != 0)
+        return (melo_ko_i(ft_isalnum(EOF), 0));

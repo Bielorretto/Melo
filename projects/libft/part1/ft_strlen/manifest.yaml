@@ -1,0 +1,38 @@
+name: ft_strlen
+prelude: |
+  #include "melo.h"
+test_defaults:
+  expected_exit: 0
+tests:
+- name: chaîne simple
+  input: ft_strlen("hello world")
+  body: |
+    if (ft_strlen("hello world") != 11)
+        return (melo_ko_i(ft_strlen("hello world"), 11));
+- name: chaîne vide
+  input: ft_strlen("")
+  body: |
+    if (ft_strlen("") != 0)
+        return (melo_ko_i(ft_strlen(""), 0));
+- name: un seul caractère
+  input: ft_strlen("a")
+  body: |
+    if (ft_strlen("a") != 1)
+        return (melo_ko_i(ft_strlen("a"), 1));
+- name: s'arrête au premier \0
+  input: ft_strlen("ab\0cd")
+  body: |
+    if (ft_strlen("ab\0cd") != 2)
+        return (melo_ko_i(ft_strlen("ab\0cd"), 2));
+- name: caractères non ASCII (octets > 127)
+  input: ft_strlen("\351t\351")
+  body: |
+    if (ft_strlen("\351t\351") != 3)
+        return (melo_ko_i(ft_strlen("\351t\351"), 3));
+- name: longue chaîne (10000 caractères)
+  input: ft_strlen(10000 x 'a')
+  body: |
+    static char s[10001];
+    memset(s, 'a', 10000);
+    if (ft_strlen(s) != 10000)
+        return (melo_ko_i(ft_strlen(s), 10000));

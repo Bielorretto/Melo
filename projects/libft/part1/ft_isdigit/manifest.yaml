@@ -1,0 +1,43 @@
+name: ft_isdigit
+prelude: |
+  #include "melo.h"
+test_defaults:
+  expected_exit: 0
+tests:
+- name: renvoie exactement 1 pour un chiffre
+  input: ft_isdigit(c) pour c dans {'0', '5', '9'}
+  body: |
+    int tab[] = {'0', '5', '9'};
+    for (size_t i = 0; i < sizeof(tab) / sizeof(*tab); i++)
+        if (ft_isdigit(tab[i]) != 1)
+        {
+            printf("obtenu : ft_isdigit(%d) = %d\nattendu : ft_isdigit(%d) = 1\n", tab[i], ft_isdigit(tab[i]), tab[i]);
+            return (1);
+        }
+- name: renvoie 0 pour les autres caractères
+  input: ft_isdigit(c) pour c dans {'/', ':', 'a', ' ', 0}
+  body: |
+    int tab[] = {'/', ':', 'a', ' ', 0};
+    for (size_t i = 0; i < sizeof(tab) / sizeof(*tab); i++)
+        if (ft_isdigit(tab[i]) != 0)
+        {
+            printf("obtenu : ft_isdigit(%d) = %d\nattendu : ft_isdigit(%d) = 0\n", tab[i], ft_isdigit(tab[i]), tab[i]);
+            return (1);
+        }
+- name: même résultat que isdigit de 0 à 255, et seulement 1 ou 0
+  input: ft_isdigit(c) pour c de 0 à 255
+  body: |
+    for (int c = 0; c <= 255; c++)
+    {
+        int exp = isdigit(c) ? 1 : 0;
+        if (ft_isdigit(c) != exp)
+        {
+            printf("obtenu : ft_isdigit(%d) = %d\nattendu : ft_isdigit(%d) = %d\n", c, ft_isdigit(c), c, exp);
+            return (1);
+        }
+    }
+- name: EOF (-1) renvoie 0
+  input: ft_isdigit(EOF)
+  body: |
+    if (ft_isdigit(EOF) != 0)
+        return (melo_ko_i(ft_isdigit(EOF), 0));

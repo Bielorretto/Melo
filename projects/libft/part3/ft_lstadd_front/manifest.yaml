@@ -1,0 +1,132 @@
+name: ft_lstadd_front
+prelude: |
+  #include "melo.h"
+  #include "melo_malloc.h"
+
+  static int g_del_calls = 0;
+
+  /* Crée une liste de n noeuds avec malloc réel ; contenus = "0", "1", ... (alloués). */
+  static inline t_list *make_list(int n)
+  {
+      t_list *head = NULL;
+      t_list **tail = &head;
+      for (int i = 0; i < n; i++)
+      {
+          t_list *node = __real_malloc(sizeof(t_list));
+          char *s = __real_malloc(12);
+          sprintf(s, "%d", i);
+          node->content = s;
+          node->next = NULL;
+          *tail = node;
+          tail = &node->next;
+      }
+      return (head);
+  }
+
+  static inline void free_list(t_list *l)
+  {
+      while (l)
+      {
+          t_list *next = l->next;
+          free(l->content);
+          free(l);
+          l = next;
+      }
+  }
+
+  static inline void del_count(void *p)
+  {
+      g_del_calls++;
+      free(p);
+  }
+
+  static inline void print_list(t_list *l)
+  {
+      int n = 0;
+      printf("[");
+      while (l && n < 10)
+      {
+          melo_s(l->content);
+          if (l->next)
+              printf(" -> ");
+          l = l->next;
+          n++;
+      }
+      if (l)
+          printf(" ...");
+      printf("]");
+  }
+
+  /* Compare les contenus (chaînes) à exp[] ; nb = longueur attendue. */
+  static inline int check_list(t_list *l, const char **exp, int nb)
+  {
+      t_list *cur = l;
+      int i = 0;
+      while (cur && i < nb && cur->content && strcmp(cur->content, exp[i]) == 0)
+      {
+          cur = cur->next;
+          i++;
+      }
+      if (i == nb && cur == NULL)
+          return (0);
+      printf("obtenu : ");
+      print_list(l);
+      printf("\nattendu : [");
+      for (int k = 0; k < nb; k++)
+      {
+          printf("\"%s\"", exp[k]);
+          if (k + 1 < nb)
+              printf(" -> ");
+      }
+      printf("]\n");
+      return (1);
+  }
+test_defaults:
+  expected_exit: 0
+  check_memory: true
+  link_flags:
+  - -Wl,--wrap=malloc
+tests:
+- name: sur une liste vide
+  input: lst = NULL ; ft_lstadd_front(&lst, new)
+  body: |
+    t_list *lst = NULL;
+    t_list *n = make_list(1);
+    ft_lstadd_front(&lst, n);
+    if (lst != n)
+        return (melo_ko_txt("*lst ne pointe pas sur new", "*lst == new"));
+    if (n->next != NULL)
+        return (melo_ko_txt("new->next n'est pas NULL", "new->next == NULL"));
+    free_list(lst);
+- name: ajoute au début
+  input: lst = ["0" -> "1"] ; ft_lstadd_front(&lst, new("x"))
+  body: |
+    t_list *lst = make_list(2);
+    t_list *old = lst;
+    t_list *n = __real_malloc(sizeof(t_list));
+    n->content = strdup("x");
+    n->next = NULL;
+    ft_lstadd_front(&lst, n);
+    const char *exp[] = {"x", "0", "1"};
+    if (check_list(lst, exp, 3))
+        return (1);
+    if (lst != n || n->next != old)
+        return (melo_ko_txt("chaînage incorrect", "*lst == new et new->next == ancien premier"));
+    free_list(lst);
+- name: plusieurs ajouts successifs
+  input: 3 x ft_lstadd_front
+  body: |
+    t_list *lst = NULL;
+    t_list *nodes = make_list(3);
+    t_list *a = nodes;
+    t_list *b = a->next;
+    t_list *c = b->next;
+    a->next = NULL;
+    b->next = NULL;
+    ft_lstadd_front(&lst, a);
+    ft_lstadd_front(&lst, b);
+    ft_lstadd_front(&lst, c);
+    const char *exp[] = {"2", "1", "0"};
+    if (check_list(lst, exp, 3))
+        return (1);
+    free_list(lst);

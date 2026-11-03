@@ -1,0 +1,69 @@
+name: ft_strlcpy
+prelude: |
+  #include "melo.h"
+test_defaults:
+  expected_exit: 0
+  check_memory: true
+tests:
+- name: copie entière quand size > longueur
+  input: ft_strlcpy(dst, "hello", 10)
+  body: |
+    char dst[10] = "xxxxxxxxx";
+    size_t r = ft_strlcpy(dst, "hello", 10);
+    if (strcmp(dst, "hello") != 0)
+        return (melo_ko_s(dst, "hello"));
+    if (r != 5)
+        return (melo_ko_i(r, 5));
+- name: tronque à size - 1 caractères et termine par \0
+  input: ft_strlcpy(dst, "hello world", 6)
+  body: |
+    char dst[10] = "xxxxxxxxx";
+    size_t r = ft_strlcpy(dst, "hello world", 6);
+    if (memcmp(dst, "hello\0xxx", 10) != 0)
+        return (melo_ko_m(dst, "hello\0xxx", 10));
+    if (r != 11)
+        return (melo_ko_txt("mauvaise valeur de retour", "11 (longueur de src)"));
+- name: renvoie toujours la longueur de src
+  input: ft_strlcpy(dst, "hello world", 3)
+  body: |
+    char dst[10];
+    size_t r = ft_strlcpy(dst, "hello world", 3);
+    if (r != 11)
+        return (melo_ko_i(r, 11));
+    if (strcmp(dst, "he") != 0)
+        return (melo_ko_s(dst, "he"));
+- name: 'size = 0 : dst intact, renvoie la longueur de src'
+  input: ft_strlcpy(dst = "abc", "hello", 0)
+  body: |
+    char dst[4] = "abc";
+    size_t r = ft_strlcpy(dst, "hello", 0);
+    if (strcmp(dst, "abc") != 0)
+        return (melo_ko_s(dst, "abc"));
+    if (r != 5)
+        return (melo_ko_i(r, 5));
+- name: 'size = 1 : dst devient une chaîne vide'
+  input: ft_strlcpy(dst = "abc", "hello", 1)
+  body: |
+    char dst[4] = "abc";
+    size_t r = ft_strlcpy(dst, "hello", 1);
+    if (memcmp(dst, "\0bc", 4) != 0)
+        return (melo_ko_m(dst, "\0bc", 4));
+    if (r != 5)
+        return (melo_ko_i(r, 5));
+- name: src vide
+  input: ft_strlcpy(dst = "abc", "", 4)
+  body: |
+    char dst[4] = "abc";
+    size_t r = ft_strlcpy(dst, "", 4);
+    if (dst[0] != '\0')
+        return (melo_ko_s(dst, ""));
+    if (r != 0)
+        return (melo_ko_i(r, 0));
+- name: n'écrit jamais au-delà de size
+  input: ft_strlcpy(dst, "abcdefgh", 4) (dst rempli de 'Z')
+  body: |
+    char dst[10];
+    memset(dst, 'Z', 10);
+    ft_strlcpy(dst, "abcdefgh", 4);
+    if (memcmp(dst, "abc\0ZZZZZZ", 10) != 0)
+        return (melo_ko_m(dst, "abc\0ZZZZZZ", 10));

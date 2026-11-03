@@ -1,0 +1,118 @@
+name: ft_substr
+prelude: |
+  #include "melo.h"
+  #include "melo_malloc.h"
+test_defaults:
+  expected_exit: 0
+  check_memory: true
+  link_flags:
+  - -Wl,--wrap=malloc
+tests:
+- name: sous-chaîne au milieu
+  input: ft_substr("Hello world", 6, 5)
+  body: |
+    char *r = ft_substr("Hello world", 6, 5);
+    if (!r || strcmp(r, "world") != 0)
+    {
+        melo_ko_s(r, "world");
+        free(r);
+        return (1);
+    }
+    free(r);
+- name: depuis le début
+  input: ft_substr("Hello", 0, 3)
+  body: |
+    char *r = ft_substr("Hello", 0, 3);
+    if (!r || strcmp(r, "Hel") != 0)
+    {
+        melo_ko_s(r, "Hel");
+        free(r);
+        return (1);
+    }
+    free(r);
+- name: len plus grand que ce qui reste
+  input: ft_substr("hello", 1, 100)
+  body: |
+    char *r = ft_substr("hello", 1, 100);
+    if (!r || strcmp(r, "ello") != 0)
+    {
+        melo_ko_s(r, "ello");
+        free(r);
+        return (1);
+    }
+    free(r);
+- name: len = SIZE_MAX
+  input: ft_substr("hello", 2, SIZE_MAX)
+  body: |
+    char *r = ft_substr("hello", 2, SIZE_MAX);
+    if (!r || strcmp(r, "llo") != 0)
+    {
+        melo_ko_s(r, "llo");
+        free(r);
+        return (1);
+    }
+    free(r);
+- name: 'len = 0 : chaîne vide'
+  input: ft_substr("hello", 1, 0)
+  body: |
+    char *r = ft_substr("hello", 1, 0);
+    if (!r || strcmp(r, "") != 0)
+    {
+        melo_ko_s(r, "");
+        free(r);
+        return (1);
+    }
+    free(r);
+- name: 'start == longueur : chaîne vide'
+  input: ft_substr("hello", 5, 3)
+  body: |
+    char *r = ft_substr("hello", 5, 3);
+    if (!r || strcmp(r, "") != 0)
+    {
+        melo_ko_s(r, "");
+        free(r);
+        return (1);
+    }
+    free(r);
+- name: 'start au-delà de la chaîne : chaîne vide (pas NULL)'
+  input: ft_substr("hello", 100, 3)
+  body: |
+    char *r = ft_substr("hello", 100, 3);
+    if (!r || strcmp(r, "") != 0)
+    {
+        melo_ko_s(r, "");
+        free(r);
+        return (1);
+    }
+    free(r);
+- name: s vide
+  input: ft_substr("", 0, 5)
+  body: |
+    char *r = ft_substr("", 0, 5);
+    if (!r || strcmp(r, "") != 0)
+    {
+        melo_ko_s(r, "");
+        free(r);
+        return (1);
+    }
+    free(r);
+- name: 'malloc qui échoue : NULL'
+  strict: true
+  input: ft_substr("hello world", 2, 5) avec chaque malloc qui échoue
+  body: |
+    for (int n = 0; n < 100; n++)
+    {
+        melo_fail_at(n);
+        char *r = ft_substr("hello world", 2, 5);
+        int failed = melo_stop();
+        if (!failed)
+        {
+            free(r);
+            break ;
+        }
+        if (r != NULL)
+        {
+            printf("obtenu : le malloc n°%d a renvoyé NULL mais la fonction n'a pas renvoyé NULL\nattendu : NULL dès qu'une allocation échoue (et tout ce qui a été alloué libéré)\n", n + 1);
+            return (1);
+        }
+    }

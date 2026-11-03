@@ -1,0 +1,58 @@
+name: ft_memmove
+prelude: |
+  #include "melo.h"
+test_defaults:
+  expected_exit: 0
+  check_memory: true
+tests:
+- name: sans chevauchement
+  input: ft_memmove(dst, "hello", 6)
+  body: |
+    char dst[6];
+    ft_memmove(dst, "hello", 6);
+    if (strcmp(dst, "hello") != 0)
+        return (melo_ko_s(dst, "hello"));
+- name: chevauchement, dst après src
+  input: buf = "abcdef" ; ft_memmove(buf + 2, buf, 4)
+  body: |
+    char buf[7] = "abcdef";
+    ft_memmove(buf + 2, buf, 4);
+    if (strcmp(buf, "ababcd") != 0)
+        return (melo_ko_s(buf, "ababcd"));
+- name: chevauchement, dst avant src
+  input: buf = "abcdef" ; ft_memmove(buf, buf + 2, 4)
+  body: |
+    char buf[7] = "abcdef";
+    ft_memmove(buf, buf + 2, 4);
+    if (strcmp(buf, "cdefef") != 0)
+        return (melo_ko_s(buf, "cdefef"));
+- name: renvoie dst
+  input: ft_memmove(buf + 2, buf, 4) == buf + 2
+  body: |
+    char buf[7] = "abcdef";
+    void *r = ft_memmove(buf + 2, buf, 4);
+    if (r != buf + 2)
+        return (melo_ko_ptr(buf, 7, r, buf + 2));
+- name: n = 0 et dst == src
+  input: ft_memmove(buf, buf + 1, 0) ; ft_memmove(buf, buf, 3)
+  body: |
+    char buf[4] = "abc";
+    ft_memmove(buf, buf + 1, 0);
+    ft_memmove(buf, buf, 3);
+    if (strcmp(buf, "abc") != 0)
+        return (melo_ko_s(buf, "abc"));
+- name: même résultat que memmove sur 1000 octets qui se chevauchent
+  input: ft_memmove(buf + 1, buf, 999) et ft_memmove(buf, buf + 1, 999)
+  body: |
+    unsigned char a[1000];
+    unsigned char b[1000];
+    for (int i = 0; i < 1000; i++)
+        a[i] = b[i] = (unsigned char)(i * 13);
+    ft_memmove(a + 1, a, 999);
+    memmove(b + 1, b, 999);
+    if (memcmp(a, b, 1000) != 0)
+        return (melo_ko_txt("contenu différent de memmove (dst après src)", "même contenu que memmove"));
+    ft_memmove(a, a + 1, 999);
+    memmove(b, b + 1, 999);
+    if (memcmp(a, b, 1000) != 0)
+        return (melo_ko_txt("contenu différent de memmove (dst avant src)", "même contenu que memmove"));

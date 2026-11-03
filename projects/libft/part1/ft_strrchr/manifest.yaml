@@ -1,0 +1,64 @@
+name: ft_strrchr
+prelude: |
+  #include "melo.h"
+test_defaults:
+  expected_exit: 0
+  check_memory: true
+tests:
+- name: trouve la dernière occurrence
+  input: ft_strrchr("hello world", 'o')
+  body: |
+    const char *s = "hello world";
+    char *r = ft_strrchr(s, 'o');
+    if (r != strrchr(s, 'o'))
+        return (melo_ko_ptr(s, 11, r, strrchr(s, 'o')));
+- name: 'caractère absent : NULL'
+  input: ft_strrchr("hello", 'z')
+  body: |
+    const char *s = "hello";
+    char *r = ft_strrchr(s, 'z');
+    if (r != NULL)
+        return (melo_ko_ptr(s, 5, r, NULL));
+- name: 'c = ''\0'' : pointeur sur le \0 final'
+  input: ft_strrchr("hello", '\0')
+  body: |
+    const char *s = "hello";
+    char *r = ft_strrchr(s, '\0');
+    if (r != s + 5)
+        return (melo_ko_ptr(s, 5, r, s + 5));
+- name: c est converti en char (c = 'e' + 256)
+  input: ft_strrchr("hello", 'e' + 256)
+  body: |
+    const char *s = "hello";
+    char *r = ft_strrchr(s, 'e' + 256);
+    if (r != strrchr(s, 'e' + 256))
+        return (melo_ko_ptr(s, 5, r, strrchr(s, 'e' + 256)));
+- name: caractère non ASCII (octet > 127)
+  input: ft_strrchr("caf\351 cr\351me", 0351)
+  body: |
+    const char *s = "caf\351 cr\351me";
+    char *r = ft_strrchr(s, 0351);
+    if (r != strrchr(s, 0351))
+        return (melo_ko_ptr(s, 10, r, strrchr(s, 0351)));
+- name: chaîne vide
+  input: ft_strrchr("", 'a') et ft_strrchr("", '\0')
+  body: |
+    const char *s = "";
+    if (ft_strrchr(s, 'a') != NULL)
+        return (melo_ko_ptr(s, 0, ft_strrchr(s, 'a'), NULL));
+    if (ft_strrchr(s, '\0') != s)
+        return (melo_ko_ptr(s, 0, ft_strrchr(s, '\0'), s));
+- name: même résultat que strrchr pour tous les caractères
+  input: ft_strrchr("abcabc\377xyz", c) pour c de 0 à 255
+  body: |
+    const char *s = "abcabc\377xyz";
+    for (int c = 0; c <= 255; c++)
+        if (ft_strrchr(s, c) != strrchr(s, c))
+        {
+            printf("obtenu : ft_strrchr(s, %d) = ", c);
+            melo_ptr(s, 10, ft_strrchr(s, c));
+            printf("\nattendu : ft_strrchr(s, %d) = ", c);
+            melo_ptr(s, 10, strrchr(s, c));
+            printf("\n");
+            return (1);
+        }

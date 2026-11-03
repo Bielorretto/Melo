@@ -5,6 +5,7 @@ import shutil
 import signal
 import subprocess
 import tempfile
+import textwrap
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -27,6 +28,8 @@ class TestResult:
     input: Optional[str] = None
     got: Optional[str] = None
     expected: Optional[str] = None
+    # Test non exécuté (outil absent, prérequis en échec...) : ni OK ni KO.
+    skipped: bool = False
 
 
 def load_manifest(exercise_dir: Path) -> dict:
@@ -51,10 +54,16 @@ def _find_student_file(student_dir: Path, src: str) -> Path:
 
 
 def _prepare_workdir(exercise_dir: Path, student_dir: Path, test: dict,
-                      manifest: dict, tmp: Path) -> None:
-    for src in manifest["sources"]:
-        student_file = _find_student_file(student_dir, src)
-        shutil.copy(student_file, tmp / src)
+                      manifest: dict, tmp: Path, library=None) -> None:
+    if library is None:
+        for src in manifest["sources"]:
+            student_file = _find_student_file(student_dir, src)
+            shutil.copy(student_file, tmp / src)
+    elif library.test_includes is not None:
+        # Mode librairie : le code de l'élève est déjà compilé dans library.archive,
+        # on ne copie que les headers d'aide aux tests du projet.
+        for header in library.test_includes.glob("*.h"):
+            shutil.copy(header, tmp / header.name)
 
     includes_dir = exercise_dir / "includes"
     if includes_dir.exists():
@@ -70,27 +79,45 @@ def _prepare_workdir(exercise_dir: Path, student_dir: Path, test: dict,
         shutil.copy(exercise_dir / test["program"], main_path)
     elif "body" in test:
         prelude = manifest.get("prelude", "")
-        generated = f"{prelude}\n\nint main(void)\n{{\n{test['body']}\n\treturn (0);\n}}\n"
+        body = test["body"]
+        if not body.startswith((" ", "\t")):
+            # Corps écrit sans indentation : on l'aligne sur le « return (0); » ajouté
+            # en dessous, sinon gcc -Wmisleading-indentation peut refuser de compiler.
+            body = textwrap.indent(body, "\t")
+        generated = f"{prelude}\n\nint main(void)\n{{\n{body}\n\treturn (0);\n}}\n"
         main_path.write_text(generated, encoding="utf-8")
     else:
         raise ValueError(
             f"test '{test['name']}' n'a ni 'main', ni 'program', ni 'body'"
         )
 
-def _compile(tmp: Path, manifest: dict) -> Optional[str]:
-    """Compile toutes les sources dans tmp. Retourne le message d'erreur, ou None si OK."""
+def _compile(tmp: Path, manifest: dict, test: Optional[dict] = None,
+             library=None) -> Optional[str]:
+    """Compile toutes les sources dans tmp. Retourne le message d'erreur, ou None si OK.
+
+    En mode librairie, seul main.c est compilé, puis lié avec l'archive de l'élève
+    (library.archive) ; les link_flags du test (ex. -Wl,--wrap=malloc) sont ajoutés.
+    """
     compile_cfg = manifest.get("compile", {})
     compiler = compile_cfg.get("compiler", "cc")
     flags = compile_cfg.get("flags", ["-Wall", "-Wextra", "-Werror"])
-    extra = compile_cfg.get("extra", [])
-
-    sources = [str(p) for p in tmp.glob("*.c")]
+    extra = [*compile_cfg.get("extra", []), *((test or {}).get("link_flags", []))]
     binary = tmp / "test_binary"
 
-    cmd = [compiler, *flags, *sources, *extra, "-o", str(binary)]
+    if library is None:
+        sources = [str(p) for p in tmp.glob("*.c")]
+        cmd = [compiler, *flags, *sources, *extra, "-o", str(binary)]
+    else:
+        if library.archive is None:
+            return library.failure_hint() or "la librairie n'a pas pu être construite"
+        cmd = [compiler, *flags, "-I", str(tmp), "-I", str(library.include_dir),
+               str(tmp / "main.c"), str(library.archive), *extra, "-o", str(binary)]
     proc = subprocess.run(cmd, capture_output=True, text=True, cwd=tmp)
     if proc.returncode != 0:
-        return proc.stderr
+        err = proc.stderr
+        if library is not None and library.failure_hint():
+            err += "\n" + library.failure_hint()
+        return err
     return None
 
 
@@ -191,19 +218,22 @@ def _expected_summary(test: dict) -> str:
 
 
 def run_test(exercise_dir: Path, student_dir: Path, test: dict,
-             manifest: Optional[dict] = None, timeout: int = 5) -> TestResult:
+             manifest: Optional[dict] = None, timeout: int = 5,
+             library=None) -> TestResult:
     manifest = manifest or load_manifest(exercise_dir)
+    # Valeurs communes à tous les tests du manifest (ex. expected_exit: 0).
+    test = {**manifest.get("test_defaults", {}), **test}
     name = test["name"]
     inp = describe_input(test)
 
     with tempfile.TemporaryDirectory(prefix="piscine_test_") as tmp_str:
         tmp = Path(tmp_str)
         try:
-            _prepare_workdir(exercise_dir, student_dir, test, manifest, tmp)
+            _prepare_workdir(exercise_dir, student_dir, test, manifest, tmp, library)
         except (FileNotFoundError, ValueError) as e:
             return TestResult(name, False, str(e))
 
-        err = _compile(tmp, manifest)
+        err = _compile(tmp, manifest, test, library)
         if err:
             return TestResult(name, False, "erreur de compilation", compile_error=err)
 
@@ -349,11 +379,11 @@ def detect_module(exercises_root: Path, student_dir: Path) -> str:
 
 
 def run_exercise(exercise_name: str, student_dir: Path, exercises_root: Path,
-                 timeout: int = 5) -> List[TestResult]:
+                 timeout: int = 5, library=None) -> List[TestResult]:
     exercise_dir = find_exercise(exercises_root, exercise_name)
     manifest = load_manifest(exercise_dir)
 
     return [
-        run_test(exercise_dir, student_dir, test, manifest, timeout=timeout)
+        run_test(exercise_dir, student_dir, test, manifest, timeout=timeout, library=library)
         for test in manifest["tests"]
     ]

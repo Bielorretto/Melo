@@ -1,0 +1,56 @@
+name: ft_memcmp
+prelude: |
+  #include "melo.h"
+  static inline int check_cmp(const char *call, int got, int exp)
+  {
+      if (melo_sign(got) != melo_sign(exp))
+      {
+          printf("obtenu : %s = %d (%s)\nattendu : %s (%s)\n", call, got, melo_sign_txt(got), melo_sign_txt(exp), exp == 0 ? "égal" : "différent");
+          return (1);
+      }
+      return (0);
+  }
+test_defaults:
+  expected_exit: 0
+tests:
+- name: zones égales
+  input: ft_memcmp("hello", "hello", 5)
+  body: |
+    if (check_cmp("ft_memcmp(\"hello\", \"hello\", 5)", ft_memcmp("hello", "hello", 5), 0))
+        return (1);
+- name: différence (signe comme memcmp)
+  input: ft_memcmp("abcd", "abce", 4) et l'inverse
+  body: |
+    if (check_cmp("ft_memcmp(\"abcd\", \"abce\", 4)", ft_memcmp("abcd", "abce", 4), -1))
+        return (1);
+    if (check_cmp("ft_memcmp(\"abce\", \"abcd\", 4)", ft_memcmp("abce", "abcd", 4), 1))
+        return (1);
+- name: 'différence après n : 0'
+  input: ft_memcmp("abcd", "abce", 3)
+  body: |
+    if (check_cmp("ft_memcmp(\"abcd\", \"abce\", 3)", ft_memcmp("abcd", "abce", 3), 0))
+        return (1);
+- name: 'n = 0 : 0'
+  input: ft_memcmp("abc", "xyz", 0)
+  body: |
+    if (check_cmp("ft_memcmp(\"abc\", \"xyz\", 0)", ft_memcmp("abc", "xyz", 0), 0))
+        return (1);
+- name: ne s'arrête pas au \0
+  input: ft_memcmp("a\0b", "a\0c", 3)
+  body: |
+    if (check_cmp("ft_memcmp(\"a\\0b\", \"a\\0c\", 3)", ft_memcmp("a\0b", "a\0c", 3), -1))
+        return (1);
+- name: compare en unsigned char (octets > 127)
+  input: ft_memcmp("\200", "\0", 1) et ft_memcmp("a", "\377", 1)
+  body: |
+    if (check_cmp("ft_memcmp(\"\\200\", \"\\0\", 1)", ft_memcmp("\200", "\0", 1), 1))
+        return (1);
+    if (check_cmp("ft_memcmp(\"a\", \"\\377\", 1)", ft_memcmp("a", "\377", 1), -1))
+        return (1);
+- name: même signe que memcmp sur des entiers
+  input: ft_memcmp(&a, &b, sizeof(int))
+  body: |
+    int a[] = {1, 2, 3};
+    int b[] = {1, 2, 4};
+    if (check_cmp("ft_memcmp(a, b, sizeof(a))", ft_memcmp(a, b, sizeof(a)), memcmp(a, b, sizeof(a))))
+        return (1);

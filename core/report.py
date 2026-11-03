@@ -21,6 +21,9 @@ def print_results(exercise_name: str, results: List[TestResult]) -> bool:
     all_passed = True
 
     for r in results:
+        if r.skipped:
+            print(f"  {YELLOW}[--]{RESET} {r.name} — {r.message}")
+            continue
         if r.passed:
             print(f"  {GREEN}[OK]{RESET} {r.name}")
             continue
@@ -45,8 +48,10 @@ def print_results(exercise_name: str, results: List[TestResult]) -> bool:
                 print(f"       {line}")
         print()
 
-    total = len(results)
+    skipped = sum(1 for r in results if r.skipped)
+    total = len(results) - skipped
     passed = sum(1 for r in results if r.passed)
     color = GREEN if passed == total else RED
-    print(f"  {color}{passed}/{total} tests réussis{RESET}\n")
+    extra = f" {YELLOW}({skipped} non exécuté(s)){RESET}" if skipped else ""
+    print(f"  {color}{passed}/{total} tests réussis{RESET}{extra}\n")
     return all_passed
