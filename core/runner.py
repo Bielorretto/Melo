@@ -30,6 +30,8 @@ class TestResult:
     expected: Optional[str] = None
     # Test non exécuté (outil absent, prérequis en échec...) : ni OK ni KO.
     skipped: bool = False
+    # Règle du sujet / du man que le test vérifie (affichée en cas d'échec).
+    rule: Optional[str] = None
 
 
 def load_manifest(exercise_dir: Path) -> dict:
@@ -110,7 +112,7 @@ def _compile(tmp: Path, manifest: dict, test: Optional[dict] = None,
     else:
         if library.archive is None:
             return library.failure_hint() or "la librairie n'a pas pu être construite"
-        cmd = [compiler, *flags, "-I", str(tmp), "-I", str(library.include_dir),
+        cmd = [compiler, *flags, "-I", str(tmp), "-I", str(library.test_include_dir or library.include_dir),
                str(tmp / "main.c"), str(library.archive), *extra, "-o", str(binary)]
     proc = subprocess.run(cmd, capture_output=True, text=True, cwd=tmp)
     if proc.returncode != 0:

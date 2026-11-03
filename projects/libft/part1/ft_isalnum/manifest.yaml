@@ -5,6 +5,7 @@ test_defaults:
   expected_exit: 0
 tests:
 - name: renvoie exactement 1 pour une lettre ou un chiffre
+  rule: "Melo attend exactement 1 ou 0 (le man dit seulement « non nul » : la vraie isalnum peut renvoyer autre chose, ex. 1024)"
   input: ft_isalnum(c) pour c dans {'a', 'Z', '0', '9'}
   body: |
     int tab[] = {'a', 'Z', '0', '9'};
@@ -25,6 +26,7 @@ tests:
             return (1);
         }
 - name: même résultat que isalnum de 0 à 255, et seulement 1 ou 0
+  rule: "Melo attend exactement 1 ou 0 (le man dit seulement « non nul » : la vraie isalnum peut renvoyer autre chose, ex. 1024)"
   input: ft_isalnum(c) pour c de 0 à 255
   body: |
     for (int c = 0; c <= 255; c++)

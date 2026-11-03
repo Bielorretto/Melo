@@ -20,6 +20,8 @@ PROJECTS_ROOT = ROOT / "projects"
 
 
 def cmd_test(args):
+    import core.report
+    core.report.VERBOSE = args.verbose
     student_dir = Path(args.student_dir).resolve() if args.student_dir else ROOT.parent
 
     exercise = args.exercise
@@ -35,7 +37,8 @@ def cmd_test(args):
         found = find_project(PROJECTS_ROOT, exercise)
         if found:
             project_dir, only = found
-            ok = run_project(project_dir, student_dir, only, timeout=args.timeout, strict=args.strict)
+            ok = run_project(project_dir, student_dir, only, timeout=args.timeout, strict=args.strict,
+                             no_header=args.no_header, student_arg=args.student_dir)
             sys.exit(0 if ok else 1)
 
     if exercise is None:
@@ -159,7 +162,9 @@ def main():
     parser = argparse.ArgumentParser(prog="piscine-tester")
     sub = parser.add_subparsers(dest="command", required=True)
 
-    p_test = sub.add_parser("test", help="teste un exercice")
+    # -h est pris par --no-header : l'aide de « test » reste accessible avec --help.
+    p_test = sub.add_parser("test", help="teste un exercice", add_help=False)
+    p_test.add_argument("--help", action="help", help="affiche cette aide")
     p_test.add_argument("exercise", nargs="?", default=None,
                          help="exercice, module ou projet (ex. libft, libft/ft_split, libft/makefile) ; défaut : détection automatique")
     p_test.add_argument("student_dir", nargs="?", default=None,
@@ -168,6 +173,12 @@ def main():
     p_test.add_argument("--strict", action="store_true",
                         help="projets (libft) : ajoute les vérifications plus sévères que la moulinette "
                              "(échecs de malloc, helpers static, make re)")
+    p_test.add_argument("-h", "--no-header", action="store_true",
+                        help="projets (libft) : compile chaque fonction qui n'utilise ni t_list ni une "
+                             "autre fonction du sujet sans libft.h (son .c doit se suffire à lui-même) ; "
+                             "les tests utilisent alors le libft.h de référence de Melo")
+    p_test.add_argument("-v", "--verbose", action="store_true",
+                        help="affiche la sortie complète du compilateur au lieu du résumé")
     p_test.set_defaults(func=cmd_test)
 
     p_list = sub.add_parser("list", help="liste les exercices disponibles")

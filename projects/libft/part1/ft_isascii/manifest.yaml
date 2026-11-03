@@ -5,6 +5,7 @@ test_defaults:
   expected_exit: 0
 tests:
 - name: renvoie exactement 1 pour un caractère ASCII (0 à 127)
+  rule: "Melo attend exactement 1 ou 0 (le man dit seulement « non nul » : la vraie isascii peut renvoyer autre chose, ex. 1024)"
   input: ft_isascii(c) pour c dans {0, 'a', 127}
   body: |
     int tab[] = {0, 'a', 127};
@@ -25,6 +26,7 @@ tests:
             return (1);
         }
 - name: même résultat que isascii de 0 à 255, et seulement 1 ou 0
+  rule: "Melo attend exactement 1 ou 0 (le man dit seulement « non nul » : la vraie isascii peut renvoyer autre chose, ex. 1024)"
   input: ft_isascii(c) pour c de 0 à 255
   body: |
     for (int c = 0; c <= 255; c++)

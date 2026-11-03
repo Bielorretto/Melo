@@ -199,13 +199,44 @@ Le mode `test` sait aussi tester une **libft complète** (sujet v1.3) : les 43 f
 ./cli.py test libft/makefile ~/chemin/vers/libft    # une seule section
 ./cli.py list                                       # toutes les cibles possibles
 ./cli.py test libft ~/chemin/vers/libft --strict    # + vérifications plus sévères que la moulinette
+./cli.py test libft ~/chemin/vers/libft -h          # fonctions compilées sans libft.h
+./cli.py test libft ~/chemin/vers/libft -v          # sortie complète du compilateur
 ```
+
+L'aide de `test` s'affiche avec `--help`, car `-h` sert au mode sans header.
 
 Sans chemin, Melo teste son dossier parent : si Melo est cloné dans ta libft, `./cli.py test libft` suffit.
 
 Par défaut, Melo teste comme la moulinette.
 `--strict` ajoute des vérifications qu'elle ne fait pas mais qu'un correcteur peut demander :
 échecs de malloc simulés, helpers en `static`, `make re`.
+
+### Lire les résultats
+
+- Une section entièrement réussie tient sur une ligne : `[OK] libft/ft_isdigit 4/4`. Seules les sections en échec sont détaillées.
+- Chaque KO donne l'`appel` exact qui a échoué, ce qui est `obtenu`, ce qui est `attendu`, et la `règle` du sujet ou du man qui n'est pas respectée :
+
+```text
+  [KO] renvoie exactement 1 pour une lettre
+       appel    : ft_isalpha('a')  (97)
+       obtenu   : 1024
+       attendu  : 1
+       règle    : Melo attend exactement 1 ou 0 (le man dit seulement « non nul » ...)
+```
+
+- Les erreurs de compilation sont résumées en une ligne par erreur, en français : `ft_strlen.c:16  ft_strlen : type différent de sa déclaration dans libft.h:30 (ici size_t(const char *), là-bas int(const char *))`. `-v` affiche la sortie complète de gcc.
+- Les erreurs de make courantes sont expliquées (tabulation manquante, `multiple target patterns`, fichier introuvable). Si make ne peut pas lire le Makefile, les autres vérifications du Makefile sont marquées non vérifiées au lieu d'échouer en cascade.
+- À la fin, un résumé liste les sections en échec, leur premier KO et la commande pour relancer chacune seule.
+
+### Mode sans header (`-h`)
+
+Avec `-h`, Melo vérifie que chaque fonction se suffit à elle-même :
+
+- un `.c` qui n'utilise ni `t_list` ni une autre fonction du sujet est compilé avec un `libft.h` **vide**. Il doit donc inclure lui-même ce dont il a besoin (`<unistd.h>` pour `write`, `<stdlib.h>` pour `malloc`, `<stddef.h>` pour `size_t`...). C'est cet objet qui est mis dans la lib testée ;
+- un `.c` qui utilise `t_list` ou appelle une autre fonction du sujet (ex. `ft_strjoin` qui appelle `ft_strlen`) est compilé normalement avec ton `libft.h` ;
+- les mains de test utilisent le `libft.h` de référence de Melo (prototypes exacts du sujet) au lieu du tien.
+
+Ce mode n'est pas une règle de la moulinette : c'est un contrôle en plus, à lancer quand tu veux.
 
 ### Ce qui est testé
 
@@ -240,7 +271,7 @@ Les fonctions sont testées avec une lib compilée par Melo, donc un Makefile ca
 ### Où sont les tests
 
 ```text
-projects/libft/project.yaml        # prototypes, fonctions autorisées, fichiers attendus
+projects/libft/project.yaml        # prototypes, fonctions autorisées, règle de chaque fonction, fichiers attendus
 projects/libft/includes/           # helpers C des tests (melo.h, melo_malloc.h)
 projects/libft/part1|2|3/ft_*/manifest.yaml
 ```
