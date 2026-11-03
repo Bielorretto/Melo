@@ -219,6 +219,19 @@ Par défaut, Melo teste comme la moulinette.
 | `readme` | première ligne en italique, sections Description / Instructions / Resources, usage de l'IA décrit |
 | `ft_*` | comportement de chaque fonction comparé au sujet ou à la vraie libc, cas limites, fuites et erreurs mémoire (valgrind), **échecs de malloc simulés** en `--strict` (la fonction doit renvoyer NULL sans fuite) |
 
+### Vérification du README de la libft
+
+| Règle du sujet | Ce que Melo vérifie |
+|----------------|---------------------|
+| `README.md` à la racine | le fichier existe |
+| Première ligne en italique | exactement `*This activity has been created as part of the 42 curriculum by <login1>[, <login2>...]*` (ou `_..._`, pas en gras) |
+| Section Description | un titre `#` contenant « Description » |
+| Section Instructions | un titre `#` contenant « Instructions » |
+| Section Resources | un titre `#` contenant « Resources » (ou « Ressources ») |
+| Usage de l'IA décrit dans Resources | une mention de l'IA (AI, IA, ChatGPT, LLM...) dans Resources ou ses sous-sections |
+
+Non vérifié (à relire toi-même) : le contenu des sections, la description détaillée de la librairie, les références de Resources et le détail des tâches où l'IA a servi.
+
 Le Makefile est testé sur une copie : ton dossier n'est jamais modifié.
 Les fonctions sont testées avec une lib compilée par Melo, donc un Makefile cassé n'empêche pas de tester les fonctions.
 
