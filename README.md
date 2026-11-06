@@ -29,6 +29,28 @@ export OPENAI_API_KEY=sk-...
 ```
 
 
+# 🚲 Lancer Melo
+
+Clone Melo **dans le dossier de ton module** (ta libft, ton dossier de piscine...) : Melo teste toujours son dossier parent.
+
+```bash
+cd ~/libft
+git clone <URL_DU_REPO> Melo
+cd Melo
+./cli.py melo
+```
+
+Tout se fait ensuite dans le menu, en tapant juste un numéro :
+
+```text
+1. 🏊 Piscine          →   1. 📝 Exam
+2. 🎓 Common Core          2. 🧪 Module
+                           3. 🤖 IA
+```
+
+Dans chaque menu : `r` (ou `retour`) revient au menu précédent, `q` quitte Melo.
+
+
 # 🤖 Assistant IA
 
 
@@ -53,9 +75,7 @@ Cela permet à Melo de connaître uniquement le sujet dont tu lui demandes l'exp
 
 ### Lancer l'Assistant IA
 
-```bash
-./cli.py melo
-```
+`./cli.py melo`, choisis ton parcours, puis **🤖 IA**. Tape `retour` pour revenir au menu.
 
 Pour utiliser l'API OpenAI, configure ta clé :
 
@@ -73,9 +93,8 @@ Le mode `exam` permet de simuler une session d'examen avec une progression par n
 
 ### Lancer un examen
 
-```bash
-./cli.py exam
-```
+`./cli.py melo`, choisis ton parcours, puis **📝 Exam** : choisis ton exam et ton niveau de départ.
+Ton code s'écrit dans `rendu/`. Commandes : `test`, `next`, `re`, `sujet`, `help`, `retour`, `quit`.
 
 Le programme recherche les exercices dans :
 
@@ -161,10 +180,13 @@ Le mode `test` permet de vérifier directement ton rendu avec les mêmes princip
 
 ### Lancer un test
 
-```bash
-./cli.py test (détecte automatiquement le module à tester)
-./cli.py test ft_putnbr (pour tester un seul exo)
-./cli.py test nom_du_module (pour tester tout le module d'un coup)
+`./cli.py melo`, choisis **🏊 Piscine**, puis **🧪 Module** et ton module (celui dans lequel Melo est cloné est marqué `détecté 📍`). Ensuite :
+
+```text
+test               # tout le module d'un coup
+test ft_putnbr     # un seul exercice
+test -v            # sortie complète du compilateur
+retour             # revenir à la liste des modules
 ```
 
 Le programme recherche l'exercice dans :
@@ -193,19 +215,18 @@ Le mode `test` sait aussi tester une **libft complète** (sujet v1.3) : les 43 f
 
 ### Lancer les tests
 
-```bash
-./cli.py test libft ~/chemin/vers/libft             # tout
-./cli.py test libft/ft_split ~/chemin/vers/libft    # une seule fonction
-./cli.py test libft/makefile ~/chemin/vers/libft    # une seule section
-./cli.py list                                       # toutes les cibles possibles
-./cli.py test libft ~/chemin/vers/libft --strict    # + vérifications plus sévères que la moulinette
-./cli.py test libft ~/chemin/vers/libft -h          # fonctions compilées sans libft.h
-./cli.py test libft ~/chemin/vers/libft -v          # sortie complète du compilateur
+Clone Melo dans ta libft, puis `./cli.py melo`, **🎓 Common Core**, **🧪 Module** et **libft** :
+
+```text
+test                   # toute la libft
+test ft_split          # une seule fonction
+test makefile          # une seule section (rendu, makefile, header, symboles, norme, readme)
+test --strict          # + vérifications plus sévères que la moulinette
+test -h                # fonctions compilées sans libft.h
+test ft_split -h       # les options se combinent avec une fonction
+test -v                # sortie complète du compilateur
+retour                 # revenir à la liste des modules
 ```
-
-L'aide de `test` s'affiche avec `--help`, car `-h` sert au mode sans header.
-
-Sans chemin, Melo teste son dossier parent : si Melo est cloné dans ta libft, `./cli.py test libft` suffit.
 
 Par défaut, Melo teste comme la moulinette.
 `--strict` ajoute des vérifications qu'elle ne fait pas mais qu'un correcteur peut demander :

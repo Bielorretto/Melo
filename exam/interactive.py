@@ -2,7 +2,7 @@
 import random
 import sys
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 
 import yaml
 from rich.console import Console
@@ -13,6 +13,21 @@ from core.runner import find_exercise, load_manifest, run_exercise
 
 console = Console()
 
+BACK = ("r", "retour", "back")
+QUIT = ("q", "quit", "exit")
+
+
+def _ask(prompt: str) -> str:
+    """Lit un choix ; q / Ctrl+D / Ctrl+C quittent Melo."""
+    try:
+        choice = console.input(f"[cyan]>[/] {prompt}").strip()
+    except (EOFError, KeyboardInterrupt):
+        choice = "q"
+    if choice.lower() in QUIT:
+        console.print("[yellow]À bientôt ![/]")
+        sys.exit(0)
+    return choice
+
 
 def show_help() -> None:
     text = (
@@ -21,7 +36,8 @@ def show_help() -> None:
         "[bold]📄 sujet[/]  réaffiche le sujet de l'exercice\n"
         "[bold]📄 re[/]    exercice précédent du niveau\n"
         "[bold]📄 help[/]  réaffiche cette aide\n"
-        "[bold]📄 quit[/]  quitte le mode examen"
+        "[bold]🔙 retour[/] revenir au menu de Melo\n"
+        "[bold]📄 quit[/]  quitte Melo"
     )
     console.print(Panel(text, title="Commandes", border_style="green",
                          expand=False, padding=(0, 2)))
@@ -44,30 +60,7 @@ def _track_label(track: str) -> str:
     return track.replace("_", " ").title()
 
 
-def _choose_track(exams: Dict[str, dict]) -> str:
-    tracks = sorted({data["track"] for data in exams.values()},
-                    key=lambda t: (t != "piscine", t))
-    while True:
-        lines = "\n".join(
-            f"[cyan]{i}[/]. {_track_label(t)}"
-            for i, t in enumerate(tracks, start=1)
-        )
-        console.print(Panel(lines, title="🏊 Tracks disponibles", border_style="blue",
-                             expand=False, padding=(0, 2)))
-        choice = console.input("[cyan]>[/] choix (numéro, q pour quitter) : ").strip()
-
-        if choice.lower() in ("q", "quit", "exit"):
-            console.print("[yellow]À bientôt ![/]")
-            sys.exit(0)
-
-        if not choice.isdigit() or not (1 <= int(choice) <= len(tracks)):
-            console.print("[red]Choix invalide.[/]")
-            continue
-
-        return tracks[int(choice) - 1]
-
-
-def _choose_exam(exams: Dict[str, dict], track: str) -> dict:
+def _choose_exam(exams: Dict[str, dict], track: str) -> Optional[dict]:
     ordered = [data for data in exams.values() if data["track"] == track]
     while True:
         lines = "\n".join(
@@ -76,11 +69,10 @@ def _choose_exam(exams: Dict[str, dict], track: str) -> dict:
         )
         console.print(Panel(lines, title=f"🏔️🏔️{_track_label(track)} — exams🏔️🏔️",
                              border_style="blue", expand=False, padding=(0, 2)))
-        choice = console.input("[cyan]>[/] choix (numéro, q pour quitter) : ").strip()
+        choice = _ask("choix (numéro, r pour revenir, q pour quitter) : ").lower()
 
-        if choice.lower() in ("q", "quit", "exit"):
-            console.print("[yellow]À bientôt ![/]")
-            sys.exit(0)
+        if choice in BACK:
+            return None
 
         if not choice.isdigit() or not (1 <= int(choice) <= len(ordered)):
             console.print("[red]Choix invalide.[/]")
@@ -89,13 +81,16 @@ def _choose_exam(exams: Dict[str, dict], track: str) -> dict:
         return ordered[int(choice) - 1]
 
 
-def _choose_starting_level(exam: dict) -> int:
+def _choose_starting_level(exam: dict) -> Optional[int]:
     levels = sorted(exam["levels"].keys())
     while True:
         text = f"niveaux : [green]{', '.join(str(l) for l in levels)}[/]"
         console.print(Panel(text, title=exam["title"], border_style="blue",
                              expand=False, padding=(0, 2)))
-        choice = console.input("[cyan]>[/] niveau de départ : ").strip()
+        choice = _ask("niveau de départ (r pour revenir, q pour quitter) : ").lower()
+
+        if choice in BACK:
+            return None
 
         if not choice.lstrip("-").isdigit() or int(choice) not in exam["levels"]:
             console.print("[red]Niveau invalide.[/]")
@@ -156,15 +151,21 @@ def _print_current(level: int, exo_name: str, student_dir: Path,
 
 
 def run_interactive_exam(exams_root: Path, exercises_exam_root: Path,
-                          rendu_root: Path) -> None:
+                          rendu_root: Path, track: str) -> None:
+    """Le parcours (piscine / common_core) est choisi dans le menu de Melo.
+    « retour » revient au menu précédent, « quit » quitte Melo."""
     exams = _load_exams(exams_root)
-    if not exams:
-        console.print(f"[red]Aucun exam trouvé dans {exams_root} (*.yaml attendus).[/]")
+    if not any(data["track"] == track for data in exams.values()):
+        console.print(f"[red]Aucun exam {_track_label(track)} dans {exams_root} (*.yaml attendus).[/]")
         return
 
-    track = _choose_track(exams)
-    exam = _choose_exam(exams, track)
-    level = _choose_starting_level(exam)
+    while True:
+        exam = _choose_exam(exams, track)
+        if exam is None:
+            return
+        level = _choose_starting_level(exam)
+        if level is not None:
+            break
 
     pool = exam["levels"][level]
     index = random.randrange(len(pool))
@@ -179,10 +180,13 @@ def run_interactive_exam(exams_root: Path, exercises_exam_root: Path,
             cmd = console.input("\n[cyan]>[/] ").strip().lower()
         except (EOFError, KeyboardInterrupt):
             console.print("\n[yellow]À bientôt ![/]")
-            return
+            sys.exit(0)
 
-        if cmd in ("quit", "exit", "q"):
+        if cmd in QUIT:
             console.print("[yellow]À bientôt ![/]")
+            sys.exit(0)
+
+        if cmd in BACK:
             return
 
         if cmd == "help":

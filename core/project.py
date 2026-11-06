@@ -804,8 +804,7 @@ def _function_manifests(project_dir: Path, project: dict) -> List[Path]:
 
 
 def run_project(project_dir: Path, student_dir: Path, only: Optional[str] = None,
-                timeout: int = 5, strict: bool = False, no_header: bool = False,
-                student_arg: Optional[str] = None) -> bool:
+                timeout: int = 5, strict: bool = False, no_header: bool = False) -> bool:
     """strict=False (défaut) : mode moulinette, les vérifications plus sévères que la
     moulinette (tests marqués strict, helpers static, make re) ne sont pas lancées."""
     project = load_project(project_dir)
@@ -815,8 +814,8 @@ def run_project(project_dir: Path, student_dir: Path, only: Optional[str] = None
         print(f"{RED}Dossier introuvable : {student_dir}{RESET}")
         return False
     if not _root_files(student_dir, "*.c") and not (student_dir / "Makefile").exists():
-        print(f"{RED}Aucun .c ni Makefile dans {student_dir} : précise le dossier de ta {pname}.{RESET}")
-        print(f"  ex. ./cli.py test {pname} ~/{pname}")
+        print(f"{RED}Aucun .c ni Makefile dans {student_dir}.{RESET}")
+        print(f"  clone Melo dans le dossier de ta {pname} : Melo teste son dossier parent.")
         return False
 
     mode = "strict (plus sévère que la moulinette)" if strict else "moulinette"
@@ -923,8 +922,7 @@ def run_project(project_dir: Path, student_dir: Path, only: Optional[str] = None
     if totals["skipped"]:
         print(f"{YELLOW}{totals['skipped']} test(s) non exécuté(s){RESET}")
     if failed and len(sections) > 1:
-        options = "".join([f" {shlex.quote(student_arg)}" if student_arg else "",
-                           " --strict" if strict else "", " -h" if no_header else ""])
+        options = "".join([" --strict" if strict else "", " -h" if no_header else ""])
         print(f"\n{RED}Résumé : {len(failed)} section(s) en échec{RESET}")
         width = max(len(title.split("/", 1)[1]) for title, _, _ in failed)
         for title, target, results in failed:
@@ -932,5 +930,5 @@ def run_project(project_dir: Path, student_dir: Path, only: Optional[str] = None
             first_ko = next(r for r in results if not r.passed and not r.skipped)
             print(f"  {RED}{title.split('/', 1)[1]:<{width}}{RESET}  {total - passed} KO"
                   f"  ({first_ko.name})")
-            print(f"  {'':<{width}}  → ./cli.py test {pname}/{target}{options}")
+            print(f"  {'':<{width}}  → test {target}{options}")
     return all_ok
