@@ -1,4 +1,5 @@
 
+import os
 import re
 import shutil
 import subprocess
@@ -30,9 +31,14 @@ def check_memory(binary_path: str, args: Optional[List[str]] = None,
         binary_path,
         *args,
     ]
+    # Sans ça, sur Fedora (DEBUGINFOD_URLS défini), valgrind télécharge les symboles
+    # de debug de la libc au premier lancement : avec les sections lancées en
+    # parallèle, le premier test de chaque section dépasse le timeout.
+    env = {**os.environ, "DEBUGINFOD_URLS": ""}
     try:
         proc = subprocess.run(
-            cmd, input=stdin_data, capture_output=True, text=True, timeout=timeout
+            cmd, input=stdin_data, capture_output=True, text=True, timeout=timeout,
+            env=env,
         )
     except subprocess.TimeoutExpired:
         return MemoryReport(True, False, -1, -1, -1, "valgrind: timeout")

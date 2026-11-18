@@ -91,6 +91,15 @@ def _tail(text: str, n: int = 12) -> str:
     return "\n".join(lines) or "(aucune sortie)"
 
 
+# Melo est cloné dans le dossier de l'élève : son propre dossier n'est jamais un fichier rendu.
+MELO_ROOT = Path(__file__).resolve().parent.parent
+
+
+def _is_melo(path: Path) -> bool:
+    path = path.resolve()
+    return path == MELO_ROOT or MELO_ROOT in path.parents
+
+
 def _root_files(student_dir: Path, pattern: str) -> List[Path]:
     return sorted(p for p in student_dir.glob(pattern) if p.is_file())
 
@@ -104,6 +113,8 @@ def _student_files(student_dir: Path) -> Tuple[List[str], bool]:
     files = []
     for p in student_dir.rglob("*"):
         rel = p.relative_to(student_dir)
+        if _is_melo(p):
+            continue
         if p.is_file() and ".git" not in rel.parts and p.suffix not in (".o", ".a"):
             files.append(rel.as_posix())
     return sorted(files), False
@@ -395,8 +406,13 @@ def check_makefile(project: dict, student_dir: Path, strict: bool = False) -> Li
     env = _make_env()
     with tempfile.TemporaryDirectory(prefix="melo_make_") as tmp:
         work = Path(tmp) / "rendu"
-        shutil.copytree(student_dir, work, symlinks=True,
-                        ignore=shutil.ignore_patterns(".git", "*.o", "*.a"))
+        base_ignore = shutil.ignore_patterns(".git", "*.o", "*.a")
+
+        def ignore(src: str, names: List[str]) -> set:
+            skipped = set(base_ignore(src, names))
+            return skipped | {n for n in names if _is_melo(Path(src) / n)}
+
+        shutil.copytree(student_dir, work, symlinks=True, ignore=ignore)
 
         def make(*args: str) -> Tuple[Optional[int], str]:
             return _sh(["make", *args], work, timeout=180, env=env)
