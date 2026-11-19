@@ -1,0 +1,46 @@
+# Généré par tools/gen_gnl.py : cas du gnlTester de Tripouille
+# (github.com/Tripouille/gnlTester, tests/bonus.cpp).
+name: bonus
+order: 2
+bonus: true
+builds: [bonus_bs1, bonus_bs42, bonus_bs10M]
+files_dir: ../files
+rule: "sujet (bonus) : get_next_line gère plusieurs fd à la fois sans perdre la lecture de chacun"
+prelude: |
+  #include "melo_gnl.h"
+test_defaults:
+  expected_exit: 0
+  check_memory: true
+  # Un gnl correct mais lent (BUFFER_SIZE=1, ligne de 10000 caractères) ne doit pas être KO :
+  # 30 s (60 s sous valgrind) ne sont dépassées que par une boucle infinie.
+  timeout: 30
+tests:
+- name: plusieurs fd lus en alternance (avec des fd invalides entre les deux)
+  input: 3 fichiers ouverts, lus une ligne à la fois chacun, avec get_next_line(1000...) entre
+  body: |
+    int fd[4];
+    fd[0] = open("files/41_with_nl", O_RDONLY);
+    fd[1] = open("files/42_with_nl", O_RDONLY);
+    fd[2] = open("files/43_with_nl", O_RDONLY);
+    GNL(1000, NULL, "1000");
+    GNL(fd[0], "0123456789012345678901234567890123456789\n", "fd[0]");
+    GNL(1001, NULL, "1001");
+    GNL(fd[1], "01234567890123456789012345678901234567890\n", "fd[1]");
+    GNL(1002, NULL, "1002");
+    GNL(fd[2], "012345678901234567890123456789012345678901\n", "fd[2]");
+    GNL(1003, NULL, "1003");
+    GNL(fd[0], "0", "fd[0]");
+    GNL(1004, NULL, "1004");
+    GNL(fd[1], "1", "fd[1]");
+    GNL(1005, NULL, "1005");
+    GNL(fd[2], "2", "fd[2]");
+    GNL(fd[0], NULL, "fd[0]");
+    GNL(fd[1], NULL, "fd[1]");
+    GNL(fd[2], NULL, "fd[2]");
+    fd[3] = open("files/nl", O_RDONLY);
+    GNL(1006, NULL, "1006");
+    GNL(fd[3], "\n", "fd[3]");
+    GNL(1007, NULL, "1007");
+    GNL(fd[3], NULL, "fd[3]");
+    for (int i = 0; i < 4; i++)
+        close(fd[i]);

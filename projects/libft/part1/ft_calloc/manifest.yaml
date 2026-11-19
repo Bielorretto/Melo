@@ -71,3 +71,48 @@ tests:
         free(p);
         return (melo_ko_txt("un pointeur", "NULL"));
     }
+# --- Cas repris du libftTester de Tripouille (github.com/Tripouille/libftTester) ---
+- name: 'nmemb * size trop grand ou négatif converti : NULL'
+  input: ft_calloc(SIZE_MAX, SIZE_MAX), (INT_MAX, INT_MAX), (INT_MIN, INT_MIN), (-5, -5), (3, -5), (-5, 3)
+  body: |
+    struct s_case { size_t n; size_t s; const char *txt; };
+    const struct s_case c[] = {
+        {SIZE_MAX, SIZE_MAX, "SIZE_MAX, SIZE_MAX"},
+        {INT_MAX, INT_MAX, "INT_MAX, INT_MAX"},
+        {(size_t)INT_MIN, (size_t)INT_MIN, "INT_MIN, INT_MIN"},
+        {(size_t)-5, (size_t)-5, "-5, -5"},
+        {3, (size_t)-5, "3, -5"},
+        {(size_t)-5, 3, "-5, 3"},
+    };
+    for (size_t i = 0; i < sizeof(c) / sizeof(*c); i++)
+    {
+        void *p = ft_calloc(c[i].n, c[i].s);
+        if (p)
+        {
+            free(p);
+            printf("obtenu : ft_calloc(%s) = un pointeur\nattendu : ft_calloc(%s) = NULL\n", c[i].txt, c[i].txt);
+            return (1);
+        }
+    }
+- name: 'un des deux à 0 avec l''autre « négatif » : pointeur valide'
+  input: ft_calloc(0, -5) et ft_calloc(-5, 0)
+  body: |
+    void *a = ft_calloc(0, (size_t)-5);
+    void *b = ft_calloc((size_t)-5, 0);
+    if (!a || !b)
+    {
+        free(a);
+        free(b);
+        return (melo_ko_txt("NULL", "un pointeur qu'on peut free (0 octet à allouer)"));
+    }
+    free(a);
+    free(b);
+- name: taille exacte du malloc (MKO)
+  strict: true
+  input: ft_calloc(2, 2)
+  body: |
+    void *p = ft_calloc(2, 2);
+    int ok = melo_mcheck(p, 4, "ft_calloc(2, 2)");
+    free(p);
+    if (!ok)
+        return (1);

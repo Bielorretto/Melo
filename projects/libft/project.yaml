@@ -11,6 +11,8 @@ compile:
 
 # Fichiers obligatoires à la racine du dépôt.
 required_files: [Makefile, libft.h, README.md]
+# Au moins un fichier source qui correspond à ce motif.
+source_glob: "ft_*.c"
 # Tout fichier rendu doit correspondre à un de ces motifs ("Turning in unused files is forbidden").
 allowed_files: [Makefile, libft.h, README.md, "ft_*.c", .gitignore]
 
@@ -20,6 +22,12 @@ makefile_rules: [all, clean, fclean, re]
 readme:
   first_line: 'This activity has been created as part of the 42 curriculum by'
   sections: [Description, Instructions, Resources]
+
+# Vérifications propres à la libft.
+forbid_restrict: true         # pas de mot-clé restrict
+header_t_list: true           # structure t_list conforme dans libft.h
+strict_static_helpers: true   # --strict : toute fonction hors sujet en static
+no_header_mode: true          # option -h disponible
 
 # Fonctions externes autorisées pour un fichier qui ne contient pas de fonction du sujet.
 default_allowed: [malloc, free, write]

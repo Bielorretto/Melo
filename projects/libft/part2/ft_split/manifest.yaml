@@ -142,3 +142,59 @@ tests:
             return (1);
         }
     }
+# --- Cas repris du libftTester de Tripouille (github.com/Tripouille/libftTester) ---
+- name: séparateurs répétés de longueurs différentes
+  input: ft_split("--1-2--3---4----5-----42", '-')
+  body: |
+    const char *exp[] = {"1", "2", "3", "4", "5", "42", NULL};
+    if (check("--1-2--3---4----5-----42", '-', exp))
+        return (1);
+- name: espaces autour des mots
+  input: ft_split("  tripouille  42  ", ' ')
+  body: |
+    const char *exp[] = {"tripouille", "42", NULL};
+    if (check("  tripouille  42  ", ' ', exp))
+        return (1);
+- name: 'chaîne vide allouée et c = ''\0'' : ne lit pas après le \0'
+  input: ft_split(s, '\0') avec s = chaîne vide allouée (1 octet)
+  body: |
+    char *s = malloc(1);
+    s[0] = 0;
+    char **r = ft_split(s, 0);
+    free(s);
+    if (!r || r[0] != NULL)
+    {
+        printf("obtenu : ");
+        print_split(r, 2);
+        printf("\nattendu : {NULL}\n");
+        free_split(r);
+        return (1);
+    }
+    free_split(r);
+- name: taille exacte des malloc (MKO)
+  strict: true
+  input: ft_split pour "  tripouille  42  ", "chinimala", "", " Tripouille " et "--1-2--3---4----5-----42"
+  body: |
+    struct s_case { const char *s; char c; int words; size_t sizes[6]; };
+    const struct s_case c[] = {
+        {"  tripouille  42  ", ' ', 2, {11, 3}},
+        {"chinimala", ' ', 1, {10}},
+        {"", ' ', 0, {0}},
+        {" Tripouille ", ' ', 1, {11}},
+        {"--1-2--3---4----5-----42", '-', 6, {2, 2, 2, 2, 2, 3}},
+    };
+    for (size_t i = 0; i < sizeof(c) / sizeof(*c); i++)
+    {
+        char txt[96];
+        char **r = ft_split(c[i].s, c[i].c);
+        snprintf(txt, sizeof(txt), "le tableau de ft_split(\"%s\", '%c')", c[i].s, c[i].c);
+        int ok = melo_mcheck(r, sizeof(char *) * (c[i].words + 1), txt);
+        for (int w = 0; ok && r && w < c[i].words && r[w]; w++)
+        {
+            snprintf(txt, sizeof(txt), "le mot \"%s\" de ft_split(\"%s\", '%c')", r[w], c[i].s, c[i].c);
+            ok = melo_mcheck(r[w], c[i].sizes[w], txt);
+        }
+        free_split(r);
+        if (!ok)
+            return (1);
+    }

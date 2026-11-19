@@ -69,3 +69,44 @@ tests:
   body: |
     if (check("", "", 0, 0, 1) || check("", "a", 1, 0, 0))
         return (1);
+# --- Cas repris du libftTester de Tripouille (github.com/Tripouille/libftTester) ---
+- name: len = SIZE_MAX, len trop court, chaîne vide...
+  input: 16 appels ft_strnstr du libftTester (big = "aaabcabcd" ou "")
+  body: |
+    char h[30] = "aaabcabcd";
+    char e[1] = "";
+    const char *one = "1";
+    const char *two = "22";
+    struct s_case { const char *big; const char *little; size_t len; const char *exp; const char *txt; };
+    const struct s_case c[] = {
+        {h, "aabc", 0, NULL, "\"aaabcabcd\", \"aabc\", 0"},
+        {h, "aabc", (size_t)-1, h + 1, "\"aaabcabcd\", \"aabc\", SIZE_MAX"},
+        {h, "a", (size_t)-1, h, "\"aaabcabcd\", \"a\", SIZE_MAX"},
+        {h, "c", (size_t)-1, h + 4, "\"aaabcabcd\", \"c\", SIZE_MAX"},
+        {e, "", (size_t)-1, e, "\"\", \"\", SIZE_MAX"},
+        {e, "", 0, e, "\"\", \"\", 0"},
+        {e, "coucou", (size_t)-1, NULL, "\"\", \"coucou\", SIZE_MAX"},
+        {h, "aaabc", 5, h, "\"aaabcabcd\", \"aaabc\", 5"},
+        {e, "12345", 5, NULL, "\"\", \"12345\", 5"},
+        {h, "abcd", 9, h + 5, "\"aaabcabcd\", \"abcd\", 9"},
+        {h, "cd", 8, NULL, "\"aaabcabcd\", \"cd\", 8"},
+        {h, "a", 1, h, "\"aaabcabcd\", \"a\", 1"},
+        {one, "a", 1, NULL, "\"1\", \"a\", 1"},
+        {two, "b", 2, NULL, "\"22\", \"b\", 2"},
+        {two, "22", 3, two, "\"22\", \"22\", 3"},
+        {h, "", 0, h, "\"aaabcabcd\", \"\", 0"},
+    };
+    for (size_t i = 0; i < sizeof(c) / sizeof(*c); i++)
+    {
+        char *r = ft_strnstr(c[i].big, c[i].little, c[i].len);
+        if (r != c[i].exp)
+        {
+            size_t len = strlen(c[i].big);
+            printf("obtenu : ft_strnstr(%s) = ", c[i].txt);
+            melo_ptr(c[i].big, len, r);
+            printf("\nattendu : ft_strnstr(%s) = ", c[i].txt);
+            melo_ptr(c[i].big, len, c[i].exp);
+            printf("\n");
+            return (1);
+        }
+    }

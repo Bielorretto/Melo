@@ -72,6 +72,11 @@ def _prepare_workdir(exercise_dir: Path, student_dir: Path, test: dict,
         for header in includes_dir.glob("*.h"):
             shutil.copy(header, tmp / header.name)
 
+    # Fichiers de données lus par le test (ex. get_next_line) : copiés dans tmp/files.
+    files_dir = manifest.get("files_dir")
+    if files_dir:
+        shutil.copytree((exercise_dir / files_dir).resolve(), tmp / "files")
+
     main_path = tmp / "main.c"
     if manifest.get("own_main"):
         return
@@ -112,7 +117,12 @@ def _compile(tmp: Path, manifest: dict, test: Optional[dict] = None,
     else:
         if library.archive is None:
             return library.failure_hint() or "la librairie n'a pas pu être construite"
-        cmd = [compiler, *flags, "-I", str(tmp), "-I", str(library.test_include_dir or library.include_dir),
+        if library.test_include_dir:
+            includes = [library.test_include_dir]
+        else:
+            includes = library.include_dirs or [library.include_dir]
+        cmd = [compiler, *flags, *library.cflags, *compile_cfg.get("test_flags", []),
+               "-I", str(tmp), *(a for d in includes for a in ("-I", str(d))),
                str(tmp / "main.c"), str(library.archive), *extra, "-o", str(binary)]
     proc = subprocess.run(cmd, capture_output=True, text=True, cwd=tmp)
     if proc.returncode != 0:
@@ -130,6 +140,22 @@ _WRAPPER_CALL_RE = re.compile(r'^(?!ft_)\w+\((ft_\w+\(.*\))\);$')
 _GOT_RE = re.compile(r"^\s*obtenu\s*:\s?(.*)$")
 _EXPECTED_RE = re.compile(r"^\s*attendu\s*:\s?(.*)$")
 _FIXED_EXPECTED_RE = re.compile(r'attendu : ((?:[^"\\]|\\")*?)\\n')
+
+# Les mains de test peuvent écrire « melo-appel: <appel> » sur stderr avant chaque appel :
+# en cas de crash ou de timeout, on sait quel appel était en cours.
+_CALL_MARKER = "melo-appel: "
+
+
+def _split_markers(stderr: str) -> Tuple[Optional[str], str]:
+    """(dernier appel annoncé, stderr sans les marqueurs)"""
+    last, kept = None, []
+    for line in stderr.splitlines(keepends=True):
+        if line.startswith(_CALL_MARKER):
+            last = line[len(_CALL_MARKER):].strip()
+        else:
+            kept.append(line)
+    return last, "".join(kept)
+
 
 _SIGNAL_HINTS = {
     "SIGSEGV": "segmentation fault : accès mémoire invalide",
@@ -225,6 +251,8 @@ def run_test(exercise_dir: Path, student_dir: Path, test: dict,
     manifest = manifest or load_manifest(exercise_dir)
     # Valeurs communes à tous les tests du manifest (ex. expected_exit: 0).
     test = {**manifest.get("test_defaults", {}), **test}
+    # Un manifest peut allonger la limite (ex. get_next_line avec BUFFER_SIZE=1 sous valgrind).
+    timeout = max(timeout, int(test.get("timeout", timeout)))
     name = test["name"]
     inp = describe_input(test)
 
@@ -243,20 +271,22 @@ def run_test(exercise_dir: Path, student_dir: Path, test: dict,
         args = test.get("args", [])
         stdin_data = test.get("stdin", "")
 
-        result = run_binary(binary, args, stdin_data, timeout=timeout)
+        result = run_binary(binary, args, stdin_data, timeout=timeout, cwd=str(tmp))
+        last_call, result.stderr = _split_markers(result.stderr)
 
         def fail(message: str, got: str, expected: str, **extra) -> TestResult:
             return TestResult(name, False, message, stdout=result.stdout,
-                              stderr=result.stderr, input=inp, got=got,
+                              stderr=result.stderr, input=extra.pop("input", inp), got=got,
                               expected=expected, **extra)
 
         if result.timed_out:
             return fail("timeout",
                         f"aucune fin après {timeout}s (boucle infinie ou récursion sans fin ?)",
-                        _expected_summary(test))
+                        _expected_summary(test), input=last_call or inp)
 
         if result.returncode is not None and result.returncode < 0:
-            return fail("crash", _describe_signal(result.returncode), _expected_summary(test))
+            return fail("crash", _describe_signal(result.returncode), _expected_summary(test),
+                        input=last_call or inp)
 
         expected_stdout = test.get("expected_stdout")
         if expected_stdout is not None and result.stdout != expected_stdout:
@@ -279,7 +309,7 @@ def run_test(exercise_dir: Path, student_dir: Path, test: dict,
         if expected_exit is not None and result.returncode != expected_exit:
             reported = _parse_reported(result.stdout)
             if reported:
-                return fail("résultat différent de l'attendu", *reported)
+                return fail("résultat différent de l'attendu", *reported, input=last_call or inp)
             got = f"code de retour {result.returncode}"
             if result.stdout:
                 got += f", sortie {json.dumps(result.stdout, ensure_ascii=False)}"
@@ -288,7 +318,7 @@ def run_test(exercise_dir: Path, student_dir: Path, test: dict,
 
         memory_report = None
         if test.get("check_memory"):
-            memory_report = check_memory(binary, args, stdin_data, timeout=timeout * 2)
+            memory_report = check_memory(binary, args, stdin_data, timeout=timeout * 2, cwd=str(tmp))
             if memory_report.available and not memory_report.clean:
                 lost = memory_report.definitely_lost + memory_report.indirectly_lost
                 if lost < 0:

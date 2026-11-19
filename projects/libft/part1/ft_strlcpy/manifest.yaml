@@ -67,3 +67,43 @@ tests:
     ft_strlcpy(dst, "abcdefgh", 4);
     if (memcmp(dst, "abc\0ZZZZZZ", 10) != 0)
         return (melo_ko_m(dst, "abc\0ZZZZZZ", 10));
+# --- Cas repris du libftTester de Tripouille (github.com/Tripouille/libftTester) ---
+- name: 'size = SIZE_MAX : copie toute la chaîne'
+  input: ft_strlcpy(dst, "coucou", SIZE_MAX) (dst rempli de 'A')
+  body: |
+    char dst[10];
+    memset(dst, 'A', 10);
+    size_t r = ft_strlcpy(dst, "coucou", (size_t)-1);
+    if (r != 6)
+        return (melo_ko_i(r, 6));
+    if (memcmp(dst, "coucou\0AAA", 10) != 0)
+        return (melo_ko_m(dst, "coucou\0AAA", 10));
+- name: size autour de la longueur de src (6, 7, 8)
+  input: ft_strlcpy(dst, "coucou", size) pour size dans {6, 7, 8} (dst rempli de 'A')
+  body: |
+    size_t sizes[] = {6, 7, 8};
+    const char *exp[] = {"couco\0AAAA", "coucou\0AAA", "coucou\0AAA"};
+    for (int i = 0; i < 3; i++)
+    {
+        char dst[10];
+        memset(dst, 'A', 10);
+        size_t r = ft_strlcpy(dst, "coucou", sizes[i]);
+        if (r != 6 || memcmp(dst, exp[i], 10) != 0)
+        {
+            printf("obtenu : ft_strlcpy(dst, \"coucou\", %zu) = %zu, dst = ", sizes[i], r);
+            melo_m(dst, 10);
+            printf("\nattendu : ft_strlcpy(dst, \"coucou\", %zu) = 6, dst = ", sizes[i]);
+            melo_m(exp[i], 10);
+            printf("\n");
+            return (1);
+        }
+    }
+- name: 'src d''un caractère et size = 0 : dst intact'
+  input: ft_strlcpy(dst = "", "1", 0)
+  body: |
+    char dst[4] = "";
+    size_t r = ft_strlcpy(dst, "1", 0);
+    if (r != 1)
+        return (melo_ko_i(r, 1));
+    if (dst[0] != 0)
+        return (melo_ko_s(dst, ""));

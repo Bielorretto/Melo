@@ -19,7 +19,7 @@ import subprocess
 import sys
 import tempfile
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Set, Tuple
 
@@ -145,6 +145,18 @@ def _prototypes(project: dict) -> Dict[str, List[str]]:
 
 
 @dataclass
+class Variant:
+    """Une version de la lib compilée par Melo (ex. libft : « default » ; ft_printf : obligatoire
+    et bonus ; get_next_line : une par BUFFER_SIZE)."""
+    name: str
+    label: str
+    archive: Optional[Path]
+    cflags: List[str]
+    bonus: bool = False
+    compile_errors: Dict[str, str] = field(default_factory=dict)  # erreurs propres à ces flags
+
+
+@dataclass
 class LibraryBuild:
     """La lib de l'élève compilée par Melo (indépendamment de son Makefile)."""
     root: Path
@@ -160,17 +172,30 @@ class LibraryBuild:
     noheader_errors: Dict[str, str] = field(default_factory=dict)  # "ft_x.c" -> erreur sans .h
     # Objets mis dans l'archive (en mode -h : versions compilées sans header quand c'est possible).
     lib_objects: Dict[str, Path] = field(default_factory=dict)
+    # Dossiers qui contiennent des headers (ex. ft_printf avec un dossier libft/).
+    include_dirs: List[Path] = field(default_factory=list)
+    # Flags ajoutés à la compilation des mains de test (ex. -D BUFFER_SIZE=42).
+    cflags: List[str] = field(default_factory=list)
+    variants: Dict[str, Variant] = field(default_factory=dict)
+    variant_errors: Dict[str, str] = field(default_factory=dict)
 
     def failure_hint(self) -> str:
         hints = []
-        if self.compile_errors:
-            names = ", ".join(sorted(self.compile_errors))
-            hints.append(f"(ces fichiers ne compilent pas avec -Wall -Wextra -Werror : {names}"
-                         " — voir la section rendu)")
+        errors = {**self.compile_errors, **self.variant_errors}
+        if errors:
+            names = ", ".join(sorted(errors))
+            flags = " ".join(self.cflags)
+            hints.append(f"(ces fichiers ne compilent pas avec -Wall -Wextra -Werror{' ' + flags if flags else ''}"
+                         f" : {names} — voir la section rendu)")
         if self.noheader_errors:
             names = ", ".join(sorted(self.noheader_errors))
             hints.append(f"(ces fichiers ne compilent pas sans libft.h : {names})")
         return "\n".join(hints)
+
+    def view(self, variant: str) -> "LibraryBuild":
+        """La même lib, vue par les tests d'une variante (archive et flags de cette variante)."""
+        v = self.variants[variant]
+        return replace(self, archive=v.archive, cflags=v.cflags, variant_errors=v.compile_errors)
 
 
 def _strip_c(code: str) -> str:
@@ -205,9 +230,71 @@ def _reference_header(project: dict, dest: Path) -> None:
         f"\tstruct s_list\t*next;\n}}\tt_list;\n\n{protos}\n\n#endif\n", encoding="utf-8")
 
 
+def _matches(rel: str, patterns: List[str]) -> bool:
+    return any(fnmatch.fnmatchcase(rel, pat) for pat in patterns)
+
+
+def source_files(project: dict, student_dir: Path) -> List[str]:
+    """Les .c du rendu compilés dans la lib (chemins relatifs), d'après « sources »
+    (défaut : les .c de la racine ; ft_printf : aussi libft/*.c)."""
+    found = set()
+    for pattern in project.get("sources", ["*.c"]):
+        for p in student_dir.glob(pattern):
+            if p.is_file() and p.suffix == ".c" and not _is_melo(p):
+                found.add(p.relative_to(student_dir).as_posix())
+    return sorted(found)
+
+
+def header_files(project: dict, student_dir: Path) -> List[str]:
+    """Les .h à côté des sources (racine + dossiers des sources)."""
+    dirs = {Path(rel).parent for rel in source_files(project, student_dir)} | {Path(".")}
+    found = set()
+    for d in dirs:
+        for p in (student_dir / d).glob("*.h"):
+            if p.is_file() and not _is_melo(p):
+                found.add(p.relative_to(student_dir).as_posix())
+    return sorted(found)
+
+
+def has_bonus(project: dict, student_dir: Path) -> Optional[bool]:
+    """None si le projet n'a pas de bonus ; sinon True si l'élève a rendu le bonus
+    (fichiers *_bonus.c, ou règle bonus dans le Makefile)."""
+    cfg = project.get("bonus")
+    if not cfg:
+        return None
+    files = [rel for rel in source_files(project, student_dir) if _matches(rel, cfg.get("files", []))]
+    if files:
+        return True
+    rule = cfg.get("make_rule")
+    makefile = student_dir / "Makefile"
+    if rule and makefile.is_file():
+        return re.search(rf"^{re.escape(rule)}\s*:", makefile.read_text(errors="replace"), re.M) is not None
+    return False
+
+
+def _bonus_hint(project: dict) -> str:
+    cfg = project.get("bonus", {})
+    parts = []
+    if cfg.get("files"):
+        parts.append("aucun fichier " + " / ".join(cfg["files"]))
+    if cfg.get("make_rule"):
+        parts.append(f"pas de règle {cfg['make_rule']} dans le Makefile")
+    return "bonus non rendu (" + ", ".join(parts) + ")"
+
+
+def _variant_sources(cfg: dict, sources: List[str]) -> List[str]:
+    selected = [s for s in sources if not cfg.get("only") or _matches(s, cfg["only"])]
+    selected = [s for s in selected if not _matches(s, cfg.get("exclude", []))]
+    if cfg.get("prefer_bonus"):
+        # Version bonus : X_bonus.c remplace X.c quand les deux existent.
+        names = set(selected)
+        selected = [s for s in selected if not s.endswith(".c") or s[:-2] + "_bonus.c" not in names]
+    return selected
+
+
 def build_library(project_dir: Path, project: dict, student_dir: Path,
                   no_header: bool = False) -> LibraryBuild:
-    """Compile chaque .c de la racine séparément, puis crée l'archive avec ar.
+    """Compile chaque .c séparément, puis crée une archive par variante avec ar.
 
     no_header=True (-h) : chaque .c qui n'a pas besoin du header (ni t_list, ni appel à une
     autre fonction du sujet) est compilé avec un libft.h vide, et c'est cet objet qui va dans
@@ -218,28 +305,36 @@ def build_library(project_dir: Path, project: dict, student_dir: Path,
     src_dir, obj_dir = root / "src", root / "obj"
     src_dir.mkdir()
     obj_dir.mkdir()
-    for p in [*_root_files(student_dir, "*.c"), *_root_files(student_dir, "*.h")]:
-        shutil.copy(p, src_dir / p.name)
+    sources = source_files(project, student_dir)
+    for rel in [*sources, *header_files(project, student_dir)]:
+        (src_dir / rel).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(student_dir / rel, src_dir / rel)
 
     cfg = project.get("compile", {})
     compiler = cfg.get("compiler", "cc")
     flags = cfg.get("flags", ["-Wall", "-Wextra", "-Werror"])
     includes = project_dir / "includes"
+    include_dirs = [src_dir] + sorted({(src_dir / h).parent for h in header_files(project, student_dir)} - {src_dir})
+    inc_args = [a for d in include_dirs for a in ("-I", str(d))]
     build = LibraryBuild(root, src_dir, None,
                          test_includes=includes if includes.is_dir() else None,
-                         no_header=no_header)
+                         no_header=no_header, include_dirs=include_dirs)
 
-    def compile_one(src: Path) -> Tuple[str, Optional[str]]:
-        obj = obj_dir / (src.stem + ".o")
-        rc, out = _sh([compiler, *flags, "-I", str(src_dir), "-c", str(src), "-o", str(obj)],
-                      src_dir, timeout=60)
-        return src.name, None if rc == 0 else (out or f"code de retour {rc}")
+    def obj_name(rel: str) -> str:
+        return rel[:-2].replace("/", "__") + ".o"
 
-    sources = sorted(src_dir.glob("*.c"))
+    def compiler_for(dest: Path, extra: List[str]) -> Callable[[str], Tuple[str, Optional[str]]]:
+        def compile_one(rel: str) -> Tuple[str, Optional[str]]:
+            obj = dest / obj_name(rel)
+            rc, out = _sh([compiler, *flags, *extra, *inc_args, "-c", rel, "-o", str(obj)],
+                          src_dir, timeout=60)
+            return rel, None if rc == 0 else (out or f"code de retour {rc}")
+        return compile_one
+
     with ThreadPoolExecutor(max_workers=os.cpu_count() or 4) as pool:
-        for name, err in pool.map(compile_one, sources):
+        for name, err in pool.map(compiler_for(obj_dir, []), sources):
             if err is None:
-                build.objects[name] = obj_dir / (Path(name).stem + ".o")
+                build.objects[name] = obj_dir / obj_name(name)
             else:
                 build.compile_errors[name] = err.replace(str(src_dir) + "/", "")
 
@@ -264,7 +359,7 @@ def build_library(project_dir: Path, project: dict, student_dir: Path,
 
         build.lib_objects = dict(build.objects)
         independent = []
-        for src in sources:
+        for src in sorted(src_dir.glob("*.c")):
             if src.name in build.compile_errors:
                 continue
             why = needs_header(src.read_text(errors="replace"), project)
@@ -282,11 +377,39 @@ def build_library(project_dir: Path, project: dict, student_dir: Path,
     else:
         build.lib_objects = dict(build.objects)
 
-    if build.lib_objects:
-        archive = root / project.get("library", "lib.a")
-        rc, _ = _sh(["ar", "rcs", str(archive), *map(str, build.lib_objects.values())], root)
-        if rc == 0:
-            build.archive = archive
+    # Une archive par variante (par défaut : une seule, avec tous les .c).
+    lib_name = project.get("library") or f"melo_{project['name']}.a"
+    for vname, vcfg in (project.get("builds") or {"default": {}}).items():
+        vcfg = vcfg or {}
+        vflags = list(vcfg.get("flags", []))
+        selected = _variant_sources(vcfg, sources)
+        # test_flags : seulement pour les mains de test (ex. quel header inclure).
+        variant = Variant(vname, vcfg.get("label", vname), None, vflags + list(vcfg.get("test_flags", [])),
+                          bool(vcfg.get("bonus")))
+        if not vflags:
+            objs = [build.lib_objects[r] for r in selected if r in build.lib_objects]
+            variant.compile_errors = {r: e for r, e in build.compile_errors.items() if r in selected}
+        else:
+            vdir = obj_dir / vname
+            vdir.mkdir()
+            objs = []
+            with ThreadPoolExecutor(max_workers=os.cpu_count() or 4) as pool:
+                for name, err in pool.map(compiler_for(vdir, vflags), selected):
+                    if err is None:
+                        objs.append(vdir / obj_name(name))
+                    else:
+                        variant.compile_errors[name] = err.replace(str(src_dir) + "/", "")
+        if objs:
+            vroot = root / "lib" / vname
+            vroot.mkdir(parents=True)
+            archive = vroot / lib_name
+            rc, _ = _sh(["ar", "rcs", str(archive), *map(str, objs)], root)
+            if rc == 0:
+                variant.archive = archive
+        build.variants[vname] = variant
+    first = next(iter(build.variants.values()))
+    build.archive, build.cflags = first.archive, first.cflags
+    build.variant_errors = first.compile_errors
     return build
 
 
@@ -297,20 +420,24 @@ def check_rendu(project: dict, student_dir: Path, build: LibraryBuild) -> List[T
     results = []
     files, from_git = _student_files(student_dir)
     source = "fichiers suivis par git" if from_git else "fichiers du dossier"
+    source_glob = project.get("source_glob", "*.c")
+    required = project["required_files"]
 
-    missing = [f for f in project["required_files"] if not (student_dir / f).is_file()]
-    if not _root_files(student_dir, "ft_*.c"):
-        missing.append("ft_*.c (aucun fichier source)")
+    missing = [f for f in required if not (student_dir / f).is_file()]
+    if not _root_files(student_dir, source_glob):
+        missing.append(f"{source_glob} (aucun fichier source)")
     if from_git:
-        missing += [f"{f} (présent mais pas commité)" for f in project["required_files"]
+        missing += [f"{f} (présent mais pas commité)" for f in required
                     if (student_dir / f).is_file() and f not in files]
-    results.append(_check("fichiers obligatoires présents (Makefile, libft.h, README.md, ft_*.c)",
+    results.append(_check(f"fichiers obligatoires présents ({', '.join([*required, source_glob])})",
                           [f"manquant : {m}" for m in missing], "tous présents à la racine"))
 
-    nested = [f for f in files if "/" in f]
-    results.append(_check("tous les fichiers sont à la racine du dépôt",
-                          [f"pas à la racine : {f}" for f in nested],
-                          "aucun sous-dossier", inp=source))
+    allowed_dirs = project.get("allowed_dirs", [])
+    nested = [f for f in files if "/" in f and f.split("/", 1)[0] not in allowed_dirs]
+    where = "aucun sous-dossier" + (f" (sauf {', '.join(d + '/' for d in allowed_dirs)})" if allowed_dirs else "")
+    results.append(_check("tous les fichiers sont à la racine du dépôt" if not allowed_dirs else
+                          f"pas de sous-dossier en dehors de {', '.join(allowed_dirs)}/",
+                          [f"pas à la racine : {f}" for f in nested], where, inp=source))
 
     allowed = project["allowed_files"]
     extra = [f for f in files if "/" not in f
@@ -325,13 +452,36 @@ def check_rendu(project: dict, student_dir: Path, build: LibraryBuild) -> List[T
     results.append(_check(f"chaque .c compile avec cc {flags}", errors,
                           "aucune erreur ni warning", limit=5))
 
-    restrict = []
-    for p in [*_root_files(student_dir, "*.c"), *_root_files(student_dir, "*.h")]:
-        for i, line in enumerate(p.read_text(errors="replace").splitlines(), 1):
-            if re.search(r"\b(__)?restrict(__)?\b", line):
-                restrict.append(f"{p.name}:{i} : {line.strip()}")
-    results.append(_check("pas de mot-clé restrict (interdit par le sujet)", restrict,
-                          "aucun restrict dans les prototypes"))
+    # Chaque variante (ex. -D BUFFER_SIZE=1) doit compiler aussi.
+    for vname, v in build.variants.items():
+        vflags = (project.get("builds") or {}).get(vname, {}).get("flags", [])
+        if not vflags or (v.bonus and not has_bonus(project, student_dir)):
+            continue
+        errors = [err if report.VERBOSE else short_cc_error(err, limit=4)
+                  for _, err in sorted(v.compile_errors.items())]
+        results.append(_check(f"compile avec {' '.join(vflags)}" + (" (bonus)" if v.bonus else ""),
+                              errors, "aucune erreur ni warning", limit=5))
+
+    # Chaque .c inclut le bon header (ex. get_next_line.c -> "get_next_line.h").
+    for pattern, header in project.get("must_include", {}).items():
+        problems = []
+        for p in _root_files(student_dir, pattern):
+            if not re.search(rf'^\s*#\s*include\s*"{re.escape(header)}"', p.read_text(errors="replace"), re.M):
+                problems.append(f'{p.name} n\'inclut pas "{header}"')
+        if problems:
+            results.append(_check(f'les fichiers {pattern} incluent "{header}"', problems,
+                                  f'#include "{header}" dans chaque fichier'))
+        elif _root_files(student_dir, pattern):
+            results.append(_ok(f'les fichiers {pattern} incluent "{header}"'))
+
+    if project.get("forbid_restrict"):
+        restrict = []
+        for p in [*_root_files(student_dir, "*.c"), *_root_files(student_dir, "*.h")]:
+            for i, line in enumerate(p.read_text(errors="replace").splitlines(), 1):
+                if re.search(r"\b(__)?restrict(__)?\b", line):
+                    restrict.append(f"{p.name}:{i} : {line.strip()}")
+        results.append(_check("pas de mot-clé restrict (interdit par le sujet)", restrict,
+                              "aucun restrict dans les prototypes"))
     return results
 
 
@@ -399,6 +549,10 @@ def _make_failure(rc: Optional[int], out: str) -> str:
 def check_makefile(project: dict, student_dir: Path, strict: bool = False) -> List[TestResult]:
     name = project["library"]
     rules = [*project["makefile_rules"], name]
+    bonus_rule = project.get("bonus", {}).get("make_rule")
+    with_bonus = bool(bonus_rule) and has_bonus(project, student_dir)
+    if with_bonus:
+        rules.append(bonus_rule)
     if not (student_dir / "Makefile").is_file():
         return [_ko("Makefile présent", "pas de fichier Makefile à la racine", "Makefile")]
 
@@ -453,11 +607,15 @@ def check_makefile(project: dict, student_dir: Path, strict: bool = False) -> Li
             problems.append("variable NAME absente")
         elif m.group(1) != name:
             problems.append(f"NAME = {m.group(1)} (devrait être {name})")
-        results.append(_check("règles $(NAME), all, clean, fclean et re présentes", problems,
+        shown = ["$(NAME)", *project["makefile_rules"], *([bonus_rule] if with_bonus else [])]
+        results.append(_check(f"règles {', '.join(shown[:-1])} et {shown[-1]} présentes", problems,
                               f"NAME = {name} et les règles {', '.join(rules)}"))
 
         # 3. commandes : cc + flags, ar, pas de libtool
         _, dry = make("-n", "-B")
+        if with_bonus:
+            _, dry_bonus = make("-n", "-B", bonus_rule)
+            dry += "\n" + dry_bonus
         compiled: Set[str] = set()
         problems = []
         # problème -> (nombre de commandes concernées, exemple de commande)
@@ -505,7 +663,8 @@ def check_makefile(project: dict, student_dir: Path, strict: bool = False) -> Li
         unused = [p.name for p in _root_files(work, "*.c") if p.name not in compiled]
         results.append(_check("chaque .c rendu est compilé par le Makefile",
                               [f"jamais compilé : {f}" for f in unused],
-                              "aucun fichier .c inutilisé", inp="make -n -B"))
+                              "aucun fichier .c inutilisé",
+                              inp="make -n -B" + (f" et make -n -B {bonus_rule}" if with_bonus else "")))
 
         if not built_ok:
             for n in ("pas de relink", f"{name} contient toutes les fonctions du sujet",
@@ -577,8 +736,9 @@ def _syntax_check(code: str, build: LibraryBuild, project: dict) -> Tuple[bool, 
     with tempfile.TemporaryDirectory(prefix="melo_h_") as tmp:
         src = Path(tmp) / "check.c"
         src.write_text(code, encoding="utf-8")
+        inc = [a for d in (build.include_dirs or [build.include_dir]) for a in ("-I", str(d))]
         rc, out = _sh([cfg.get("compiler", "cc"), *cfg.get("flags", []), "-fsyntax-only",
-                       "-I", str(build.include_dir), str(src)], Path(tmp), timeout=30)
+                       *inc, str(src)], Path(tmp), timeout=30)
         return rc == 0, out.replace(str(src), "test.c")
 
 
@@ -611,6 +771,17 @@ def check_header(project: dict, student_dir: Path, build: LibraryBuild) -> List[
                        _ko("protégé contre la double inclusion", _tail(out2, 6),
                            "#ifndef / # define / #endif autour du header", inp=f"{header} inclus deux fois"))
 
+    # Headers optionnels (ex. get_next_line_bonus.h) : compilent seuls et protégés s'ils existent.
+    for extra in project.get("extra_headers", []):
+        if not (build.include_dir / extra).is_file():
+            continue
+        einc = f'#include "{extra}"\n'
+        e_ok, e_out = _syntax_check(einc + einc + "int main(void)\n{\n\treturn (0);\n}\n", build, project)
+        results.append(_ok(f"{extra} compile seul et protégé contre la double inclusion") if e_ok else
+                       _ko(f"{extra} compile seul et protégé contre la double inclusion", _tail(e_out, 6),
+                           "aucune erreur, #ifndef / # define / #endif autour du header",
+                           inp=f"{extra} inclus deux fois"))
+
     struct_code = inc + (
         "_Static_assert(__builtin_types_compatible_p(__typeof__(((t_list *)0)->content), void *),\n"
         "\t\"content doit etre un void *\");\n"
@@ -618,10 +789,11 @@ def check_header(project: dict, student_dir: Path, build: LibraryBuild) -> List[
         "\t\"next doit etre un struct s_list *\");\n"
         "_Static_assert(sizeof(t_list) == 2 * sizeof(void *), \"t_list ne doit avoir que content et next\");\n"
         "int main(void)\n{\n\treturn (0);\n}\n")
-    ok3, out3 = _syntax_check(struct_code, build, project)
-    results.append(_ok("structure t_list conforme au sujet") if ok3 else
-                   _ko("structure t_list conforme au sujet", _tail(out3, 6),
-                       "typedef struct s_list { void *content; struct s_list *next; } t_list;"))
+    if project.get("header_t_list"):
+        ok3, out3 = _syntax_check(struct_code, build, project)
+        results.append(_ok("structure t_list conforme au sujet") if ok3 else
+                       _ko("structure t_list conforme au sujet", _tail(out3, 6),
+                           "typedef struct s_list { void *content; struct s_list *next; } t_list;"))
 
     header_text = (build.include_dir / header).read_text(errors="replace")
 
@@ -673,9 +845,11 @@ def check_symbols(project: dict, student_dir: Path, build: LibraryBuild,
                           f"les {len(functions)} fonctions du sujet"))
 
     globals_ = []
+    # get_next_line : une variable static (même hors fonction) n'est pas une globale.
+    kinds = "BCD" if project.get("allow_static_vars") else "BCDbd"
     for src, syms in sorted(per_obj.items()):
         for t, n in syms:
-            if t in "BCDbd" and "." not in n:
+            if t in kinds and "." not in n:
                 globals_.append(f"{src} : variable globale {n}")
     results.append(_check("aucune variable globale", globals_, "aucune variable globale"))
 
@@ -684,16 +858,25 @@ def check_symbols(project: dict, student_dir: Path, build: LibraryBuild,
         for t, n in syms:
             if t == "T" and n not in functions and n != Path(src).stem:
                 helpers.append(f"{src} : {n} n'est pas static")
-    if strict:
+    if strict and project.get("strict_static_helpers"):
         results.append(_check("fonctions helpers déclarées en static", helpers,
                               "toute fonction hors sujet en static"))
+
+    # Nombre de variables statiques (ex. bonus de get_next_line : une seule).
+    limit = project.get("static_vars")
+    if limit and (not limit.get("bonus") or has_bonus(project, student_dir)):
+        statics = sorted({f"{src} : {n.split('.')[0]}" for src, syms in per_obj.items()
+                          if _matches(src, limit.get("files", ["*.c"])) for t, n in syms if t in "bd"})
+        problems = [] if len(statics) <= limit["max"] else statics
+        results.append(_check(f"au plus {limit['max']} variable(s) statique(s) dans {', '.join(limit.get('files', ['*.c']))}",
+                              problems, limit.get("rule", f"{limit['max']} variable statique maximum")))
 
     forbidden = []
     for src, syms in sorted(per_obj.items()):
         own = [n for t, n in syms if t == "T" and n in functions]
         allowed = set(project.get("default_allowed", [])) if not own else \
             {a for f in own for a in functions[f].get("allowed", [])}
-        code = (build.include_dir / src).read_text(errors="replace")
+        code = (build.include_dir / src).read_text(errors="replace")  # src : chemin relatif
         for t, n in syms:
             if (t != "U" or n in defined_everywhere or n in functions or n in allowed
                     or n in _COMPILER_SYMBOLS):
@@ -714,7 +897,8 @@ def check_norm(project: dict, student_dir: Path) -> List[TestResult]:
     name = "norminette sur tous les .c et .h"
     if shutil.which("norminette") is None:
         return [_skip(name, "norminette n'est pas installée (pip install norminette)")]
-    files = [p.name for p in [*_root_files(student_dir, "*.c"), *_root_files(student_dir, "*.h")]]
+    files = sorted({*(p.name for p in [*_root_files(student_dir, "*.c"), *_root_files(student_dir, "*.h")]),
+                    *source_files(project, student_dir), *header_files(project, student_dir)})
     if not files:
         return [_skip(name, "aucun fichier")]
     rc, out = _sh(["norminette", *files], student_dir, timeout=300)
@@ -805,18 +989,29 @@ def list_project_targets(projects_root: Path) -> List[str]:
     for pf in sorted(projects_root.glob(f"*/{PROJECT_FILE}")):
         name = pf.parent.name
         targets.append(name)
-        targets += [f"{name}/{s}" for s in _CHECK_KEYS]
-        targets += [f"{name}/{m.parent.name}" for m in _function_manifests(pf.parent, load_project(pf.parent))]
+        project = load_project(pf.parent)
+        targets += [f"{name}/{s}" for s in _check_keys(project)]
+        targets += [f"{name}/{m.parent.name}" for m in _function_manifests(pf.parent, project)]
     return targets
 
 
 _CHECK_KEYS = ["rendu", "makefile", "header", "symboles", "norme", "readme"]
 
 
+def _check_keys(project: dict) -> List[str]:
+    return [k for k in _CHECK_KEYS if k != "makefile" or project.get("library")]
+
+
 def _function_manifests(project_dir: Path, project: dict) -> List[Path]:
+    """Manifests dans l'ordre des fonctions du sujet, puis de leur clé « order », puis du nom."""
     order = {name: i for i, name in enumerate(project["functions"])}
-    found = list(project_dir.rglob("manifest.yaml"))
-    return sorted(found, key=lambda p: (order.get(p.parent.name, len(order)), p.parent.name))
+
+    def key(p: Path) -> Tuple[int, int, str]:
+        with open(p, encoding="utf-8") as f:
+            manual = (yaml.safe_load(f) or {}).get("order", 1000)
+        return order.get(p.parent.name, len(order)), manual, p.parent.relative_to(project_dir).as_posix()
+
+    return sorted(project_dir.rglob("manifest.yaml"), key=key)
 
 
 def run_project(project_dir: Path, student_dir: Path, only: Optional[str] = None,
@@ -829,6 +1024,9 @@ def run_project(project_dir: Path, student_dir: Path, only: Optional[str] = None
     if not student_dir.is_dir():
         print(f"{RED}Dossier introuvable : {student_dir}{RESET}")
         return False
+    if no_header and not project.get("no_header_mode"):
+        print(f"{YELLOW}-h n'existe que pour la libft : option ignorée pour {pname}.{RESET}")
+        no_header = False
     if not _root_files(student_dir, "*.c") and not (student_dir / "Makefile").exists():
         print(f"{RED}Aucun .c ni Makefile dans {student_dir}.{RESET}")
         print(f"  clone Melo dans le dossier de ta {pname} : Melo teste son dossier parent.")
@@ -856,24 +1054,38 @@ def run_project(project_dir: Path, student_dir: Path, only: Optional[str] = None
     header = project["header"]
     checks: List[Tuple[str, str, Callable[[], List[TestResult]]]] = [
         ("rendu", f"{pname}/rendu", lambda: check_rendu(project, student_dir, build)),
-        ("makefile", f"{pname}/Makefile", lambda: check_makefile(project, student_dir, strict)),
+        *([("makefile", f"{pname}/Makefile", lambda: check_makefile(project, student_dir, strict))]
+          if project.get("library") else []),
         ("header", f"{pname}/{header}", lambda: check_header(project, student_dir, build)),
         ("symboles", f"{pname}/symboles", lambda: check_symbols(project, student_dir, build, strict)),
         ("norme", f"{pname}/norme", lambda: check_norm(project, student_dir)),
         ("readme", f"{pname}/README", lambda: check_readme(project, student_dir)),
     ]
 
-    def function_section(manifest_path: Path) -> Callable[[], List[TestResult]]:
+    bonus_done = has_bonus(project, student_dir)
+
+    def function_section(manifest_path: Path, variant: Optional[str]) -> Callable[[], List[TestResult]]:
         def run() -> List[TestResult]:
             exo_dir = manifest_path.parent
             manifest = load_manifest(exo_dir)
             func = exo_dir.name
-            own = f"{func}.c"
             tests = [t for t in manifest["tests"] if strict or not t.get("strict")]
             not_run = f"{len(tests)} test(s) de {func} non lancé(s)"
+            is_bonus = manifest.get("bonus") or (variant and build.variants[variant].bonus)
+            if is_bonus and not bonus_done:
+                return [_skip(f"{len(tests)} test(s) bonus", _bonus_hint(project))]
+            lib = build.view(variant) if variant else build
+            # libft : un .c par fonction ; s'il ne compile pas, inutile de lancer ses tests.
+            own = f"{func}.c"
             if own in build.compile_errors:
                 return [TestResult(f"{own} ne compile pas", False, not_run,
                                    compile_error=build.compile_errors[own])]
+            # Projet à variantes (ft_printf, get_next_line) : un .c qui ne compile pas casse la lib.
+            if lib.archive is None or (project.get("builds") and lib.variant_errors):
+                errors = {**build.compile_errors, **lib.variant_errors}
+                first = next(iter(sorted(errors.items())), (None, "la lib n'a pas pu être construite"))
+                return [TestResult(f"{first[0]} ne compile pas" if first[0] else "lib non construite",
+                                   False, not_run, compile_error=first[1])]
             header = project["header"]
             if own in build.noheader_errors:
                 return [TestResult(f"{own} ne compile pas sans {header}", False, not_run,
@@ -884,9 +1096,9 @@ def run_project(project_dir: Path, student_dir: Path, only: Optional[str] = None
             results = []
             if no_header and (student_dir / own).is_file() and own not in build.needs_header:
                 results.append(_ok(f"compile sans {header}"))
-            func_rule = project["functions"].get(func, {}).get("rule")
+            func_rule = manifest.get("rule") or project["functions"].get(func, {}).get("rule")
             for t in tests:
-                r = run_test(exo_dir, student_dir, t, manifest, timeout=timeout, library=build)
+                r = run_test(exo_dir, student_dir, t, manifest, timeout=timeout, library=lib)
                 if not r.passed and not r.skipped:
                     r.rule = t.get("rule") or func_rule
                 results.append(r)
@@ -902,7 +1114,11 @@ def run_project(project_dir: Path, student_dir: Path, only: Optional[str] = None
     for mp in _function_manifests(project_dir, project):
         rel = mp.parent.relative_to(project_dir).as_posix().lower()
         if key is None or key == mp.parent.name.lower() or rel == key or rel.startswith(key + "/"):
-            sections.append((f"{pname}/{mp.parent.name}", mp.parent.name, function_section(mp)))
+            manifest = load_manifest(mp.parent)
+            variants = manifest.get("builds") or [manifest.get("build")]
+            for v in variants:
+                label = f" ({build.variants[v].label})" if v and len(variants) > 1 else ""
+                sections.append((f"{pname}/{mp.parent.name}{label}", mp.parent.name, function_section(mp, v)))
 
     if not sections:
         print(f"{RED}'{only}' introuvable dans {pname}.{RESET} Cibles possibles :")

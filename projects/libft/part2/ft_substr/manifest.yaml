@@ -116,3 +116,62 @@ tests:
             return (1);
         }
     }
+# --- Cas repris du libftTester de Tripouille (github.com/Tripouille/libftTester) ---
+- name: cas du libftTester (start loin après la fin, len énorme...)
+  input: ft_substr pour 7 cas ("1", 42, 42000000), ("0123456789", 9, 10)...
+  body: |
+    char *one = strdup("1");
+    char *digits = strdup("0123456789");
+    struct s_case { const char *s; unsigned int start; size_t len; const char *exp; const char *txt; };
+    const struct s_case c[] = {
+        {"tripouille", 0, 42000, "tripouille", "\"tripouille\", 0, 42000"},
+        {"tripouille", 1, 1, "r", "\"tripouille\", 1, 1"},
+        {"tripouille", 100, 1, "", "\"tripouille\", 100, 1"},
+        {one, 42, 42000000, "", "\"1\", 42, 42000000"},
+        {digits, 9, 10, "9", "\"0123456789\", 9, 10"},
+        {"42", 0, 0, "", "\"42\", 0, 0"},
+        {"BONJOUR LES HARICOTS !", 8, 14, "LES HARICOTS !", "\"BONJOUR LES HARICOTS !\", 8, 14"},
+        {"test", 1, 2, "es", "\"test\", 1, 2"},
+    };
+    for (size_t i = 0; i < sizeof(c) / sizeof(*c); i++)
+    {
+        char *r = ft_substr(c[i].s, c[i].start, c[i].len);
+        if (!r || strcmp(r, c[i].exp) != 0)
+        {
+            printf("obtenu : ft_substr(%s) = ", c[i].txt);
+            melo_s(r);
+            printf("\nattendu : ft_substr(%s) = ", c[i].txt);
+            melo_s(c[i].exp);
+            printf("\n");
+            free(r);
+            free(one);
+            free(digits);
+            return (1);
+        }
+        free(r);
+    }
+    free(one);
+    free(digits);
+- name: taille exacte du malloc (MKO)
+  strict: true
+  input: ft_substr pour 8 cas, dont ("1", 42, 42000000) qui doit allouer 1 octet
+  body: |
+    struct s_case { const char *s; unsigned int start; size_t len; size_t size; const char *txt; };
+    const struct s_case c[] = {
+        {"tripouille", 0, 42000, 11, "ft_substr(\"tripouille\", 0, 42000)"},
+        {"tripouille", 1, 1, 2, "ft_substr(\"tripouille\", 1, 1)"},
+        {"tripouille", 100, 1, 1, "ft_substr(\"tripouille\", 100, 1)"},
+        {"1", 42, 42000000, 1, "ft_substr(\"1\", 42, 42000000)"},
+        {"0123456789", 9, 10, 2, "ft_substr(\"0123456789\", 9, 10)"},
+        {"42", 0, 0, 1, "ft_substr(\"42\", 0, 0)"},
+        {"BONJOUR LES HARICOTS !", 8, 14, 15, "ft_substr(\"BONJOUR LES HARICOTS !\", 8, 14)"},
+        {"test", 1, 2, 3, "ft_substr(\"test\", 1, 2)"},
+    };
+    for (size_t i = 0; i < sizeof(c) / sizeof(*c); i++)
+    {
+        char *r = ft_substr(c[i].s, c[i].start, c[i].len);
+        int ok = melo_mcheck(r, c[i].size, c[i].txt);
+        free(r);
+        if (!ok)
+            return (1);
+    }

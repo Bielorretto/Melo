@@ -102,18 +102,34 @@ def _choose_module(track: str) -> Optional[str]:
     return None if index is None else modules[index]
 
 
+def _project_examples(module: str) -> List[str]:
+    """Noms de sections testables seules (ex. ft_strlen, d, mandatory)."""
+    from core.project import _function_manifests, load_project
+    try:
+        project_dir = PROJECTS_ROOT / module
+        return [m.parent.name for m in _function_manifests(project_dir, load_project(project_dir))]
+    except Exception:
+        return []
+
+
 def _module_help(track: str, module: str) -> None:
-    one = "un seul exercice" if track == PISCINE else "une seule fonction"
-    what = "exercice" if track == PISCINE else "fonction"
-    rows = [
-        ("🧪 test", f"teste tout {module}"),
-        (f"🧪 test <{what}>", f"teste {one} (ex. test ft_strlen)"),
-    ]
-    if track == COMMON_CORE:
-        rows += [
-            ("   -h", "compile sans ton header (ex. test ft_strlen -h)"),
-            ("   --strict", "vérifications plus sévères que la moulinette"),
+    if track == PISCINE:
+        rows = [
+            ("🧪 test", f"teste tout {module}"),
+            ("🧪 test <exercice>", "teste un seul exercice (ex. test ft_strlen)"),
         ]
+    else:
+        names = _project_examples(module)
+        example = names[0] if names else "ft_strlen"
+        rows = [
+            ("🧪 test", f"teste tout {module}"),
+            ("🧪 test <section>", f"teste une seule section (ex. test {example}, test rendu)"),
+        ]
+        if any(n == "bonus" or n in ("minus", "zero", "dot", "sharp", "space", "plus") for n in names):
+            rows.append(("🧪 test bonus", "teste seulement le bonus"))
+        if module == "libft":
+            rows.append(("   -h", "compile sans ton header (ex. test ft_strlen -h)"))
+        rows.append(("   --strict", "vérifications plus sévères que la moulinette"))
     rows += [
         ("   -v", "sortie complète du compilateur"),
         ("🔙 retour", "revenir au menu précédent"),

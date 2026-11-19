@@ -1,0 +1,29 @@
+# Généré par tools/gen_printf.py à partir du printfTester de Tripouille
+# (github.com/Tripouille/printfTester, tests/p_test.cpp).
+# Chaque cas compare ft_printf à printf : même sortie, même valeur de retour.
+name: p
+order: 3
+build: mandatory
+rule: "sujet : %p doit afficher la même chose que printf et renvoyer le nombre de caractères écrits"
+compile:
+  # Les cas reprennent volontairement des formats que gcc signale (ex. '% s').
+  test_flags: [-Wno-format]
+prelude: |
+  #include "melo_printf.h"
+test_defaults:
+  expected_exit: 0
+  check_memory: true
+tests:
+- name: '%p (9 cas du printfTester)'
+  input: '9 appels ft_printf comparés à printf, ex. ft_printf(" %p ", -1)'
+  body: |
+    PF("\" %p \", -1", " %p ", (void *)(uintptr_t)(-1));
+    PF("\" %p \", 1", " %p ", (void *)(uintptr_t)(1));
+    PF("\" %p \", 15", " %p ", (void *)(uintptr_t)(15));
+    PF("\" %p \", 16", " %p ", (void *)(uintptr_t)(16));
+    PF("\" %p \", 17", " %p ", (void *)(uintptr_t)(17));
+    PF("\" %p %p \", LONG_MIN, LONG_MAX", " %p %p ", (void *)(uintptr_t)(LONG_MIN), (void *)(uintptr_t)(LONG_MAX));
+    PF("\" %p %p \", INT_MIN, INT_MAX", " %p %p ", (void *)(uintptr_t)(INT_MIN), (void *)(uintptr_t)(INT_MAX));
+    PF("\" %p %p \", ULONG_MAX, -ULONG_MAX", " %p %p ", (void *)(uintptr_t)(ULONG_MAX), (void *)(uintptr_t)(-ULONG_MAX));
+    PF("\" %p %p \", 0, 0", " %p %p ", (void *)(uintptr_t)(0), (void *)(uintptr_t)(0));
+    PF_DONE();

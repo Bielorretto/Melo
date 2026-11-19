@@ -1,0 +1,49 @@
+# Généré par tools/gen_printf.py à partir du printfTester de Tripouille
+# (github.com/Tripouille/printfTester, tests/u_test.cpp).
+# Chaque cas compare ft_printf à printf : même sortie, même valeur de retour.
+name: u
+order: 6
+build: mandatory
+rule: "sujet : %u doit afficher la même chose que printf et renvoyer le nombre de caractères écrits"
+compile:
+  # Les cas reprennent volontairement des formats que gcc signale (ex. '% s').
+  test_flags: [-Wno-format]
+prelude: |
+  #include "melo_printf.h"
+test_defaults:
+  expected_exit: 0
+  check_memory: true
+tests:
+- name: '%u (29 cas du printfTester)'
+  input: '29 appels ft_printf comparés à printf, ex. ft_printf(" %u ", 0)'
+  body: |
+    PF("\" %u \", 0", " %u ", (unsigned int)(0));
+    PF("\" %u \", -1", " %u ", (unsigned int)(-1));
+    PF("\" %u \", 1", " %u ", (unsigned int)(1));
+    PF("\" %u \", 9", " %u ", (unsigned int)(9));
+    PF("\" %u \", 10", " %u ", (unsigned int)(10));
+    PF("\" %u \", 11", " %u ", (unsigned int)(11));
+    PF("\" %u \", 15", " %u ", (unsigned int)(15));
+    PF("\" %u \", 16", " %u ", (unsigned int)(16));
+    PF("\" %u \", 17", " %u ", (unsigned int)(17));
+    PF("\" %u \", 99", " %u ", (unsigned int)(99));
+    PF("\" %u \", 100", " %u ", (unsigned int)(100));
+    PF("\" %u \", 101", " %u ", (unsigned int)(101));
+    PF("\" %u \", -9", " %u ", (unsigned int)(-9));
+    PF("\" %u \", -10", " %u ", (unsigned int)(-10));
+    PF("\" %u \", -11", " %u ", (unsigned int)(-11));
+    PF("\" %u \", -14", " %u ", (unsigned int)(-14));
+    PF("\" %u \", -15", " %u ", (unsigned int)(-15));
+    PF("\" %u \", -16", " %u ", (unsigned int)(-16));
+    PF("\" %u \", -99", " %u ", (unsigned int)(-99));
+    PF("\" %u \", -100", " %u ", (unsigned int)(-100));
+    PF("\" %u \", -101", " %u ", (unsigned int)(-101));
+    PF("\" %u \", INT_MAX", " %u ", (unsigned int)(INT_MAX));
+    PF("\" %u \", INT_MIN", " %u ", (unsigned int)(INT_MIN));
+    PF("\" %u \", LONG_MAX", " %u ", (unsigned int)(LONG_MAX));
+    PF("\" %u \", LONG_MIN", " %u ", (unsigned int)(LONG_MIN));
+    PF("\" %u \", UINT_MAX", " %u ", (unsigned int)(UINT_MAX));
+    PF("\" %u \", ULONG_MAX", " %u ", (unsigned int)(ULONG_MAX));
+    PF("\" %u \", 9223372036854775807LL", " %u ", (unsigned int)(9223372036854775807LL));
+    PF("\" %u %u %u %u %u %u %u\", INT_MAX, INT_MIN, LONG_MAX, LONG_MIN, ULONG_MAX, 0, -42", " %u %u %u %u %u %u %u", (unsigned int)(INT_MAX), (unsigned int)(INT_MIN), (unsigned int)(LONG_MAX), (unsigned int)(LONG_MIN), (unsigned int)(ULONG_MAX), (unsigned int)(0), (unsigned int)(-42));
+    PF_DONE();

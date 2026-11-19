@@ -63,3 +63,51 @@ tests:
         return (1);
     if (check_cmp("ft_strncmp(\"\", \"a\", 1)", ft_strncmp("", "a", 1), -1))
         return (1);
+# --- Cas repris du libftTester de Tripouille (github.com/Tripouille/libftTester) ---
+- name: n = SIZE_MAX, majuscules, préfixes et chaînes vides
+  input: ft_strncmp(s1, s2, n) pour 14 cas du libftTester (signe comparé à strncmp)
+  body: |
+    struct s_case { const char *a; const char *b; size_t n; };
+    const struct s_case c[] = {
+        {"t", "", 0}, {"1234", "1235", 3}, {"1234", "1235", 4},
+        {"1234", "1235", (size_t)-1}, {"", "", 42},
+        {"Tripouille", "Tripouille", 42}, {"Tripouille", "tripouille", 42},
+        {"Tripouille", "TriPouille", 42}, {"Tripouille", "TripouillE", 42},
+        {"Tripouille", "TripouilleX", 42}, {"Tripouille", "Tripouill", 42},
+        {"", "1", 0}, {"1", "", 0}, {"", "1", 1}, {"1", "", 1}, {"", "", 1},
+    };
+    for (size_t i = 0; i < sizeof(c) / sizeof(*c); i++)
+    {
+        volatile size_t n = c[i].n;
+        int got = ft_strncmp(c[i].a, c[i].b, n);
+        int exp = strncmp(c[i].a, c[i].b, n);
+        if (melo_sign(got) != melo_sign(exp))
+        {
+            char sz[32];
+            if (c[i].n == (size_t)-1)
+                snprintf(sz, sizeof(sz), "SIZE_MAX");
+            else
+                snprintf(sz, sizeof(sz), "%zu", c[i].n);
+            printf("obtenu : ft_strncmp(\"%s\", \"%s\", %s) = %s (%d)\n", c[i].a, c[i].b, sz, melo_sign_txt(got), got);
+            printf("attendu : ft_strncmp(\"%s\", \"%s\", %s) = %s\n", c[i].a, c[i].b, sz, melo_sign_txt(exp));
+            return (1);
+        }
+    }
+- name: caractères négatifs (SCHAR_MIN, -42) comparés en unsigned char
+  input: ft_strncmp("test", s2, 4) avec s2[3] = SCHAR_MIN puis -42
+  body: |
+    signed char vals[] = {SCHAR_MIN, -42};
+    for (int i = 0; i < 2; i++)
+    {
+        char s1[] = "test";
+        char s2[] = "test";
+        s2[3] = (char)vals[i];
+        int got = ft_strncmp(s1, s2, 4);
+        int exp = strncmp(s1, s2, 4);
+        if (melo_sign(got) != melo_sign(exp))
+        {
+            printf("obtenu : ft_strncmp(\"test\", \"tes\\%03o\", 4) = %s (%d)\n", (unsigned char)s2[3], melo_sign_txt(got), got);
+            printf("attendu : ft_strncmp(\"test\", \"tes\\%03o\", 4) = %s\n", (unsigned char)s2[3], melo_sign_txt(exp));
+            return (1);
+        }
+    }

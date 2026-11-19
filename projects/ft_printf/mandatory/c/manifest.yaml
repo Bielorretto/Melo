@@ -1,0 +1,29 @@
+# Généré par tools/gen_printf.py à partir du printfTester de Tripouille
+# (github.com/Tripouille/printfTester, tests/c_test.cpp).
+# Chaque cas compare ft_printf à printf : même sortie, même valeur de retour.
+name: c
+order: 1
+build: mandatory
+rule: "sujet : %c doit afficher la même chose que printf et renvoyer le nombre de caractères écrits"
+compile:
+  # Les cas reprennent volontairement des formats que gcc signale (ex. '% s').
+  test_flags: [-Wno-format]
+prelude: |
+  #include "melo_printf.h"
+test_defaults:
+  expected_exit: 0
+  check_memory: true
+tests:
+- name: '%c (9 cas du printfTester)'
+  input: '9 appels ft_printf comparés à printf, ex. ft_printf("%c", ''0'')'
+  body: |
+    PF("\"%c\", '0'", "%c", (int)('0'));
+    PF("\" %c \", '0'", " %c ", (int)('0'));
+    PF("\" %c\", '0' - 256", " %c", (int)('0' - 256));
+    PF("\"%c \", '0' + 256", "%c ", (int)('0' + 256));
+    PF("\" %c %c %c \", '0', 0, '1'", " %c %c %c ", (int)('0'), (int)(0), (int)('1'));
+    PF("\" %c %c %c \", ' ', ' ', ' '", " %c %c %c ", (int)(' '), (int)(' '), (int)(' '));
+    PF("\" %c %c %c \", '1', '2', '3'", " %c %c %c ", (int)('1'), (int)('2'), (int)('3'));
+    PF("\" %c %c %c \", '2', '1', 0", " %c %c %c ", (int)('2'), (int)('1'), (int)(0));
+    PF("\" %c %c %c \", 0, '1', '2'", " %c %c %c ", (int)(0), (int)('1'), (int)('2'));
+    PF_DONE();

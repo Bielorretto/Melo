@@ -15,6 +15,11 @@ prelude: |
       g_calls++;
   }
 
+  static inline void add_index(unsigned int i, char *c)
+  {
+      *c = (char)(*c + (int)i);
+  }
+
   static inline void upper_even(unsigned int i, char *c)
   {
       if (i % 2 == 0)
@@ -61,3 +66,11 @@ tests:
     ft_striteri(s, record);
     if (g_calls != 0)
         return (melo_ko_txt("f appelée", "f jamais appelée"));
+# --- Cas repris du libftTester de Tripouille (github.com/Tripouille/libftTester) ---
+- name: f reçoit le bon index pour chaque caractère
+  input: ft_striteri(s = "0000000000", f(i, c) = *c += i)
+  body: |
+    char s[] = "0000000000";
+    ft_striteri(s, add_index);
+    if (strcmp(s, "0123456789") != 0)
+        return (melo_ko_s(s, "0123456789"));

@@ -71,3 +71,15 @@ tests:
         free(r);
         return (1);
     }
+# --- Cas repris du libftTester de Tripouille (github.com/Tripouille/libftTester) ---
+- name: taille exacte du malloc (MKO)
+  strict: true
+  input: ft_strdup("coucou") et ft_strdup("")
+  body: |
+    char *a = ft_strdup("coucou");
+    char *b = ft_strdup("");
+    int ok = melo_mcheck(a, 7, "ft_strdup(\"coucou\")") && melo_mcheck(b, 1, "ft_strdup(\"\")");
+    free(a);
+    free(b);
+    if (!ok)
+        return (1);

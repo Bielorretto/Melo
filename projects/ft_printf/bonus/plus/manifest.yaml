@@ -1,0 +1,82 @@
+# Généré par tools/gen_printf.py à partir du printfTester de Tripouille
+# (github.com/Tripouille/printfTester, tests/+_test.cpp).
+# Chaque cas compare ft_printf à printf : même sortie, même valeur de retour.
+name: plus
+order: 16
+build: bonus
+bonus: true
+rule: "sujet (bonus) : flag '+' doit se comporter comme dans printf"
+compile:
+  # Les cas reprennent volontairement des formats que gcc signale (ex. '% s').
+  test_flags: [-Wno-format]
+prelude: |
+  #include "melo_printf.h"
+test_defaults:
+  expected_exit: 0
+  check_memory: true
+tests:
+- name: 'flag ''+'' avec %d (28 cas)'
+  input: '28 appels ft_printf comparés à printf, ex. ft_printf(" %+d ", 0)'
+  body: |
+    PF("\" %+d \", 0", " %+d ", (int)(0));
+    PF("\" %+d \", -1", " %+d ", (int)(-1));
+    PF("\" %+d \", 9", " %+d ", (int)(9));
+    PF("\" %+d \", 10", " %+d ", (int)(10));
+    PF("\" %+d \", 11", " %+d ", (int)(11));
+    PF("\" %+d \", 15", " %+d ", (int)(15));
+    PF("\" %+d \", 16", " %+d ", (int)(16));
+    PF("\" %+d \", 17", " %+d ", (int)(17));
+    PF("\" %+d \", 99", " %+d ", (int)(99));
+    PF("\" %+d \", 100", " %+d ", (int)(100));
+    PF("\" %+d \", 101", " %+d ", (int)(101));
+    PF("\" %+d \", -9", " %+d ", (int)(-9));
+    PF("\" %+d \", -10", " %+d ", (int)(-10));
+    PF("\" %+d \", -11", " %+d ", (int)(-11));
+    PF("\" %+d \", -14", " %+d ", (int)(-14));
+    PF("\" %+d \", -15", " %+d ", (int)(-15));
+    PF("\" %+d \", -16", " %+d ", (int)(-16));
+    PF("\" %+d \", -99", " %+d ", (int)(-99));
+    PF("\" %+d \", -100", " %+d ", (int)(-100));
+    PF("\" %+d \", -101", " %+d ", (int)(-101));
+    PF("\" %+d \", INT_MAX", " %+d ", (int)(INT_MAX));
+    PF("\" %+d \", INT_MIN", " %+d ", (int)(INT_MIN));
+    PF("\" %+d \", LONG_MAX", " %+d ", (int)(LONG_MAX));
+    PF("\" %+d \", LONG_MIN", " %+d ", (int)(LONG_MIN));
+    PF("\" %+d \", UINT_MAX", " %+d ", (int)(UINT_MAX));
+    PF("\" %+d \", ULONG_MAX", " %+d ", (int)(ULONG_MAX));
+    PF("\" %+d \", 9223372036854775807LL", " %+d ", (int)(9223372036854775807LL));
+    PF("\" %+d %+d %+d %+d %+d %+d %+d\", INT_MAX, INT_MIN, LONG_MAX, LONG_MIN, ULONG_MAX, 0, -42", " %+d %+d %+d %+d %+d %+d %+d", (int)(INT_MAX), (int)(INT_MIN), (int)(LONG_MAX), (int)(LONG_MIN), (int)(ULONG_MAX), (int)(0), (int)(-42));
+    PF_DONE();
+- name: 'flag ''+'' avec %i (29 cas)'
+  input: '29 appels ft_printf comparés à printf, ex. ft_printf(" %+i ", 0)'
+  body: |
+    PF("\" %+i \", 0", " %+i ", (int)(0));
+    PF("\" %+i \", -1", " %+i ", (int)(-1));
+    PF("\" %+i \", 1", " %+i ", (int)(1));
+    PF("\" %+i \", 9", " %+i ", (int)(9));
+    PF("\" %+i \", 10", " %+i ", (int)(10));
+    PF("\" %+i \", 11", " %+i ", (int)(11));
+    PF("\" %+i \", 15", " %+i ", (int)(15));
+    PF("\" %+i \", 16", " %+i ", (int)(16));
+    PF("\" %+i \", 17", " %+i ", (int)(17));
+    PF("\" %+i \", 99", " %+i ", (int)(99));
+    PF("\" %+i \", 100", " %+i ", (int)(100));
+    PF("\" %+i \", 101", " %+i ", (int)(101));
+    PF("\" %+i \", -9", " %+i ", (int)(-9));
+    PF("\" %+i \", -10", " %+i ", (int)(-10));
+    PF("\" %+i \", -11", " %+i ", (int)(-11));
+    PF("\" %+i \", -14", " %+i ", (int)(-14));
+    PF("\" %+i \", -15", " %+i ", (int)(-15));
+    PF("\" %+i \", -16", " %+i ", (int)(-16));
+    PF("\" %+i \", -99", " %+i ", (int)(-99));
+    PF("\" %+i \", -100", " %+i ", (int)(-100));
+    PF("\" %+i \", -101", " %+i ", (int)(-101));
+    PF("\" %+i \", INT_MAX", " %+i ", (int)(INT_MAX));
+    PF("\" %+i \", INT_MIN", " %+i ", (int)(INT_MIN));
+    PF("\" %+i \", LONG_MAX", " %+i ", (int)(LONG_MAX));
+    PF("\" %+i \", LONG_MIN", " %+i ", (int)(LONG_MIN));
+    PF("\" %+i \", UINT_MAX", " %+i ", (int)(UINT_MAX));
+    PF("\" %+i \", ULONG_MAX", " %+i ", (int)(ULONG_MAX));
+    PF("\" %+i \", 9223372036854775807LL", " %+i ", (int)(9223372036854775807LL));
+    PF("\" %+i %+i %+i %+i %+i %+i %+i\", INT_MAX, INT_MIN, LONG_MAX, LONG_MIN, ULONG_MAX, 0, -42", " %+i %+i %+i %+i %+i %+i %+i", (int)(INT_MAX), (int)(INT_MIN), (int)(LONG_MAX), (int)(LONG_MIN), (int)(ULONG_MAX), (int)(0), (int)(-42));
+    PF_DONE();

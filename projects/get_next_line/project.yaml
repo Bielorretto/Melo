@@ -1,0 +1,63 @@
+# Projet Common Core : get_next_line
+# Utilisé par core/project.py. Tests repris du gnlTester de Tripouille
+# (github.com/Tripouille/gnlTester) : obligatoire et bonus, BUFFER_SIZE = 1, 42 et 10000000.
+
+name: get_next_line
+header: get_next_line.h
+# Pas de Makefile ni de lib à rendre : Melo compile les .c lui-même.
+
+compile:
+  compiler: cc
+  flags: ["-Wall", "-Wextra", "-Werror"]
+
+required_files: [get_next_line.c, get_next_line_utils.c, get_next_line.h, README.md]
+source_glob: "get_next_line*.c"
+allowed_files: [get_next_line.c, get_next_line_utils.c, get_next_line.h,
+                get_next_line_bonus.c, get_next_line_utils_bonus.c, get_next_line_bonus.h,
+                README.md, .gitignore]
+extra_headers: [get_next_line_bonus.h]
+
+# Comme le gnlTester : chaque .c inclut son header.
+must_include:
+  "get_next_line.c": get_next_line.h
+  "get_next_line_utils.c": get_next_line.h
+  "get_next_line_bonus.c": get_next_line_bonus.h
+  "get_next_line_utils_bonus.c": get_next_line_bonus.h
+
+bonus:
+  files: ["*_bonus.c"]
+
+# Une lib compilée par Melo par BUFFER_SIZE (le sujet : « doit compiler avec et sans -D BUFFER_SIZE »).
+# test_flags : flags des mains de test uniquement.
+builds:
+  bs1: {label: "BUFFER_SIZE=1", only: [get_next_line.c, get_next_line_utils.c],
+        flags: ["-D", "BUFFER_SIZE=1"]}
+  bs42: {label: "BUFFER_SIZE=42", only: [get_next_line.c, get_next_line_utils.c],
+         flags: ["-D", "BUFFER_SIZE=42"]}
+  bs10M: {label: "BUFFER_SIZE=10000000", only: [get_next_line.c, get_next_line_utils.c],
+          flags: ["-D", "BUFFER_SIZE=10000000"]}
+  bonus_bs1: {label: "bonus, BUFFER_SIZE=1", bonus: true, flags: ["-D", "BUFFER_SIZE=1"],
+              only: [get_next_line_bonus.c, get_next_line_utils_bonus.c],
+              test_flags: ['-DMELO_GNL_HEADER="get_next_line_bonus.h"']}
+  bonus_bs42: {label: "bonus, BUFFER_SIZE=42", bonus: true, flags: ["-D", "BUFFER_SIZE=42"],
+               only: [get_next_line_bonus.c, get_next_line_utils_bonus.c],
+               test_flags: ['-DMELO_GNL_HEADER="get_next_line_bonus.h"']}
+  bonus_bs10M: {label: "bonus, BUFFER_SIZE=10000000", bonus: true, flags: ["-D", "BUFFER_SIZE=10000000"],
+                only: [get_next_line_bonus.c, get_next_line_utils_bonus.c],
+                test_flags: ['-DMELO_GNL_HEADER="get_next_line_bonus.h"']}
+
+readme:
+  first_line: 'This activity has been created as part of the 42 curriculum by'
+  sections: [Description, Instructions, Resources]
+
+# Une variable static est permise (le sujet interdit seulement les variables globales).
+allow_static_vars: true
+# Bonus : une seule variable statique (le gnlTester affiche « [Static = N] »).
+static_vars: {files: ["*_bonus.c"], max: 1, bonus: true,
+              rule: "sujet (bonus) : get_next_line avec une seule variable statique"}
+
+default_allowed: [read, malloc, free]
+
+functions:
+  get_next_line: {prototype: "char *get_next_line(int fd)", allowed: [read, malloc, free],
+                  rule: "sujet : renvoie la ligne lue (\\n compris), NULL s'il n'y a plus rien à lire ou en cas d'erreur"}

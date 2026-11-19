@@ -55,3 +55,12 @@ tests:
   body: |
     if (check("0000123") || check("-000042"))
         return (1);
+# --- Cas repris du libftTester de Tripouille (github.com/Tripouille/libftTester) ---
+- name: tous les espaces (\t\n\v\f\r) avant ou après le signe
+  input: ft_atoi(s) pour 9 chaînes du libftTester ("\t\n\v\f\r+42lyon", "+\t\n\v\f\r42"...)
+  body: |
+    if (check("\t\n\v\f\r1") || check("\t\n\v\f\ra1") || check("\t\n\v\f\r+42lyon")
+        || check("\t\n\v\f\r+101") || check("\t\n\v\f\r2147483647")
+        || check("\t\n\v\f\r-2147483648") || check("+\t\n\v\f\r42")
+        || check("-\t\n\v\f\r42") || check("1\t\n\v\f\r42") || check("-1\t\n\v\f\r42"))
+        return (1);

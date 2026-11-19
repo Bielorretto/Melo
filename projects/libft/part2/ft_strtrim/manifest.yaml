@@ -125,3 +125,54 @@ tests:
             return (1);
         }
     }
+# --- Cas repris du libftTester de Tripouille (github.com/Tripouille/libftTester) ---
+- name: cas du libftTester (set de plusieurs caractères des deux côtés)
+  input: ft_strtrim pour ("   xxxtripouille   xxx", " x"), ("abcdba", "acb"), ("ababa", "a")...
+  body: |
+    struct s_case { const char *s; const char *set; const char *exp; };
+    const struct s_case c[] = {
+        {"   xxxtripouille", " x", "tripouille"},
+        {"tripouille   xxx", " x", "tripouille"},
+        {"   xxxtripouille   xxx", " x", "tripouille"},
+        {"   xxx   xxx", " x", ""},
+        {"", "123", ""},
+        {"123", "", "123"},
+        {"", "", ""},
+        {"abcdba", "acb", "d"},
+        {"ababa", "a", "bab"},
+    };
+    for (size_t i = 0; i < sizeof(c) / sizeof(*c); i++)
+    {
+        char *r = ft_strtrim(c[i].s, c[i].set);
+        if (!r || strcmp(r, c[i].exp) != 0)
+        {
+            printf("obtenu : ft_strtrim(\"%s\", \"%s\") = ", c[i].s, c[i].set);
+            melo_s(r);
+            printf("\nattendu : ft_strtrim(\"%s\", \"%s\") = ", c[i].s, c[i].set);
+            melo_s(c[i].exp);
+            printf("\n");
+            free(r);
+            return (1);
+        }
+        free(r);
+    }
+- name: taille exacte du malloc (MKO)
+  strict: true
+  input: ft_strtrim pour les 9 cas du libftTester
+  body: |
+    struct s_case { const char *s; const char *set; size_t size; };
+    const struct s_case c[] = {
+        {"   xxxtripouille", " x", 11}, {"tripouille   xxx", " x", 11},
+        {"   xxxtripouille   xxx", " x", 11}, {"   xxx   xxx", " x", 1},
+        {"", "123", 1}, {"123", "", 4}, {"", "", 1}, {"abcdba", "acb", 2}, {"ababa", "a", 4},
+    };
+    for (size_t i = 0; i < sizeof(c) / sizeof(*c); i++)
+    {
+        char txt[80];
+        snprintf(txt, sizeof(txt), "ft_strtrim(\"%s\", \"%s\")", c[i].s, c[i].set);
+        char *r = ft_strtrim(c[i].s, c[i].set);
+        int ok = melo_mcheck(r, c[i].size, txt);
+        free(r);
+        if (!ok)
+            return (1);
+    }

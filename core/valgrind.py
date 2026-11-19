@@ -18,7 +18,8 @@ class MemoryReport:
 
 
 def check_memory(binary_path: str, args: Optional[List[str]] = None,
-                  stdin_data: str = "", timeout: int = 10) -> MemoryReport:
+                  stdin_data: str = "", timeout: int = 10,
+                  cwd: Optional[str] = None) -> MemoryReport:
     args = args or []
     if shutil.which("valgrind") is None:
         return MemoryReport(False, True, 0, 0, 0, "valgrind non installé sur cette machine")
@@ -38,7 +39,7 @@ def check_memory(binary_path: str, args: Optional[List[str]] = None,
     try:
         proc = subprocess.run(
             cmd, input=stdin_data, capture_output=True, text=True, timeout=timeout,
-            env=env,
+            env=env, cwd=cwd, errors="replace",
         )
     except subprocess.TimeoutExpired:
         return MemoryReport(True, False, -1, -1, -1, "valgrind: timeout")

@@ -90,3 +90,20 @@ tests:
             return (1);
         }
     }
+# --- Cas repris du libftTester de Tripouille (github.com/Tripouille/libftTester) ---
+- name: taille exacte du malloc (MKO)
+  strict: true
+  input: ft_strjoin pour ("tripouille", "42"), ("", "42"), ("42", ""), ("", "")
+  body: |
+    const char *a[] = {"tripouille", "", "42", ""};
+    const char *b[] = {"42", "42", "", ""};
+    for (int i = 0; i < 4; i++)
+    {
+        char txt[64];
+        snprintf(txt, sizeof(txt), "ft_strjoin(\"%s\", \"%s\")", a[i], b[i]);
+        char *r = ft_strjoin(a[i], b[i]);
+        int ok = melo_mcheck(r, strlen(a[i]) + strlen(b[i]) + 1, txt);
+        free(r);
+        if (!ok)
+            return (1);
+    }

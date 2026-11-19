@@ -49,3 +49,13 @@ tests:
     memcpy(b, src, 1000);
     if (memcmp(a, b, 1000) != 0)
         return (melo_ko_txt("contenu différent de memcpy", "même contenu que memcpy"));
+# --- Cas repris du libftTester de Tripouille (github.com/Tripouille/libftTester) ---
+- name: 'n = 0 avec src NULL : renvoie dst sans rien lire'
+  input: ft_memcpy(dst, NULL, 0)
+  body: |
+    char dst[4] = "AAA";
+    void *r = ft_memcpy(dst, NULL, 0);
+    if (r != dst)
+        return (melo_ko_txt("un autre pointeur que dst", "dst"));
+    if (strcmp(dst, "AAA") != 0)
+        return (melo_ko_s(dst, "AAA"));

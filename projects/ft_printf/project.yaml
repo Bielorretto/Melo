@@ -1,0 +1,45 @@
+# Projet Common Core : ft_printf
+# Utilisé par core/project.py. Tests repris du printfTester de Tripouille
+# (github.com/Tripouille/printfTester) : obligatoire (cspdiuxX%) et bonus (-0.# +).
+
+name: ft_printf
+header: ft_printf.h
+library: libftprintf.a
+
+compile:
+  compiler: cc
+  flags: ["-Wall", "-Wextra", "-Werror"]
+
+# Fichiers obligatoires à la racine du dépôt.
+required_files: [Makefile, ft_printf.h, README.md]
+source_glob: "*.c"
+# « Turn-in files : Makefile, *.h, */*.h, *.c, */*.c » : la libft peut être copiée dans libft/.
+allowed_files: [Makefile, README.md, "*.c", "*.h", .gitignore]
+allowed_dirs: [libft]
+# .c compilés dans la lib par Melo (libft/ compris si elle est utilisée).
+sources: ["*.c", "libft/*.c"]
+
+makefile_rules: [all, clean, fclean, re]
+
+# Bonus rendu : fichiers *_bonus.c, ou règle bonus dans le Makefile.
+bonus:
+  files: ["*_bonus.c"]
+  make_rule: bonus
+
+# Deux libs compilées par Melo : obligatoire (sans *_bonus.c) et bonus
+# (X_bonus.c remplace X.c quand les deux existent).
+builds:
+  mandatory: {label: obligatoire, exclude: ["*_bonus.c"]}
+  bonus: {label: bonus, prefer_bonus: true, bonus: true}
+
+readme:
+  first_line: 'This activity has been created as part of the 42 curriculum by'
+  sections: [Description, Instructions, Resources]
+
+# Fonctions externes autorisées pour un fichier qui ne contient pas ft_printf
+# (va_start, va_arg, va_copy et va_end sont des macros : aucun symbole).
+default_allowed: [malloc, free, write]
+
+functions:
+  ft_printf: {prototype: "int ft_printf(const char *format, ...)", allowed: [malloc, free, write],
+              rule: "sujet : se comporte comme printf pour cspdiuxX% et renvoie le nombre de caractères écrits"}

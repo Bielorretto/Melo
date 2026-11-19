@@ -230,7 +230,12 @@ retour                 # revenir à la liste des modules
 
 Par défaut, Melo teste comme la moulinette.
 `--strict` ajoute des vérifications qu'elle ne fait pas mais qu'un correcteur peut demander :
-échecs de malloc simulés, helpers en `static`, `make re`.
+échecs de malloc simulés, helpers en `static`, `make re`, et la **taille exacte des malloc**
+(le « MKO » du libftTester de Tripouille : `ft_substr("1", 42, 42000000)` doit allouer 1 octet, pas 42000001).
+
+Les cas limites du [libftTester de Tripouille](https://github.com/Tripouille/libftTester) sont repris
+dans les manifests (`ft_strlcat` avec `size` = 0, 1 ou `SIZE_MAX`, `ft_strnstr` avec `len` = `SIZE_MAX`,
+`ft_calloc(INT_MAX, INT_MAX)`, `ft_split("--1-2--3---4----5-----42", '-')`...).
 
 ### Lire les résultats
 
@@ -295,4 +300,62 @@ Les fonctions sont testées avec une lib compilée par Melo, donc un Makefile ca
 projects/libft/project.yaml        # prototypes, fonctions autorisées, règle de chaque fonction, fichiers attendus
 projects/libft/includes/           # helpers C des tests (melo.h, melo_malloc.h)
 projects/libft/part1|2|3/ft_*/manifest.yaml
+```
+
+
+# 🖨️ Common Core : ft_printf
+
+Clone Melo dans ton dossier ft_printf, puis `./cli.py melo`, **🎓 Common Core**, **🧪 Module** et **ft_printf**.
+
+```text
+test                   # tout ft_printf (obligatoire + bonus)
+test d                 # une seule conversion (c, s, p, d, i, u, x, upperx, percent, mix)
+test bonus             # seulement le bonus (minus, zero, dot, sharp, space, plus)
+test rendu             # une seule section (rendu, makefile, header, symboles, norme, readme)
+```
+
+Les ~900 cas du [printfTester de Tripouille](https://github.com/Tripouille/printfTester) sont repris :
+chaque appel compare `ft_printf` à la vraie `printf` (même sortie octet par octet, même valeur de retour),
+avec valgrind. En cas d'échec, Melo affiche l'appel exact, et combien d'autres cas du même test sont KO :
+
+```text
+  [KO] %p (9 cas du printfTester)
+       appel    : ft_printf(" %p %p ", 0, 0)
+       obtenu   : " 0x0 0x0 ", renvoie 9
+       attendu  : " (nil) (nil) ", renvoie 13 (comme printf)
+```
+
+- Ta `libft` peut être dans un dossier `libft/` : Melo la compile avec le reste.
+- Bonus : testé si tu as des fichiers `*_bonus.c` ou une règle `bonus` dans le Makefile, sinon marqué non rendu.
+  Avec des fichiers `*_bonus.c`, `X_bonus.c` remplace `X.c` pour les tests bonus.
+- Le Makefile doit créer `libftprintf.a` (règles `$(NAME) all clean fclean re`, + `bonus` si tu as fait le bonus).
+
+
+# 📄 Common Core : get_next_line
+
+Clone Melo dans ton dossier get_next_line, puis **🎓 Common Core**, **🧪 Module** et **get_next_line**.
+
+```text
+test                   # tout get_next_line (obligatoire + bonus)
+test mandatory         # les tests obligatoires (sur les fichiers obligatoires et bonus)
+test bonus             # plusieurs fd en même temps (fichiers *_bonus.c)
+```
+
+Les tests du [gnlTester de Tripouille](https://github.com/Tripouille/gnlTester) sont repris :
+
+- chaque test est lancé avec `BUFFER_SIZE` = 1, 42 et 10000000 (et le code doit aussi compiler sans `-D BUFFER_SIZE`) ;
+- fd invalides (1000, -1, fd fermé), fichier vide, lignes de 41 / 42 / 43 caractères avec et sans `\n`,
+  lignes vides, ligne de 10000 caractères, lecture sur l'entrée standard ;
+- avec `BUFFER_SIZE=42`, après la 1re ligne de `42_with_nl`, `get_next_line` ne doit pas avoir lu plus loin ;
+- fuites mémoire (valgrind) : la mémoire doit être libérée quand le fichier est fini ;
+- bonus : 3 fichiers lus en alternance avec des fd invalides entre les deux, une seule variable statique ;
+- chaque `.c` inclut son header (`get_next_line.h` / `get_next_line_bonus.h`).
+
+### Où sont les tests
+
+```text
+projects/ft_printf/                # project.yaml, includes/melo_printf.h, mandatory/*/ et bonus/*/
+projects/get_next_line/            # project.yaml, includes/melo_gnl.h, files/ (fichiers lus), mandatory/ et bonus/
+tools/gen_printf.py                # régénère les manifests ft_printf depuis un clone du printfTester
+tools/gen_gnl.py                   # régénère les manifests get_next_line depuis projects/get_next_line/files/
 ```

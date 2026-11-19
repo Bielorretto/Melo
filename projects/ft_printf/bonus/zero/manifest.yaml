@@ -1,0 +1,181 @@
+# Généré par tools/gen_printf.py à partir du printfTester de Tripouille
+# (github.com/Tripouille/printfTester, tests/0_test.cpp).
+# Chaque cas compare ft_printf à printf : même sortie, même valeur de retour.
+name: zero
+order: 12
+build: bonus
+bonus: true
+rule: "sujet (bonus) : flag '0' doit se comporter comme dans printf"
+compile:
+  # Les cas reprennent volontairement des formats que gcc signale (ex. '% s').
+  test_flags: [-Wno-format]
+prelude: |
+  #include "melo_printf.h"
+test_defaults:
+  expected_exit: 0
+  check_memory: true
+tests:
+- name: 'flag ''0'' avec %d (28 cas)'
+  input: '28 appels ft_printf comparés à printf, ex. ft_printf(" %01d ", 0)'
+  body: |
+    PF("\" %01d \", 0", " %01d ", (int)(0));
+    PF("\" %02d \", -1", " %02d ", (int)(-1));
+    PF("\" %04d \", 9", " %04d ", (int)(9));
+    PF("\" %01d \", 10", " %01d ", (int)(10));
+    PF("\" %02d \", 11", " %02d ", (int)(11));
+    PF("\" %03d \", 15", " %03d ", (int)(15));
+    PF("\" %04d \", 16", " %04d ", (int)(16));
+    PF("\" %05d \", 17", " %05d ", (int)(17));
+    PF("\" %01d \", 99", " %01d ", (int)(99));
+    PF("\" %02d \", 100", " %02d ", (int)(100));
+    PF("\" %03d \", 101", " %03d ", (int)(101));
+    PF("\" %01d \", -9", " %01d ", (int)(-9));
+    PF("\" %02d \", -10", " %02d ", (int)(-10));
+    PF("\" %03d \", -11", " %03d ", (int)(-11));
+    PF("\" %04d \", -14", " %04d ", (int)(-14));
+    PF("\" %05d \", -15", " %05d ", (int)(-15));
+    PF("\" %06d \", -16", " %06d ", (int)(-16));
+    PF("\" %01d \", -99", " %01d ", (int)(-99));
+    PF("\" %02d \", -100", " %02d ", (int)(-100));
+    PF("\" %03d \", -101", " %03d ", (int)(-101));
+    PF("\" %09d \", INT_MAX", " %09d ", (int)(INT_MAX));
+    PF("\" %010d \", INT_MIN", " %010d ", (int)(INT_MIN));
+    PF("\" %011d \", LONG_MAX", " %011d ", (int)(LONG_MAX));
+    PF("\" %012d \", LONG_MIN", " %012d ", (int)(LONG_MIN));
+    PF("\" %013d \", UINT_MAX", " %013d ", (int)(UINT_MAX));
+    PF("\" %014d \", ULONG_MAX", " %014d ", (int)(ULONG_MAX));
+    PF("\" %015d \", 9223372036854775807LL", " %015d ", (int)(9223372036854775807LL));
+    PF("\" %09d %010d %011d %012d %013d %014d %015d\", INT_MAX, INT_MIN, LONG_MAX, LONG_MIN, ULONG_MAX, 0, -42", " %09d %010d %011d %012d %013d %014d %015d", (int)(INT_MAX), (int)(INT_MIN), (int)(LONG_MAX), (int)(LONG_MIN), (int)(ULONG_MAX), (int)(0), (int)(-42));
+    PF_DONE();
+- name: 'flag ''0'' avec %i (29 cas)'
+  input: '29 appels ft_printf comparés à printf, ex. ft_printf(" %01i ", 0)'
+  body: |
+    PF("\" %01i \", 0", " %01i ", (int)(0));
+    PF("\" %02i \", -1", " %02i ", (int)(-1));
+    PF("\" %03i \", 1", " %03i ", (int)(1));
+    PF("\" %04i \", 9", " %04i ", (int)(9));
+    PF("\" %01i \", 10", " %01i ", (int)(10));
+    PF("\" %02i \", 11", " %02i ", (int)(11));
+    PF("\" %03i \", 15", " %03i ", (int)(15));
+    PF("\" %04i \", 16", " %04i ", (int)(16));
+    PF("\" %05i \", 17", " %05i ", (int)(17));
+    PF("\" %01i \", 99", " %01i ", (int)(99));
+    PF("\" %02i \", 100", " %02i ", (int)(100));
+    PF("\" %03i \", 101", " %03i ", (int)(101));
+    PF("\" %01i \", -9", " %01i ", (int)(-9));
+    PF("\" %02i \", -10", " %02i ", (int)(-10));
+    PF("\" %03i \", -11", " %03i ", (int)(-11));
+    PF("\" %04i \", -14", " %04i ", (int)(-14));
+    PF("\" %05i \", -15", " %05i ", (int)(-15));
+    PF("\" %06i \", -16", " %06i ", (int)(-16));
+    PF("\" %01i \", -99", " %01i ", (int)(-99));
+    PF("\" %02i \", -100", " %02i ", (int)(-100));
+    PF("\" %03i \", -101", " %03i ", (int)(-101));
+    PF("\" %09i \", INT_MAX", " %09i ", (int)(INT_MAX));
+    PF("\" %010i \", INT_MIN", " %010i ", (int)(INT_MIN));
+    PF("\" %011i \", LONG_MAX", " %011i ", (int)(LONG_MAX));
+    PF("\" %012i \", LONG_MIN", " %012i ", (int)(LONG_MIN));
+    PF("\" %013i \", UINT_MAX", " %013i ", (int)(UINT_MAX));
+    PF("\" %014i \", ULONG_MAX", " %014i ", (int)(ULONG_MAX));
+    PF("\" %015i \", 9223372036854775807LL", " %015i ", (int)(9223372036854775807LL));
+    PF("\" %09i %010i %011i %012i %013i %014i %015i\", INT_MAX, INT_MIN, LONG_MAX, LONG_MIN, ULONG_MAX, 0, -42", " %09i %010i %011i %012i %013i %014i %015i", (int)(INT_MAX), (int)(INT_MIN), (int)(LONG_MAX), (int)(LONG_MIN), (int)(ULONG_MAX), (int)(0), (int)(-42));
+    PF_DONE();
+- name: 'flag ''0'' avec %u (29 cas)'
+  input: '29 appels ft_printf comparés à printf, ex. ft_printf(" %01u ", 0)'
+  body: |
+    PF("\" %01u \", 0", " %01u ", (unsigned int)(0));
+    PF("\" %02u \", -1", " %02u ", (unsigned int)(-1));
+    PF("\" %03u \", 1", " %03u ", (unsigned int)(1));
+    PF("\" %04u \", 9", " %04u ", (unsigned int)(9));
+    PF("\" %01u \", 10", " %01u ", (unsigned int)(10));
+    PF("\" %02u \", 11", " %02u ", (unsigned int)(11));
+    PF("\" %03u \", 15", " %03u ", (unsigned int)(15));
+    PF("\" %04u \", 16", " %04u ", (unsigned int)(16));
+    PF("\" %05u \", 17", " %05u ", (unsigned int)(17));
+    PF("\" %01u \", 99", " %01u ", (unsigned int)(99));
+    PF("\" %02u \", 100", " %02u ", (unsigned int)(100));
+    PF("\" %03u \", 101", " %03u ", (unsigned int)(101));
+    PF("\" %01u \", -9", " %01u ", (unsigned int)(-9));
+    PF("\" %02u \", -10", " %02u ", (unsigned int)(-10));
+    PF("\" %03u \", -11", " %03u ", (unsigned int)(-11));
+    PF("\" %04u \", -14", " %04u ", (unsigned int)(-14));
+    PF("\" %05u \", -15", " %05u ", (unsigned int)(-15));
+    PF("\" %06u \", -16", " %06u ", (unsigned int)(-16));
+    PF("\" %01u \", -99", " %01u ", (unsigned int)(-99));
+    PF("\" %02u \", -100", " %02u ", (unsigned int)(-100));
+    PF("\" %03u \", -101", " %03u ", (unsigned int)(-101));
+    PF("\" %09u \", INT_MAX", " %09u ", (unsigned int)(INT_MAX));
+    PF("\" %010u \", INT_MIN", " %010u ", (unsigned int)(INT_MIN));
+    PF("\" %011u \", LONG_MAX", " %011u ", (unsigned int)(LONG_MAX));
+    PF("\" %012u \", LONG_MIN", " %012u ", (unsigned int)(LONG_MIN));
+    PF("\" %013u \", UINT_MAX", " %013u ", (unsigned int)(UINT_MAX));
+    PF("\" %014u \", ULONG_MAX", " %014u ", (unsigned int)(ULONG_MAX));
+    PF("\" %015u \", 9223372036854775807LL", " %015u ", (unsigned int)(9223372036854775807LL));
+    PF("\" %09u %010u %011u %012u %013u %014u %015u\", INT_MAX, INT_MIN, LONG_MAX, LONG_MIN, ULONG_MAX, 0, -42", " %09u %010u %011u %012u %013u %014u %015u", (unsigned int)(INT_MAX), (unsigned int)(INT_MIN), (unsigned int)(LONG_MAX), (unsigned int)(LONG_MIN), (unsigned int)(ULONG_MAX), (unsigned int)(0), (unsigned int)(-42));
+    PF_DONE();
+- name: 'flag ''0'' avec %x (29 cas)'
+  input: '29 appels ft_printf comparés à printf, ex. ft_printf(" %01x ", 0)'
+  body: |
+    PF("\" %01x \", 0", " %01x ", (unsigned int)(0));
+    PF("\" %02x \", -1", " %02x ", (unsigned int)(-1));
+    PF("\" %03x \", 1", " %03x ", (unsigned int)(1));
+    PF("\" %04x \", 9", " %04x ", (unsigned int)(9));
+    PF("\" %01x \", 10", " %01x ", (unsigned int)(10));
+    PF("\" %02x \", 11", " %02x ", (unsigned int)(11));
+    PF("\" %03x \", 15", " %03x ", (unsigned int)(15));
+    PF("\" %04x \", 16", " %04x ", (unsigned int)(16));
+    PF("\" %05x \", 17", " %05x ", (unsigned int)(17));
+    PF("\" %01x \", 99", " %01x ", (unsigned int)(99));
+    PF("\" %02x \", 100", " %02x ", (unsigned int)(100));
+    PF("\" %03x \", 101", " %03x ", (unsigned int)(101));
+    PF("\" %01x \", -9", " %01x ", (unsigned int)(-9));
+    PF("\" %02x \", -10", " %02x ", (unsigned int)(-10));
+    PF("\" %03x \", -11", " %03x ", (unsigned int)(-11));
+    PF("\" %04x \", -14", " %04x ", (unsigned int)(-14));
+    PF("\" %05x \", -15", " %05x ", (unsigned int)(-15));
+    PF("\" %06x \", -16", " %06x ", (unsigned int)(-16));
+    PF("\" %01x \", -99", " %01x ", (unsigned int)(-99));
+    PF("\" %02x \", -100", " %02x ", (unsigned int)(-100));
+    PF("\" %03x \", -101", " %03x ", (unsigned int)(-101));
+    PF("\" %09x \", INT_MAX", " %09x ", (unsigned int)(INT_MAX));
+    PF("\" %010x \", INT_MIN", " %010x ", (unsigned int)(INT_MIN));
+    PF("\" %011x \", LONG_MAX", " %011x ", (unsigned int)(LONG_MAX));
+    PF("\" %012x \", LONG_MIN", " %012x ", (unsigned int)(LONG_MIN));
+    PF("\" %013x \", UINT_MAX", " %013x ", (unsigned int)(UINT_MAX));
+    PF("\" %014x \", ULONG_MAX", " %014x ", (unsigned int)(ULONG_MAX));
+    PF("\" %015x \", 9223372036854775807LL", " %015x ", (unsigned int)(9223372036854775807LL));
+    PF("\" %09x %010x %011x %012x %013x %014x %015x\", INT_MAX, INT_MIN, LONG_MAX, LONG_MIN, ULONG_MAX, 0, -42", " %09x %010x %011x %012x %013x %014x %015x", (unsigned int)(INT_MAX), (unsigned int)(INT_MIN), (unsigned int)(LONG_MAX), (unsigned int)(LONG_MIN), (unsigned int)(ULONG_MAX), (unsigned int)(0), (unsigned int)(-42));
+    PF_DONE();
+- name: 'flag ''0'' avec %X (29 cas)'
+  input: '29 appels ft_printf comparés à printf, ex. ft_printf(" %01X ", 0)'
+  body: |
+    PF("\" %01X \", 0", " %01X ", (unsigned int)(0));
+    PF("\" %02X \", -1", " %02X ", (unsigned int)(-1));
+    PF("\" %03X \", 1", " %03X ", (unsigned int)(1));
+    PF("\" %04X \", 9", " %04X ", (unsigned int)(9));
+    PF("\" %01X \", 10", " %01X ", (unsigned int)(10));
+    PF("\" %02X \", 11", " %02X ", (unsigned int)(11));
+    PF("\" %03X \", 15", " %03X ", (unsigned int)(15));
+    PF("\" %04X \", 16", " %04X ", (unsigned int)(16));
+    PF("\" %05X \", 17", " %05X ", (unsigned int)(17));
+    PF("\" %01X \", 99", " %01X ", (unsigned int)(99));
+    PF("\" %02X \", 100", " %02X ", (unsigned int)(100));
+    PF("\" %03X \", 101", " %03X ", (unsigned int)(101));
+    PF("\" %01X \", -9", " %01X ", (unsigned int)(-9));
+    PF("\" %02X \", -10", " %02X ", (unsigned int)(-10));
+    PF("\" %03X \", -11", " %03X ", (unsigned int)(-11));
+    PF("\" %04X \", -14", " %04X ", (unsigned int)(-14));
+    PF("\" %05X \", -15", " %05X ", (unsigned int)(-15));
+    PF("\" %06X \", -16", " %06X ", (unsigned int)(-16));
+    PF("\" %01X \", -99", " %01X ", (unsigned int)(-99));
+    PF("\" %02X \", -100", " %02X ", (unsigned int)(-100));
+    PF("\" %03X \", -101", " %03X ", (unsigned int)(-101));
+    PF("\" %09X \", INT_MAX", " %09X ", (unsigned int)(INT_MAX));
+    PF("\" %010X \", INT_MIN", " %010X ", (unsigned int)(INT_MIN));
+    PF("\" %011X \", LONG_MAX", " %011X ", (unsigned int)(LONG_MAX));
+    PF("\" %012X \", LONG_MIN", " %012X ", (unsigned int)(LONG_MIN));
+    PF("\" %013X \", UINT_MAX", " %013X ", (unsigned int)(UINT_MAX));
+    PF("\" %014X \", ULONG_MAX", " %014X ", (unsigned int)(ULONG_MAX));
+    PF("\" %015X \", 9223372036854775807LL", " %015X ", (unsigned int)(9223372036854775807LL));
+    PF("\" %09X %010X %011X %012X %013X %014X %015X\", INT_MAX, INT_MIN, LONG_MAX, LONG_MIN, ULONG_MAX, 0, -42", " %09X %010X %011X %012X %013X %014X %015X", (unsigned int)(INT_MAX), (unsigned int)(INT_MIN), (unsigned int)(LONG_MAX), (unsigned int)(LONG_MIN), (unsigned int)(ULONG_MAX), (unsigned int)(0), (unsigned int)(-42));
+    PF_DONE();

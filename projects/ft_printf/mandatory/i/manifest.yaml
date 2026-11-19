@@ -1,0 +1,49 @@
+# Généré par tools/gen_printf.py à partir du printfTester de Tripouille
+# (github.com/Tripouille/printfTester, tests/i_test.cpp).
+# Chaque cas compare ft_printf à printf : même sortie, même valeur de retour.
+name: i
+order: 5
+build: mandatory
+rule: "sujet : %i doit afficher la même chose que printf et renvoyer le nombre de caractères écrits"
+compile:
+  # Les cas reprennent volontairement des formats que gcc signale (ex. '% s').
+  test_flags: [-Wno-format]
+prelude: |
+  #include "melo_printf.h"
+test_defaults:
+  expected_exit: 0
+  check_memory: true
+tests:
+- name: '%i (29 cas du printfTester)'
+  input: '29 appels ft_printf comparés à printf, ex. ft_printf(" %i ", 0)'
+  body: |
+    PF("\" %i \", 0", " %i ", (int)(0));
+    PF("\" %i \", -1", " %i ", (int)(-1));
+    PF("\" %i \", 1", " %i ", (int)(1));
+    PF("\" %i \", 9", " %i ", (int)(9));
+    PF("\" %i \", 10", " %i ", (int)(10));
+    PF("\" %i \", 11", " %i ", (int)(11));
+    PF("\" %i \", 15", " %i ", (int)(15));
+    PF("\" %i \", 16", " %i ", (int)(16));
+    PF("\" %i \", 17", " %i ", (int)(17));
+    PF("\" %i \", 99", " %i ", (int)(99));
+    PF("\" %i \", 100", " %i ", (int)(100));
+    PF("\" %i \", 101", " %i ", (int)(101));
+    PF("\" %i \", -9", " %i ", (int)(-9));
+    PF("\" %i \", -10", " %i ", (int)(-10));
+    PF("\" %i \", -11", " %i ", (int)(-11));
+    PF("\" %i \", -14", " %i ", (int)(-14));
+    PF("\" %i \", -15", " %i ", (int)(-15));
+    PF("\" %i \", -16", " %i ", (int)(-16));
+    PF("\" %i \", -99", " %i ", (int)(-99));
+    PF("\" %i \", -100", " %i ", (int)(-100));
+    PF("\" %i \", -101", " %i ", (int)(-101));
+    PF("\" %i \", INT_MAX", " %i ", (int)(INT_MAX));
+    PF("\" %i \", INT_MIN", " %i ", (int)(INT_MIN));
+    PF("\" %i \", LONG_MAX", " %i ", (int)(LONG_MAX));
+    PF("\" %i \", LONG_MIN", " %i ", (int)(LONG_MIN));
+    PF("\" %i \", UINT_MAX", " %i ", (int)(UINT_MAX));
+    PF("\" %i \", ULONG_MAX", " %i ", (int)(ULONG_MAX));
+    PF("\" %i \", 9223372036854775807LL", " %i ", (int)(9223372036854775807LL));
+    PF("\" %i %i %i %i %i %i %i\", INT_MAX, INT_MIN, LONG_MAX, LONG_MIN, ULONG_MAX, 0, -42", " %i %i %i %i %i %i %i", (int)(INT_MAX), (int)(INT_MIN), (int)(LONG_MAX), (int)(LONG_MIN), (int)(ULONG_MAX), (int)(0), (int)(-42));
+    PF_DONE();

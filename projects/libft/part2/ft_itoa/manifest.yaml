@@ -72,3 +72,21 @@ tests:
             return (1);
         }
     }
+# --- Cas repris du libftTester de Tripouille (github.com/Tripouille/libftTester) ---
+- name: taille exacte du malloc (MKO)
+  strict: true
+  input: ft_itoa(n) pour n dans {INT_MAX, INT_MIN, 0, 1, -1, 42}
+  body: |
+    int ns[] = {INT_MAX, INT_MIN, 0, 1, -1, 42};
+    for (int i = 0; i < 6; i++)
+    {
+        char exp[16];
+        char txt[32];
+        snprintf(exp, sizeof(exp), "%d", ns[i]);
+        snprintf(txt, sizeof(txt), "ft_itoa(%d)", ns[i]);
+        char *r = ft_itoa(ns[i]);
+        int ok = melo_mcheck(r, strlen(exp) + 1, txt);
+        free(r);
+        if (!ok)
+            return (1);
+    }

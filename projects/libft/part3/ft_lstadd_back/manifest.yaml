@@ -128,3 +128,17 @@ tests:
     if (check_list(lst, exp, 3))
         return (1);
     free_list(lst);
+# --- Cas repris du libftTester de Tripouille (github.com/Tripouille/libftTester) ---
+- name: ajoute une liste entière à la fin
+  input: l = ["0" -> "1"], l2 = ["0" -> "1" -> "2"] ; ft_lstadd_back(&l, l2)
+  body: |
+    t_list *l = make_list(2);
+    t_list *l2 = make_list(3);
+    t_list *second = l->next;
+    ft_lstadd_back(&l, l2);
+    if (l->next != second || second->next != l2 || l2->next->next->next != NULL)
+    {
+        free_list(l);
+        return (melo_ko_txt("les maillons ne sont pas chaînés dans l'ordre", "l -> l->next -> l2 -> ... -> NULL"));
+    }
+    free_list(l);

@@ -1,0 +1,31 @@
+# Généré par tools/gen_printf.py à partir du printfTester de Tripouille
+# (github.com/Tripouille/printfTester, tests/s_test.cpp).
+# Chaque cas compare ft_printf à printf : même sortie, même valeur de retour.
+name: s
+order: 2
+build: mandatory
+rule: "sujet : %s doit afficher la même chose que printf et renvoyer le nombre de caractères écrits"
+compile:
+  # Les cas reprennent volontairement des formats que gcc signale (ex. '% s').
+  test_flags: [-Wno-format]
+prelude: |
+  #include "melo_printf.h"
+  static char *s2 = "Mussum Ipsum, cacilds vidis litro abertis. Posuere libero varius. Nullam a nisl ut ante blandit hendrerit. Aenean sit amet nisi. Atirei o pau no gatis, per gatis num morreus.";
+test_defaults:
+  expected_exit: 0
+  check_memory: true
+tests:
+- name: '%s (10 cas du printfTester)'
+  input: '10 appels ft_printf comparés à printf, ex. ft_printf("%s", "")'
+  body: |
+    PF("\"%s\", \"\"", "%s", (char *)(""));
+    PF("\" %s\", \"\"", " %s", (char *)(""));
+    PF("\"%s \", \"\"", "%s ", (char *)(""));
+    PF("\" %s \", \"\"", " %s ", (char *)(""));
+    PF("\" %s \", \"-\"", " %s ", (char *)("-"));
+    PF("\" %s %s \", \"\", \"-\"", " %s %s ", (char *)(""), (char *)("-"));
+    PF("\" %s %s \", \" - \", \"\"", " %s %s ", (char *)(" - "), (char *)(""));
+    PF("\" %s %s %s %s %s\", \" - \", \"\", \"4\", \"\", s2", " %s %s %s %s %s", (char *)(" - "), (char *)(""), (char *)("4"), (char *)(""), (char *)(s2));
+    PF("\" %s %s %s %s %s \", \" - \", \"\", \"4\", \"\", \"2 \"", " %s %s %s %s %s ", (char *)(" - "), (char *)(""), (char *)("4"), (char *)(""), (char *)("2 "));
+    PF("\" NULL %s NULL \", NULL", " NULL %s NULL ", (char *)(NULL));
+    PF_DONE();

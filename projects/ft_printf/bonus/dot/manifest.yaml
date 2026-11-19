@@ -1,0 +1,195 @@
+# Généré par tools/gen_printf.py à partir du printfTester de Tripouille
+# (github.com/Tripouille/printfTester, tests/dot_test.cpp).
+# Chaque cas compare ft_printf à printf : même sortie, même valeur de retour.
+name: dot
+order: 13
+build: bonus
+bonus: true
+rule: "sujet (bonus) : précision '.' doit se comporter comme dans printf"
+compile:
+  # Les cas reprennent volontairement des formats que gcc signale (ex. '% s').
+  test_flags: [-Wno-format]
+prelude: |
+  #include "melo_printf.h"
+test_defaults:
+  expected_exit: 0
+  check_memory: true
+tests:
+- name: 'précision ''.'' avec %s (9 cas)'
+  input: '9 appels ft_printf comparés à printf, ex. ft_printf("%.s", "")'
+  body: |
+    PF("\"%.s\", \"\"", "%.s", (char *)(""));
+    PF("\" %.1s\", \"\"", " %.1s", (char *)(""));
+    PF("\"%.1s \", \"\"", "%.1s ", (char *)(""));
+    PF("\" %.s \", \"\"", " %.s ", (char *)(""));
+    PF("\" %.s \", \"-\"", " %.s ", (char *)("-"));
+    PF("\" %.2s %.1s \", \"\", \"-\"", " %.2s %.1s ", (char *)(""), (char *)("-"));
+    PF("\" %.3s %.2s \", \" - \", \"\"", " %.3s %.2s ", (char *)(" - "), (char *)(""));
+    PF("\" %.1s %.2s %.3s %.4s \", \" - \", \"\", \"4\", \"\"", " %.1s %.2s %.3s %.4s ", (char *)(" - "), (char *)(""), (char *)("4"), (char *)(""));
+    PF("\" %.2s %.3s %.4s %.5s %.1s \", \" - \", \"\", \"4\", \"\", \"2 \"", " %.2s %.3s %.4s %.5s %.1s ", (char *)(" - "), (char *)(""), (char *)("4"), (char *)(""), (char *)("2 "));
+    PF_DONE();
+- name: 'précision ''.'' avec %d (29 cas)'
+  input: '29 appels ft_printf comparés à printf, ex. ft_printf(" %.1d ", 0)'
+  body: |
+    PF("\" %.1d \", 0", " %.1d ", (int)(0));
+    PF("\" %.2d \", -1", " %.2d ", (int)(-1));
+    PF("\" %.2d \", 1", " %.2d ", (int)(1));
+    PF("\" %.1d \", 9", " %.1d ", (int)(9));
+    PF("\" %.2d \", 10", " %.2d ", (int)(10));
+    PF("\" %.3d \", 11", " %.3d ", (int)(11));
+    PF("\" %.4d \", 15", " %.4d ", (int)(15));
+    PF("\" %.5d \", 16", " %.5d ", (int)(16));
+    PF("\" %.6d \", 17", " %.6d ", (int)(17));
+    PF("\" %.1d \", 99", " %.1d ", (int)(99));
+    PF("\" %.2d \", 100", " %.2d ", (int)(100));
+    PF("\" %.3d \", 101", " %.3d ", (int)(101));
+    PF("\" %.1d \", -9", " %.1d ", (int)(-9));
+    PF("\" %.2d \", -10", " %.2d ", (int)(-10));
+    PF("\" %.3d \", -11", " %.3d ", (int)(-11));
+    PF("\" %.4d \", -14", " %.4d ", (int)(-14));
+    PF("\" %.1d \", -15", " %.1d ", (int)(-15));
+    PF("\" %.2d \", -16", " %.2d ", (int)(-16));
+    PF("\" %.3d \", -99", " %.3d ", (int)(-99));
+    PF("\" %.3d \", -100", " %.3d ", (int)(-100));
+    PF("\" %.4d \", -101", " %.4d ", (int)(-101));
+    PF("\" %.8d \", INT_MAX", " %.8d ", (int)(INT_MAX));
+    PF("\" %.9d \", INT_MIN", " %.9d ", (int)(INT_MIN));
+    PF("\" %.10d \", LONG_MAX", " %.10d ", (int)(LONG_MAX));
+    PF("\" %.11d \", LONG_MIN", " %.11d ", (int)(LONG_MIN));
+    PF("\" %.12d \", UINT_MAX", " %.12d ", (int)(UINT_MAX));
+    PF("\" %.13d \", ULONG_MAX", " %.13d ", (int)(ULONG_MAX));
+    PF("\" %.14d \", 9223372036854775807LL", " %.14d ", (int)(9223372036854775807LL));
+    PF("\" %.8d %.9d %.10d %.11d %.12d %.13d %.14d\", INT_MAX, INT_MIN, LONG_MAX, LONG_MIN, ULONG_MAX, 0, -42", " %.8d %.9d %.10d %.11d %.12d %.13d %.14d", (int)(INT_MAX), (int)(INT_MIN), (int)(LONG_MAX), (int)(LONG_MIN), (int)(ULONG_MAX), (int)(0), (int)(-42));
+    PF_DONE();
+- name: 'précision ''.'' avec %i (29 cas)'
+  input: '29 appels ft_printf comparés à printf, ex. ft_printf(" %.1i ", 0)'
+  body: |
+    PF("\" %.1i \", 0", " %.1i ", (int)(0));
+    PF("\" %.2i \", -1", " %.2i ", (int)(-1));
+    PF("\" %.2i \", 1", " %.2i ", (int)(1));
+    PF("\" %.1i \", 9", " %.1i ", (int)(9));
+    PF("\" %.2i \", 10", " %.2i ", (int)(10));
+    PF("\" %.3i \", 11", " %.3i ", (int)(11));
+    PF("\" %.4i \", 15", " %.4i ", (int)(15));
+    PF("\" %.5i \", 16", " %.5i ", (int)(16));
+    PF("\" %.6i \", 17", " %.6i ", (int)(17));
+    PF("\" %.1i \", 99", " %.1i ", (int)(99));
+    PF("\" %.2i \", 100", " %.2i ", (int)(100));
+    PF("\" %.3i \", 101", " %.3i ", (int)(101));
+    PF("\" %.1i \", -9", " %.1i ", (int)(-9));
+    PF("\" %.2i \", -10", " %.2i ", (int)(-10));
+    PF("\" %.3i \", -11", " %.3i ", (int)(-11));
+    PF("\" %.4i \", -14", " %.4i ", (int)(-14));
+    PF("\" %.1i \", -15", " %.1i ", (int)(-15));
+    PF("\" %.2i \", -16", " %.2i ", (int)(-16));
+    PF("\" %.3i \", -99", " %.3i ", (int)(-99));
+    PF("\" %.3i \", -100", " %.3i ", (int)(-100));
+    PF("\" %.4i \", -101", " %.4i ", (int)(-101));
+    PF("\" %.8i \", INT_MAX", " %.8i ", (int)(INT_MAX));
+    PF("\" %.9i \", INT_MIN", " %.9i ", (int)(INT_MIN));
+    PF("\" %.10i \", LONG_MAX", " %.10i ", (int)(LONG_MAX));
+    PF("\" %.11i \", LONG_MIN", " %.11i ", (int)(LONG_MIN));
+    PF("\" %.12i \", UINT_MAX", " %.12i ", (int)(UINT_MAX));
+    PF("\" %.13i \", ULONG_MAX", " %.13i ", (int)(ULONG_MAX));
+    PF("\" %.14i \", 9223372036854775807LL", " %.14i ", (int)(9223372036854775807LL));
+    PF("\" %.8i %.9i %.10i %.11i %.12i %.13i %.14i\", INT_MAX, INT_MIN, LONG_MAX, LONG_MIN, ULONG_MAX, 0, -42", " %.8i %.9i %.10i %.11i %.12i %.13i %.14i", (int)(INT_MAX), (int)(INT_MIN), (int)(LONG_MAX), (int)(LONG_MIN), (int)(ULONG_MAX), (int)(0), (int)(-42));
+    PF_DONE();
+- name: 'précision ''.'' avec %u (29 cas)'
+  input: '29 appels ft_printf comparés à printf, ex. ft_printf(" %.1u ", 0)'
+  body: |
+    PF("\" %.1u \", 0", " %.1u ", (unsigned int)(0));
+    PF("\" %.2u \", -1", " %.2u ", (unsigned int)(-1));
+    PF("\" %.2u \", 1", " %.2u ", (unsigned int)(1));
+    PF("\" %.1u \", 9", " %.1u ", (unsigned int)(9));
+    PF("\" %.2u \", 10", " %.2u ", (unsigned int)(10));
+    PF("\" %.3u \", 11", " %.3u ", (unsigned int)(11));
+    PF("\" %.4u \", 15", " %.4u ", (unsigned int)(15));
+    PF("\" %.5u \", 16", " %.5u ", (unsigned int)(16));
+    PF("\" %.6u \", 17", " %.6u ", (unsigned int)(17));
+    PF("\" %.1u \", 99", " %.1u ", (unsigned int)(99));
+    PF("\" %.2u \", 100", " %.2u ", (unsigned int)(100));
+    PF("\" %.3u \", 101", " %.3u ", (unsigned int)(101));
+    PF("\" %.1u \", -9", " %.1u ", (unsigned int)(-9));
+    PF("\" %.2u \", -10", " %.2u ", (unsigned int)(-10));
+    PF("\" %.3u \", -11", " %.3u ", (unsigned int)(-11));
+    PF("\" %.4u \", -14", " %.4u ", (unsigned int)(-14));
+    PF("\" %.1u \", -15", " %.1u ", (unsigned int)(-15));
+    PF("\" %.2u \", -16", " %.2u ", (unsigned int)(-16));
+    PF("\" %.3u \", -99", " %.3u ", (unsigned int)(-99));
+    PF("\" %.3u \", -100", " %.3u ", (unsigned int)(-100));
+    PF("\" %.4u \", -101", " %.4u ", (unsigned int)(-101));
+    PF("\" %.8u \", INT_MAX", " %.8u ", (unsigned int)(INT_MAX));
+    PF("\" %.9u \", INT_MIN", " %.9u ", (unsigned int)(INT_MIN));
+    PF("\" %.10u \", LONG_MAX", " %.10u ", (unsigned int)(LONG_MAX));
+    PF("\" %.11u \", LONG_MIN", " %.11u ", (unsigned int)(LONG_MIN));
+    PF("\" %.12u \", UINT_MAX", " %.12u ", (unsigned int)(UINT_MAX));
+    PF("\" %.13u \", ULONG_MAX", " %.13u ", (unsigned int)(ULONG_MAX));
+    PF("\" %.14u \", 9223372036854775807LL", " %.14u ", (unsigned int)(9223372036854775807LL));
+    PF("\" %.8u %.9u %.10u %.11u %.12u %.13u %.14u\", INT_MAX, INT_MIN, LONG_MAX, LONG_MIN, ULONG_MAX, 0, -42", " %.8u %.9u %.10u %.11u %.12u %.13u %.14u", (unsigned int)(INT_MAX), (unsigned int)(INT_MIN), (unsigned int)(LONG_MAX), (unsigned int)(LONG_MIN), (unsigned int)(ULONG_MAX), (unsigned int)(0), (unsigned int)(-42));
+    PF_DONE();
+- name: 'précision ''.'' avec %x (29 cas)'
+  input: '29 appels ft_printf comparés à printf, ex. ft_printf(" %.1x ", 0)'
+  body: |
+    PF("\" %.1x \", 0", " %.1x ", (unsigned int)(0));
+    PF("\" %.2x \", -1", " %.2x ", (unsigned int)(-1));
+    PF("\" %.2x \", 1", " %.2x ", (unsigned int)(1));
+    PF("\" %.1x \", 9", " %.1x ", (unsigned int)(9));
+    PF("\" %.2x \", 10", " %.2x ", (unsigned int)(10));
+    PF("\" %.3x \", 11", " %.3x ", (unsigned int)(11));
+    PF("\" %.4x \", 15", " %.4x ", (unsigned int)(15));
+    PF("\" %.5x \", 16", " %.5x ", (unsigned int)(16));
+    PF("\" %.6x \", 17", " %.6x ", (unsigned int)(17));
+    PF("\" %.1x \", 99", " %.1x ", (unsigned int)(99));
+    PF("\" %.2x \", 100", " %.2x ", (unsigned int)(100));
+    PF("\" %.3x \", 101", " %.3x ", (unsigned int)(101));
+    PF("\" %.1x \", -9", " %.1x ", (unsigned int)(-9));
+    PF("\" %.2x \", -10", " %.2x ", (unsigned int)(-10));
+    PF("\" %.3x \", -11", " %.3x ", (unsigned int)(-11));
+    PF("\" %.4x \", -14", " %.4x ", (unsigned int)(-14));
+    PF("\" %.1x \", -15", " %.1x ", (unsigned int)(-15));
+    PF("\" %.2x \", -16", " %.2x ", (unsigned int)(-16));
+    PF("\" %.3x \", -99", " %.3x ", (unsigned int)(-99));
+    PF("\" %.3x \", -100", " %.3x ", (unsigned int)(-100));
+    PF("\" %.4x \", -101", " %.4x ", (unsigned int)(-101));
+    PF("\" %.8x \", INT_MAX", " %.8x ", (unsigned int)(INT_MAX));
+    PF("\" %.9x \", INT_MIN", " %.9x ", (unsigned int)(INT_MIN));
+    PF("\" %.10x \", LONG_MAX", " %.10x ", (unsigned int)(LONG_MAX));
+    PF("\" %.11x \", LONG_MIN", " %.11x ", (unsigned int)(LONG_MIN));
+    PF("\" %.12x \", UINT_MAX", " %.12x ", (unsigned int)(UINT_MAX));
+    PF("\" %.13x \", ULONG_MAX", " %.13x ", (unsigned int)(ULONG_MAX));
+    PF("\" %.14x \", 9223372036854775807LL", " %.14x ", (unsigned int)(9223372036854775807LL));
+    PF("\" %.8x %.9x %.10x %.11x %.12x %.13x %.14x\", INT_MAX, INT_MIN, LONG_MAX, LONG_MIN, ULONG_MAX, 0, -42", " %.8x %.9x %.10x %.11x %.12x %.13x %.14x", (unsigned int)(INT_MAX), (unsigned int)(INT_MIN), (unsigned int)(LONG_MAX), (unsigned int)(LONG_MIN), (unsigned int)(ULONG_MAX), (unsigned int)(0), (unsigned int)(-42));
+    PF_DONE();
+- name: 'précision ''.'' avec %X (29 cas)'
+  input: '29 appels ft_printf comparés à printf, ex. ft_printf(" %.1X ", 0)'
+  body: |
+    PF("\" %.1X \", 0", " %.1X ", (unsigned int)(0));
+    PF("\" %.2X \", -1", " %.2X ", (unsigned int)(-1));
+    PF("\" %.2X \", 1", " %.2X ", (unsigned int)(1));
+    PF("\" %.1X \", 9", " %.1X ", (unsigned int)(9));
+    PF("\" %.2X \", 10", " %.2X ", (unsigned int)(10));
+    PF("\" %.3X \", 11", " %.3X ", (unsigned int)(11));
+    PF("\" %.4X \", 15", " %.4X ", (unsigned int)(15));
+    PF("\" %.5X \", 16", " %.5X ", (unsigned int)(16));
+    PF("\" %.6X \", 17", " %.6X ", (unsigned int)(17));
+    PF("\" %.1X \", 99", " %.1X ", (unsigned int)(99));
+    PF("\" %.2X \", 100", " %.2X ", (unsigned int)(100));
+    PF("\" %.3X \", 101", " %.3X ", (unsigned int)(101));
+    PF("\" %.1X \", -9", " %.1X ", (unsigned int)(-9));
+    PF("\" %.2X \", -10", " %.2X ", (unsigned int)(-10));
+    PF("\" %.3X \", -11", " %.3X ", (unsigned int)(-11));
+    PF("\" %.4X \", -14", " %.4X ", (unsigned int)(-14));
+    PF("\" %.1X \", -15", " %.1X ", (unsigned int)(-15));
+    PF("\" %.2X \", -16", " %.2X ", (unsigned int)(-16));
+    PF("\" %.3X \", -99", " %.3X ", (unsigned int)(-99));
+    PF("\" %.3X \", -100", " %.3X ", (unsigned int)(-100));
+    PF("\" %.4X \", -101", " %.4X ", (unsigned int)(-101));
+    PF("\" %.8X \", INT_MAX", " %.8X ", (unsigned int)(INT_MAX));
+    PF("\" %.9X \", INT_MIN", " %.9X ", (unsigned int)(INT_MIN));
+    PF("\" %.10X \", LONG_MAX", " %.10X ", (unsigned int)(LONG_MAX));
+    PF("\" %.11X \", LONG_MIN", " %.11X ", (unsigned int)(LONG_MIN));
+    PF("\" %.12X \", UINT_MAX", " %.12X ", (unsigned int)(UINT_MAX));
+    PF("\" %.13X \", ULONG_MAX", " %.13X ", (unsigned int)(ULONG_MAX));
+    PF("\" %.14X \", 9223372036854775807LL", " %.14X ", (unsigned int)(9223372036854775807LL));
+    PF("\" %.8X %.9X %.10X %.11X %.12X %.13X %.14X\", INT_MAX, INT_MIN, LONG_MAX, LONG_MIN, ULONG_MAX, 0, -42", " %.8X %.9X %.10X %.11X %.12X %.13X %.14X", (unsigned int)(INT_MAX), (unsigned int)(INT_MIN), (unsigned int)(LONG_MAX), (unsigned int)(LONG_MIN), (unsigned int)(ULONG_MAX), (unsigned int)(0), (unsigned int)(-42));
+    PF_DONE();

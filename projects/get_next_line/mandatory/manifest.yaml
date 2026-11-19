@@ -1,0 +1,203 @@
+# Généré par tools/gen_gnl.py : cas du gnlTester de Tripouille
+# (github.com/Tripouille/gnlTester, tests/mandatory.cpp).
+# Lancé avec BUFFER_SIZE = 1, 42 et 10000000, sur les fichiers obligatoires puis bonus.
+name: mandatory
+order: 1
+builds: [bs1, bs42, bs10M, bonus_bs1, bonus_bs42, bonus_bs10M]
+files_dir: ../files
+rule: 'sujet : chaque appel renvoie la ligne suivante, \n compris s''il y en a un ; NULL à la fin du fichier ou en cas d''erreur'
+prelude: |
+  #include "melo_gnl.h"
+test_defaults:
+  expected_exit: 0
+  check_memory: true
+  # Un gnl correct mais lent (BUFFER_SIZE=1, ligne de 10000 caractères) ne doit pas être KO :
+  # 30 s (60 s sous valgrind) ne sont dépassées que par une boucle infinie.
+  timeout: 30
+tests:
+- name: 'fd invalide (1000, -1, fd fermé) : NULL'
+  input: get_next_line(1000), get_next_line(-1), puis get_next_line sur un fd fermé
+  body: |
+    GNL(1000, NULL, "1000");
+    GNL(-1, NULL, "-1");
+    int fd = open("files/empty", O_RDONLY);
+    close(fd);
+    GNL(fd, NULL, "fd fermé");
+- name: 'files/empty : fichier vide'
+  input: get_next_line(fd) jusqu'à NULL sur files/empty (0 ligne(s))
+  body: |
+    int fd = open("files/empty", O_RDONLY);
+    const char *w = "files/empty";
+    GNL(fd, NULL, w);
+    close(fd);
+- name: 'files/nl : un seul \n'
+  input: get_next_line(fd) jusqu'à NULL sur files/nl (1 ligne(s))
+  body: |
+    int fd = open("files/nl", O_RDONLY);
+    const char *w = "files/nl";
+    GNL(fd, "\n", w);
+    GNL(fd, NULL, w);
+    close(fd);
+- name: 'files/41_no_nl : 41 caractères sans \n final'
+  input: get_next_line(fd) jusqu'à NULL sur files/41_no_nl (1 ligne(s))
+  body: |
+    int fd = open("files/41_no_nl", O_RDONLY);
+    const char *w = "files/41_no_nl";
+    GNL(fd, "01234567890123456789012345678901234567890", w);
+    GNL(fd, NULL, w);
+    close(fd);
+- name: 'files/41_with_nl : 41 caractères avec \n, puis 1 caractère'
+  input: get_next_line(fd) jusqu'à NULL sur files/41_with_nl (2 ligne(s))
+  body: |
+    int fd = open("files/41_with_nl", O_RDONLY);
+    const char *w = "files/41_with_nl";
+    GNL(fd, "0123456789012345678901234567890123456789\n", w);
+    GNL(fd, "0", w);
+    GNL(fd, NULL, w);
+    close(fd);
+- name: 'files/42_no_nl : 42 caractères sans \n final'
+  input: get_next_line(fd) jusqu'à NULL sur files/42_no_nl (1 ligne(s))
+  body: |
+    int fd = open("files/42_no_nl", O_RDONLY);
+    const char *w = "files/42_no_nl";
+    GNL(fd, "012345678901234567890123456789012345678901", w);
+    GNL(fd, NULL, w);
+    close(fd);
+- name: 'files/42_with_nl : 42 caractères avec \n, puis 1 caractère'
+  input: get_next_line(fd) jusqu'à NULL sur files/42_with_nl (2 ligne(s))
+  body: |
+    int fd = open("files/42_with_nl", O_RDONLY);
+    const char *w = "files/42_with_nl";
+    GNL(fd, "01234567890123456789012345678901234567890\n", w);
+    #if BUFFER_SIZE == 42
+    char c = 0;
+    if (read(fd, &c, 1) != 1 || c != '1')
+    {
+        printf("obtenu : le caractère suivant a déjà été lu par get_next_line\n");
+        printf("attendu : avec BUFFER_SIZE=42, read(fd) renvoie encore '1' après la 1re ligne\n");
+        return (1);
+    }
+    #else
+    GNL(fd, "1", w);
+    #endif
+    GNL(fd, NULL, w);
+    close(fd);
+- name: 'files/43_no_nl : 43 caractères sans \n final'
+  input: get_next_line(fd) jusqu'à NULL sur files/43_no_nl (1 ligne(s))
+  body: |
+    int fd = open("files/43_no_nl", O_RDONLY);
+    const char *w = "files/43_no_nl";
+    GNL(fd, "0123456789012345678901234567890123456789012", w);
+    GNL(fd, NULL, w);
+    close(fd);
+- name: 'files/43_with_nl : 43 caractères avec \n, puis 1 caractère'
+  input: get_next_line(fd) jusqu'à NULL sur files/43_with_nl (2 ligne(s))
+  body: |
+    int fd = open("files/43_with_nl", O_RDONLY);
+    const char *w = "files/43_with_nl";
+    GNL(fd, "012345678901234567890123456789012345678901\n", w);
+    GNL(fd, "2", w);
+    GNL(fd, NULL, w);
+    close(fd);
+- name: 'files/multiple_nlx5 : 5 lignes vides'
+  input: get_next_line(fd) jusqu'à NULL sur files/multiple_nlx5 (5 ligne(s))
+  body: |
+    int fd = open("files/multiple_nlx5", O_RDONLY);
+    const char *w = "files/multiple_nlx5";
+    GNL(fd, "\n", w);
+    GNL(fd, "\n", w);
+    GNL(fd, "\n", w);
+    GNL(fd, "\n", w);
+    GNL(fd, "\n", w);
+    GNL(fd, NULL, w);
+    close(fd);
+- name: 'files/multiple_line_no_nl : plusieurs lignes, sans \n final'
+  input: get_next_line(fd) jusqu'à NULL sur files/multiple_line_no_nl (5 ligne(s))
+  body: |
+    int fd = open("files/multiple_line_no_nl", O_RDONLY);
+    const char *w = "files/multiple_line_no_nl";
+    GNL(fd, "01234567890123456789012345678901234567890\n", w);
+    GNL(fd, "987654321098765432109876543210987654321098\n", w);
+    GNL(fd, "0123456789012345678901234567890123456789012\n", w);
+    GNL(fd, "987654321098765432109876543210987654321098\n", w);
+    GNL(fd, "01234567890123456789012345678901234567890", w);
+    GNL(fd, NULL, w);
+    close(fd);
+- name: 'files/multiple_line_with_nl : plusieurs lignes, avec \n final'
+  input: get_next_line(fd) jusqu'à NULL sur files/multiple_line_with_nl (5 ligne(s))
+  body: |
+    int fd = open("files/multiple_line_with_nl", O_RDONLY);
+    const char *w = "files/multiple_line_with_nl";
+    GNL(fd, "9876543210987654321098765432109876543210\n", w);
+    GNL(fd, "01234567890123456789012345678901234567890\n", w);
+    GNL(fd, "987654321098765432109876543210987654321098\n", w);
+    GNL(fd, "01234567890123456789012345678901234567890\n", w);
+    GNL(fd, "9876543210987654321098765432109876543210\n", w);
+    GNL(fd, NULL, w);
+    close(fd);
+- name: 'files/alternate_line_nl_no_nl : lignes et lignes vides alternées, sans \n final'
+  input: get_next_line(fd) jusqu'à NULL sur files/alternate_line_nl_no_nl (9 ligne(s))
+  body: |
+    int fd = open("files/alternate_line_nl_no_nl", O_RDONLY);
+    const char *w = "files/alternate_line_nl_no_nl";
+    GNL(fd, "98765432109876543210987654321098765432109\n", w);
+    GNL(fd, "\n", w);
+    GNL(fd, "012345678901234567890123456789012345678901\n", w);
+    GNL(fd, "\n", w);
+    GNL(fd, "9876543210987654321098765432109876543210987\n", w);
+    GNL(fd, "\n", w);
+    GNL(fd, "012345678901234567890123456789012345678901\n", w);
+    GNL(fd, "\n", w);
+    GNL(fd, "98765432109876543210987654321098765432109", w);
+    GNL(fd, NULL, w);
+    close(fd);
+- name: 'files/alternate_line_nl_with_nl : lignes et lignes vides alternées, avec \n final'
+  input: get_next_line(fd) jusqu'à NULL sur files/alternate_line_nl_with_nl (9 ligne(s))
+  body: |
+    int fd = open("files/alternate_line_nl_with_nl", O_RDONLY);
+    const char *w = "files/alternate_line_nl_with_nl";
+    GNL(fd, "01234567890123456789012345678901234567890\n", w);
+    GNL(fd, "\n", w);
+    GNL(fd, "987654321098765432109876543210987654321090\n", w);
+    GNL(fd, "\n", w);
+    GNL(fd, "0123456789012345678901234567890123456789012\n", w);
+    GNL(fd, "\n", w);
+    GNL(fd, "987654321098765432109876543210987654321090\n", w);
+    GNL(fd, "\n", w);
+    GNL(fd, "01234567890123456789012345678901234567890\n", w);
+    GNL(fd, NULL, w);
+    close(fd);
+- name: 'files/big_line_no_nl : une ligne de 10000 caractères sans \n'
+  input: get_next_line(fd) jusqu'à NULL sur files/big_line_no_nl (1 ligne(s))
+  body: |
+    int fd = open("files/big_line_no_nl", O_RDONLY);
+    const char *w = "files/big_line_no_nl";
+    char *big0 = melo_digits(10000, 0);
+    GNL(fd, big0, w);
+    GNL(fd, NULL, w);
+    free(big0);
+    close(fd);
+- name: 'files/big_line_with_nl : une ligne de 10000 caractères avec \n'
+  input: get_next_line(fd) jusqu'à NULL sur files/big_line_with_nl (1 ligne(s))
+  body: |
+    int fd = open("files/big_line_with_nl", O_RDONLY);
+    const char *w = "files/big_line_with_nl";
+    char *big0 = melo_digits(10000, 1);
+    GNL(fd, big0, w);
+    GNL(fd, NULL, w);
+    free(big0);
+    close(fd);
+- name: 'stdin (fd 0)'
+  input: get_next_line(0) jusqu'à NULL, avec files/alternate_line_nl_with_nl sur l'entrée standard
+  stdin: "01234567890123456789012345678901234567890\n\n987654321098765432109876543210987654321090\n\n0123456789012345678901234567890123456789012\n\n987654321098765432109876543210987654321090\n\n01234567890123456789012345678901234567890\n"
+  body: |
+    GNL(0, "01234567890123456789012345678901234567890\n", "0");
+    GNL(0, "\n", "0");
+    GNL(0, "987654321098765432109876543210987654321090\n", "0");
+    GNL(0, "\n", "0");
+    GNL(0, "0123456789012345678901234567890123456789012\n", "0");
+    GNL(0, "\n", "0");
+    GNL(0, "987654321098765432109876543210987654321090\n", "0");
+    GNL(0, "\n", "0");
+    GNL(0, "01234567890123456789012345678901234567890\n", "0");
+    GNL(0, NULL, "0");

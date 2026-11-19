@@ -13,7 +13,8 @@ class ExecResult:
 
 
 def run_binary(binary_path: str, args: Optional[List[str]] = None,
-                stdin_data: str = "", timeout: int = 5) -> ExecResult:
+                stdin_data: str = "", timeout: int = 5,
+                cwd: Optional[str] = None) -> ExecResult:
     args = args or []
     try:
         proc = subprocess.run(
@@ -22,7 +23,9 @@ def run_binary(binary_path: str, args: Optional[List[str]] = None,
             input=stdin_data,
             capture_output=True,
             text=True,
+            errors="replace",
             timeout=timeout,
+            cwd=cwd,
         )
         return ExecResult(proc.stdout, proc.stderr, proc.returncode, timed_out=False)
     except subprocess.TimeoutExpired as e:

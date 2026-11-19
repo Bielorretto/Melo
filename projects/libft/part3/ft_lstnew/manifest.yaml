@@ -133,3 +133,13 @@ tests:
         free(n);
         return (melo_ko_txt("un noeud", "NULL"));
     }
+# --- Cas repris du libftTester de Tripouille (github.com/Tripouille/libftTester) ---
+- name: taille exacte du malloc (MKO)
+  strict: true
+  input: ft_lstnew((void *)42)
+  body: |
+    t_list *l = ft_lstnew((void *)42);
+    int ok = melo_mcheck(l, sizeof(t_list), "ft_lstnew((void *)42)");
+    free(l);
+    if (!ok)
+        return (1);
