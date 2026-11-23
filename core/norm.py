@@ -48,9 +48,57 @@ def parse_norminette(output: str) -> Tuple[Dict[str, bool], List[str]]:
     return status, problems
 
 
-def _is_melo(path: Path) -> bool:
+# Erreurs que c_formatter_42 ne sait pas corriger : il faut réécrire le code.
+_MANUAL_HINTS = {
+    "TOO_MANY_LINES": "fonction de plus de 25 lignes : découpe-la en fonctions plus petites",
+    "TOO_MANY_FUNCS": "plus de 5 fonctions dans le fichier : déplace-en dans un autre .c",
+    "TOO_MANY_ARGS": "plus de 4 paramètres : regroupe-les dans une structure",
+    "TOO_MANY_VARS_FUNC": "plus de 5 variables dans la fonction : découpe-la ou utilise une structure",
+    "LINE_TOO_LONG": "ligne de plus de 80 colonnes : coupe l'expression ou passe par une variable",
+    "INVALID_HEADER": "header 42 manquant ou invalide : ajoute-le (vim :Stdheader, ou F1 dans VS Code)",
+    "VAR_DECL_START_FUNC": "déclaration au milieu de la fonction : déclare tout au début",
+    "DECL_ASSIGN_LINE": "déclaration et affectation sur la même ligne : sépare-les",
+    "MULT_DECL_LINE": "plusieurs déclarations sur une ligne : une variable par ligne",
+    "FORBIDDEN_CS": "structure interdite (for, do...while, switch, goto) : utilise while / if",
+    "TERNARY_FBIDDEN": "ternaire interdit : remplace-le par un if / else",
+    "ASSIGN_IN_CONTROL": "affectation dans un if / while : fais-la sur la ligne d'avant",
+    "MULT_ASSIGN_LINE": "plusieurs affectations sur une ligne : une par ligne",
+    "WRONG_SCOPE_COMMENT": "commentaire dans une fonction : mets-le au-dessus de la fonction",
+    "GLOBAL_VAR_DETECTED": "variable globale interdite",
+    "FORBIDDEN_TYPEDEF": "typedef interdit à cet endroit : mets-le dans un .h",
+    "HEADER_PROT_ALL": "header non protégé : ajoute #ifndef / #define / #endif",
+    "HEADER_PROT_NAME": "nom de la protection du header : il doit correspondre au fichier (LIBFT_H)",
+    "MISSING_IDENTIFIER": "type ou nom manquant dans les paramètres",
+    "EMPTY_LINE_FUNCTION": "ligne vide dans la fonction (hors après les déclarations) : supprime-la",
+    "PREPROC_CONSTANT": "le préprocesseur ne doit contenir que des constantes",
+}
+
+
+def _print_manual(problems: List[str], paths: Dict[str, str]) -> None:
+    """Message de fin : ce qui reste après --fix doit être corrigé à la main."""
+    console.print("\n[bold yellow]⚠️  Erreurs que Melo ne peut pas corriger automatiquement "
+                  "(il faut réécrire le code) :[/]")
+    for p in problems:
+        m = re.match(r"^(.+?):(\d+):(\d+) (\S+) — (.*)$", p)
+        if not m:
+            console.print(f"  • {p}", highlight=False)
+            continue
+        f, line, code, msg = m.group(1), m.group(2), m.group(4), m.group(5)
+        hint = _MANUAL_HINTS.get(code, msg)
+        console.print(f"  • [bold]{paths.get(f, f)}[/] ligne [bold]{line}[/] : {hint} [dim]({code})[/]",
+                      highlight=False)
+
+
+def _is_melo(path: Path, student_dir: Path) -> bool:
+    """Fichier interne de Melo (ce Melo, ou une autre copie de Melo dans le rendu)."""
     path = path.resolve()
-    return path == MELO_ROOT or MELO_ROOT in path.parents
+    if path == MELO_ROOT or MELO_ROOT in path.parents:
+        return True
+    for parent in path.relative_to(student_dir.resolve()).parents:
+        d = student_dir.resolve() / parent
+        if parent != Path(".") and (d / "cli.py").is_file() and (d / "core").is_dir():
+            return True
+    return False
 
 
 def find_sources(student_dir: Path, target: Optional[str] = None) -> List[Path]:
@@ -58,7 +106,7 @@ def find_sources(student_dir: Path, target: Optional[str] = None) -> List[Path]:
     files = []
     for p in sorted([*student_dir.rglob("*.c"), *student_dir.rglob("*.h")]):
         rel = p.relative_to(student_dir)
-        if not p.is_file() or _is_melo(p) or any(part.startswith(".") for part in rel.parts):
+        if not p.is_file() or _is_melo(p, student_dir) or any(part.startswith(".") for part in rel.parts):
             continue
         files.append(p)
     if target:
@@ -79,16 +127,51 @@ def _formatter_cmd() -> Optional[List[str]]:
         return None
 
 
+def _install_formatter() -> Optional[List[str]]:
+    console.print("[red]c_formatter_42 n'est pas installé[/] : c'est lui qui reformate ton code.")
+    answer = input("L'installer maintenant (pip install --user c-formatter-42) ? [O/n] ").strip().lower()
+    if answer not in ("", "o", "oui", "y", "yes"):
+        console.print("[yellow]Installe-le avec : pip install c-formatter-42[/]")
+        return None
+    proc = subprocess.run([sys.executable, "-m", "pip", "install", "--user", "c-formatter-42"],
+                          capture_output=True, text=True)
+    if proc.returncode != 0:
+        console.print(f"[red]Installation échouée :[/]\n{proc.stderr.strip()[-800:]}")
+        return None
+    import importlib
+    import site
+    importlib.invalidate_caches()
+    user_site = site.getusersitepackages()
+    if user_site not in sys.path:
+        sys.path.append(user_site)
+    console.print("[green]c_formatter_42 installé.[/]\n")
+    return _formatter_cmd()
+
+
+def _norm_errors(path: Path) -> Optional[int]:
+    """Nombre d'erreurs norminette du fichier (None si norminette n'a pas répondu)."""
+    try:
+        proc = subprocess.run(["norminette", path.name], cwd=path.parent, capture_output=True,
+                              text=True, timeout=60, errors="replace")
+    except subprocess.TimeoutExpired:
+        return None
+    status, problems = parse_norminette(proc.stdout + proc.stderr)
+    if not status:
+        return None
+    return len(problems) if not all(status.values()) else 0
+
+
 def _fix(files: List[Path], student_dir: Path) -> bool:
-    cmd = _formatter_cmd()
+    cmd = _formatter_cmd() or _install_formatter()
     if cmd is None:
-        console.print("[red]c_formatter_42 n'est pas installé.[/] Installe-le avec : "
-                      "[bold]pip install c-formatter-42[/]")
         return False
 
     backup = BACKUP_ROOT / datetime.now().strftime("%Y%m%d-%H%M%S")
-    changed = []
+    changed, reverted = [], []
     for f in files:
+        before = _norm_errors(f)
+        if before == 0:
+            continue  # déjà à la norme : on ne touche pas au fichier
         original = f.read_text(errors="replace")
         try:
             # Mode stdin -> stdout : on n'écrit le fichier qu'une fois le formatage réussi.
@@ -105,15 +188,24 @@ def _fix(files: List[Path], student_dir: Path) -> bool:
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(f, dest)
             f.write_text(proc.stdout)
-            changed.append(f)
+            after = _norm_errors(f)
+            if before is not None and (after is None or after >= before):
+                # Le formatage n'a rien amélioré (ou a cassé) : on remet l'original.
+                f.write_text(original)
+                reverted.append(f)
+            else:
+                changed.append(f)
 
     if changed:
         console.print(f"[green]{len(changed)} fichier(s) reformaté(s)[/] "
                       f"[dim](originaux sauvegardés dans {backup})[/]")
         for f in changed:
             console.print(f"  ✏️  {f.relative_to(student_dir)}")
-    else:
+    elif not reverted:
         console.print("[green]Rien à reformater.[/]")
+    for f in reverted:
+        console.print(f"  [yellow]↩️  {f.relative_to(student_dir)} : le formatage n'améliorait rien, "
+                      f"fichier laissé tel quel[/]")
     console.print()
     return True
 
@@ -142,8 +234,8 @@ def run_norme(student_dir: Path, args: List[str]) -> None:
         return
 
     if "--fix" in flags or "-f" in flags:
-        answer = input(f"Reformater {len(files)} fichier(s) avec c_formatter_42 ? "
-                       f"(une copie est gardée) [o/N] ").strip().lower()
+        answer = input("Reformater les fichiers qui ne sont pas à la norme avec c_formatter_42 ? "
+                       "(une copie est gardée) [o/N] ").strip().lower()
         if answer not in ("o", "oui", "y", "yes"):
             console.print("[yellow]Annulé.[/]")
             return
@@ -171,6 +263,9 @@ def run_norme(student_dir: Path, args: List[str]) -> None:
 
     color = "green" if not ko and proc.returncode == 0 else "red"
     console.print(f"\n[{color}]norminette : {len(ok)}/{len(status) or len(files)} fichier(s) OK[/]")
-    if ko and "--fix" not in flags and "-f" not in flags:
+    if ko and ("--fix" in flags or "-f" in flags):
+        paths = {f.name: str(f.relative_to(student_dir)) for f in files}
+        _print_manual(problems, paths)
+    elif ko:
         console.print("[dim]norme --fix reformate automatiquement la mise en forme "
                       "(tabs, espaces, accolades...).[/]")
