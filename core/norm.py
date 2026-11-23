@@ -43,8 +43,9 @@ def parse_norminette(output: str) -> Tuple[Dict[str, bool], List[str]]:
         m = _ERR_RE.match(line)
         if m:
             problems.append(f"{current}:{m.group(2)}:{m.group(3)} {m.group(1)} — {m.group(4).strip()}")
-        elif "Error" in line:
-            problems.append(f"{current or '?'} : {line.strip()}")
+        elif line.strip().startswith("Error:"):
+            code = line.split()[1] if len(line.split()) > 1 else ""
+            problems.append(f"{current or '?'} : {_FR.get(code, line.strip())}")
     return status, problems
 
 
@@ -72,6 +73,77 @@ _MANUAL_HINTS = {
     "EMPTY_LINE_FUNCTION": "ligne vide dans la fonction (hors après les déclarations) : supprime-la",
     "PREPROC_CONSTANT": "le préprocesseur ne doit contenir que des constantes",
 }
+
+
+# Erreurs de mise en forme (corrigeables par norme --fix), en français.
+_FR = {
+    "SPACE_REPLACE_TAB": "espace trouvé à la place d'une tabulation",
+    "TAB_REPLACE_SPACE": "tabulation trouvée à la place d'un espace",
+    "TOO_FEW_TAB": "il manque des tabulations pour l'indentation",
+    "TOO_MANY_TAB": "trop de tabulations pour l'indentation",
+    "MIXED_SPACE_TAB": "espaces et tabulations mélangés",
+    "SPACE_EMPTY_LINE": "espace ou tabulation sur une ligne vide",
+    "SPC_BEFORE_NL": "espace en fin de ligne",
+    "CONSECUTIVE_SPC": "deux espaces à la suite",
+    "CONSECUTIVE_NEWLINES": "deux lignes vides à la suite",
+    "SPACE_BEFORE_FUNC": "espace avant le nom de la fonction : il faut une tabulation",
+    "SPACE_AFTER_KW": "il manque un espace après le mot-clé",
+    "SPC_AFTER_OPERATOR": "il manque un espace après l'opérateur",
+    "SPC_BFR_OPERATOR": "il manque un espace avant l'opérateur",
+    "NO_SPC_AFR_OPR": "espace en trop après l'opérateur",
+    "NO_SPC_BFR_OPR": "espace en trop avant l'opérateur",
+    "SPC_AFTER_PAR": "il manque un espace après la parenthèse / l'accolade / le crochet",
+    "SPC_BFR_PAR": "il manque un espace avant la parenthèse / l'accolade / le crochet",
+    "NO_SPC_AFR_PAR": "espace en trop après la parenthèse",
+    "NO_SPC_BFR_PAR": "espace en trop avant la parenthèse",
+    "SPC_AFTER_POINTER": "espace en trop après l'étoile du pointeur",
+    "SPC_BFR_POINTER": "espace mal placé avant l'étoile du pointeur",
+    "BRACE_NEWLINE": "l'accolade doit être seule sur sa ligne",
+    "BRACE_SHOULD_EOL": "il faut un retour à la ligne après l'accolade",
+    "EXP_NEWLINE": "il faut un retour à la ligne ici",
+    "NEWLINE_PRECEDES_FUNC": "les fonctions doivent être séparées par une ligne vide",
+    "NL_AFTER_VAR_DECL": "il faut une ligne vide après les déclarations de variables",
+    "NL_AFTER_PREPROC": "il faut une ligne vide après les #include / #define",
+    "MISALIGNED_VAR_DECL": "déclaration de variable mal alignée (tabulation avant le nom)",
+    "MISALIGNED_FUNC_DECL": "déclaration de fonction mal alignée (tabulation avant le nom)",
+    "RETURN_PARENTHESIS": "la valeur de return doit être entre parenthèses",
+    "EMPTY_LINE_FILE_START": "ligne vide au début du fichier",
+    "EMPTY_LINE_EOF": "ligne vide à la fin du fichier",
+    "EMPTY_LINE_FUNCTION": "ligne vide dans la fonction (hors après les déclarations)",
+    "NO_ARGS_VOID": "fonction sans paramètre : il faut écrire (void)",
+    "PREPROC_BAD_INDENT": "mauvaise indentation du préprocesseur (# define dans un #if)",
+    "PREPROC_START_LINE": "la directive # doit être en début de ligne",
+    "INCLUDE_START_FILE": "les #include doivent être en haut du fichier",
+    "INCLUDE_HEADER_ONLY": "on n'inclut que des fichiers .h",
+    "MISSING_TYPEDEF_ID": "nom manquant dans le typedef",
+    "USER_DEFINED_TYPEDEF": "un type défini par typedef doit commencer par t_",
+    "STRUCT_TYPE_NAMING": "un nom de structure doit commencer par s_",
+    "UNION_TYPE_NAMING": "un nom d'union doit commencer par u_",
+    "ENUM_TYPE_NAMING": "un nom d'enum doit commencer par e_",
+    "GLOBAL_VAR_NAMING": "une variable globale doit commencer par g_",
+    "FORBIDDEN_CHAR_NAME": "nom invalide : seulement minuscules, chiffres et _",
+    "MACRO_NAME_CAPITAL": "un nom de macro doit être en MAJUSCULES",
+    "TOO_MANY_INSTR": "une seule instruction par ligne",
+    "ARG_TYPE_UKN": "type de paramètre inconnu",
+    "TOO_MANY_WS": "trop d'espaces",
+    "INVALID_HEADER": "header 42 manquant ou invalide",
+    "PARSING_ERROR": "norminette n'arrive pas à lire ce fichier",
+    "LINE_TOO_LONG": "ligne de plus de 80 colonnes",
+    "TOO_MANY_LINES": "fonction de plus de 25 lignes",
+    "TOO_MANY_FUNCS": "plus de 5 fonctions dans le fichier",
+    "TOO_MANY_ARGS": "plus de 4 paramètres",
+    "TOO_MANY_VARS_FUNC": "plus de 5 variables dans la fonction",
+    "FORBIDDEN_CS": "structure interdite (for, do...while, switch, goto)",
+    "TERNARY_FBIDDEN": "ternaire interdit",
+    "ASSIGN_IN_CONTROL": "affectation dans un if / while",
+    "WRONG_SCOPE_COMMENT": "commentaire dans une fonction",
+    "GLOBAL_VAR_DETECTED": "variable globale détectée",
+    "MISSING_IDENTIFIER": "type ou nom manquant dans les paramètres",
+}
+
+
+def _fr(code: str, msg: str) -> str:
+    return _FR.get(code) or _MANUAL_HINTS.get(code, msg).split(" : ")[0]
 
 
 def _print_manual(problems: List[str], paths: Dict[str, str]) -> None:
@@ -259,7 +331,12 @@ def run_norme(student_dir: Path, args: List[str]) -> None:
         console.print(f"  [red][KO][/] {f}")
         for p in problems:
             if p.startswith(f + ":") or p.startswith(f + " "):
-                console.print(f"       {p[len(f) + 1:].strip()}", highlight=False)
+                m = re.match(r"^(\d+):(\d+) (\S+) — (.*)$", p[len(f) + 1:].strip())
+                if m:
+                    line = f"ligne {m.group(1)}, col {m.group(2)} : {_fr(m.group(3), m.group(4))}"
+                else:
+                    line = p[len(f) + 1:].strip()
+                console.print(f"       {line}", highlight=False)
 
     color = "green" if not ko and proc.returncode == 0 else "red"
     console.print(f"\n[{color}]norminette : {len(ok)}/{len(status) or len(files)} fichier(s) OK[/]")

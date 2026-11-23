@@ -298,7 +298,7 @@ Les fonctions sont testées avec une lib compilée par Melo, donc un Makefile ca
 
 ```text
 projects/libft/project.yaml        # prototypes, fonctions autorisées, règle de chaque fonction, fichiers attendus
-projects/libft/includes/           # helpers C des tests (melo.h, melo_malloc.h)
+projects/libft/includes/           # helpers C des tests (melo.h.melo, melo_malloc.h.melo : .h.melo pour que norminette les ignore)
 projects/libft/part1|2|3/ft_*/manifest.yaml
 ```
 
@@ -354,8 +354,8 @@ Les tests du [gnlTester de Tripouille](https://github.com/Tripouille/gnlTester) 
 ### Où sont les tests
 
 ```text
-projects/ft_printf/                # project.yaml, includes/melo_printf.h, mandatory/*/ et bonus/*/
-projects/get_next_line/            # project.yaml, includes/melo_gnl.h, files/ (fichiers lus), mandatory/ et bonus/
+projects/ft_printf/                # project.yaml, includes/melo_printf.h.melo, mandatory/*/ et bonus/*/
+projects/get_next_line/            # project.yaml, includes/melo_gnl.h.melo, files/ (fichiers lus), mandatory/ et bonus/
 tools/gen_printf.py                # régénère les manifests ft_printf depuis un clone du printfTester
 tools/gen_gnl.py                   # régénère les manifests get_next_line depuis projects/get_next_line/files/
 ```

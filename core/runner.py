@@ -55,6 +55,19 @@ def _find_student_file(student_dir: Path, src: str) -> Path:
     return matches[0]
 
 
+# Les headers d'aide aux tests de Melo sont stockés en « .h.melo » : norminette ne lit que
+# les .c / .h, donc ils ne polluent pas un « norminette » lancé dans le dossier de l'élève
+# (où Melo est cloné). Ils retrouvent leur nom en .h une fois copiés pour la compilation.
+_HEADER_SUFFIX = ".melo"
+
+
+def _copy_test_headers(src_dir: Path, tmp: Path) -> None:
+    for header in src_dir.glob("*.h"):
+        shutil.copy(header, tmp / header.name)
+    for header in src_dir.glob(f"*.h{_HEADER_SUFFIX}"):
+        shutil.copy(header, tmp / header.name[:-len(_HEADER_SUFFIX)])
+
+
 def _prepare_workdir(exercise_dir: Path, student_dir: Path, test: dict,
                       manifest: dict, tmp: Path, library=None) -> None:
     if library is None:
@@ -64,13 +77,11 @@ def _prepare_workdir(exercise_dir: Path, student_dir: Path, test: dict,
     elif library.test_includes is not None:
         # Mode librairie : le code de l'élève est déjà compilé dans library.archive,
         # on ne copie que les headers d'aide aux tests du projet.
-        for header in library.test_includes.glob("*.h"):
-            shutil.copy(header, tmp / header.name)
+        _copy_test_headers(library.test_includes, tmp)
 
     includes_dir = exercise_dir / "includes"
     if includes_dir.exists():
-        for header in includes_dir.glob("*.h"):
-            shutil.copy(header, tmp / header.name)
+        _copy_test_headers(includes_dir, tmp)
 
     # Fichiers de données lus par le test (ex. get_next_line) : copiés dans tmp/files.
     files_dir = manifest.get("files_dir")
