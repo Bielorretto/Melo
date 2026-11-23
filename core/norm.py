@@ -156,7 +156,7 @@ def _print_manual(problems: List[str], paths: Dict[str, str]) -> None:
             console.print(f"  • {p}", highlight=False)
             continue
         f, line, code, msg = m.group(1), m.group(2), m.group(4), m.group(5)
-        hint = _MANUAL_HINTS.get(code, msg)
+        hint = _MANUAL_HINTS.get(code) or _fr(code, msg)
         console.print(f"  • [bold]{paths.get(f, f)}[/] ligne [bold]{line}[/] : {hint} [dim]({code})[/]",
                       highlight=False)
 
@@ -220,6 +220,42 @@ def _install_formatter() -> Optional[List[str]]:
     return _formatter_cmd()
 
 
+# Déclaration de variable : indentation, type, espaces, nom (ex. «	size_t i; »).
+_DECL_RE = re.compile(
+    r"^(\t+)((?:(?:const|unsigned|signed|long|short|static|volatile|struct|union|enum)\s+)*\w+)"
+    r"[ \t]+(\**\w+(?:\[[^\]]*\])?(?:\s*=.*)?;)\s*$")
+_NOT_TYPES = {"return", "else", "goto", "break", "continue", "case", "sizeof"}
+
+
+def _align_declarations(code: str) -> str:
+    """Ce que c_formatter_42 oublie : aligner les noms des variables avec des tabulations
+    (même colonne pour toutes les déclarations d'un bloc) et finir le fichier par un \\n."""
+    lines = code.split("\n")
+    i = 0
+    while i < len(lines):
+        block = []
+        while i < len(lines):
+            m = _DECL_RE.match(lines[i])
+            if not m or m.group(2).split()[-1] in _NOT_TYPES or m.group(2).split()[0] in _NOT_TYPES:
+                break
+            block.append((i, m))
+            i += 1
+        if block:
+            # Colonne visée : après le type le plus long, sur un multiple de 4 (tab = 4).
+            starts = [len(m.group(1)) * 4 + len(m.group(2)) for _, m in block]
+            target = max(s // 4 * 4 + 4 for s in starts)
+            for (j, m), start in zip(block, starts):
+                tabs = (target - start // 4 * 4) // 4
+                lines[j] = f"{m.group(1)}{m.group(2)}{chr(9) * tabs}{m.group(3)}"
+        else:
+            i += 1
+    out = "\n".join(lines)
+    # c_formatter_42 colle « void (f)(...) » en « void(f)(...) » (pointeur sur fonction en
+    # paramètre), ce que norminette refuse (MISSING_IDENTIFIER) : on remet l'espace.
+    out = re.sub(r"\b(void|char|int|long|short|unsigned|size_t|t_\w+)\((\**\w+)\)\(", r"\1 (\2)(", out)
+    return out if out.endswith("\n") else out + "\n"
+
+
 def _norm_errors(path: Path) -> Optional[int]:
     """Nombre d'erreurs norminette du fichier (None si norminette n'a pas répondu)."""
     try:
@@ -255,11 +291,12 @@ def _fix(files: List[Path], student_dir: Path) -> bool:
             console.print(f"[red]{f.relative_to(student_dir)} : c_formatter_42 a échoué[/] "
                           f"{proc.stderr.strip()[:300]}")
             continue
-        if proc.stdout != original:
+        formatted = _align_declarations(proc.stdout)
+        if formatted != original:
             dest = backup / f.relative_to(student_dir)
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(f, dest)
-            f.write_text(proc.stdout)
+            f.write_text(formatted)
             after = _norm_errors(f)
             if before is not None and (after is None or after >= before):
                 # Le formatage n'a rien amélioré (ou a cassé) : on remet l'original.
