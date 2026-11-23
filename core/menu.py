@@ -132,6 +132,8 @@ def _module_help(track: str, module: str) -> None:
         rows.append(("   --strict", "vérifications plus sévères que la moulinette"))
     rows += [
         ("   -v", "sortie complète du compilateur"),
+        ("📏 norme [cible]", "lance norminette sur ton code (ou un fichier / dossier)"),
+        ("   --fix", "reformate ton code à la norme puis relance norminette"),
         ("🔙 retour", "revenir au menu précédent"),
         ("📄 help", "réaffiche cette aide"),
         ("🚪 quit", "quitte Melo"),
@@ -219,6 +221,12 @@ def run_module(track: str) -> None:
                 _module_help(track, module)
             elif cmd == "test":
                 _run_test(track, module, args)
+            elif cmd in ("norme", "norm", "norminette"):
+                from core.norm import run_norme
+                try:
+                    run_norme(STUDENT_DIR, args)
+                except KeyboardInterrupt:
+                    console.print("\n[yellow]norme interrompue.[/]")
             else:
                 console.print(f"[red]Commande inconnue :[/] '{cmd}' — tape 'help'")
 

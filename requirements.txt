@@ -2,3 +2,5 @@ pyyaml
 openai>=1.0.0
 rich
 python-dotenv
+norminette
+c-formatter-42
