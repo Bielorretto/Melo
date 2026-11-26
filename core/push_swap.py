@@ -5,10 +5,11 @@ le compile avec le Makefile de l'élève, puis lance push_swap sur des piles mé
 Les instructions sont vérifiées par le checker de Melo (simulation des piles en Python),
 donc pas besoin de checker_linux ni de fedora_checker.
 
-Sections : make, erreurs, petits, 100, 500, norme, readme.
+Sections : make, erreurs, 100, 500, norme, readme.
+Séries 100 / 500 : comme la commande de test (seq 1 N | shuf, 100 runs, checker),
+jugées avec les seuils du sujet (6.6 Performance Benchmarks).
 """
 
-import itertools
 import os
 import random
 import shutil
@@ -35,8 +36,6 @@ console = Console()
 INT_MIN, INT_MAX = -2**31, 2**31 - 1
 OPS = {"sa", "sb", "ss", "pa", "pb", "ra", "rb", "rr", "rra", "rrb", "rrr"}
 
-# Barème de correction 42 (points selon le nombre d'instructions).
-SCALES = {100: [700, 900, 1100, 1300, 1500], 500: [5500, 7000, 8500, 10000, 11500]}
 
 
 # --------------------------------------------------------------------------- checker
@@ -156,86 +155,49 @@ def _no_binary(build_: Build, what: str) -> List[TestResult]:
 
 
 def check_errors(b: Build) -> List[TestResult]:
+    """Ce que le sujet demande : rien sans paramètre, « Error\\n » sur stderr en cas d'erreur
+    (pas un entier, hors des limites d'un int, doublon)."""
     if not b.binary:
         return _no_binary(b, "gestion des erreurs")
+    results = []
+
+    rc, out, err = _run(b.binary, [])
+    crash = _crash(rc)
+    name = "sans paramètre : rien n'est affiché"
+    if crash:
+        results.append(_ko(name, crash, "rien, pas de crash", inp="./push_swap"))
+    elif out or err:
+        results.append(_ko(name, f"stdout={out[:40]!r} stderr={err[:40]!r}", "rien", inp="./push_swap"))
+    else:
+        results.append(_ok(name))
+
     cases = [
-        ("caractère non numérique", ["1", "2", "a"]),
-        ("doublon", ["1", "3", "2", "3"]),
+        ("pas un entier", ["1", "2", "a"]),
         ("plus grand que INT_MAX", ["1", "2147483648"]),
         ("plus petit que INT_MIN", ["-2147483649", "1"]),
-        ("signe seul", ["1", "-", "2"]),
-        ("nombre avec lettres", ["12a", "4"]),
+        ("doublon", ["1", "3", "2", "3"]),
     ]
-    results = []
-    for name, args in cases:
+    for label, args in cases:
+        name = f"{label} → Error"
+        inp = "./push_swap " + " ".join(args)
         rc, out, err = _run(b.binary, args)
         crash = _crash(rc)
         if crash:
-            results.append(_ko(f"{name} → Error", crash, "Error\\n sur la sortie d'erreur", inp=" ".join(args)))
+            results.append(_ko(name, crash, "Error\\n sur stderr", inp=inp))
         elif err != "Error\n" or out:
-            got = f"stdout={out[:40]!r} stderr={err[:40]!r}"
-            results.append(_ko(f"{name} → Error", got, "stdout vide, stderr='Error\\n'", inp=" ".join(args)))
+            results.append(_ko(name, f"stdout={out[:40]!r} stderr={err[:40]!r}",
+                               "stdout vide, stderr='Error\\n'", inp=inp))
         else:
-            results.append(_ok(f"{name} → Error"))
-
-    silent = [
-        ("sans argument : rien n'est affiché", []),
-        ("un seul nombre : rien n'est affiché", ["42"]),
-        ("déjà trié : aucune instruction", ["1", "2", "3", "4", "5"]),
-        ("INT_MIN et INT_MAX acceptés et triés", ["2147483647", "-2147483648", "0"]),
-    ]
-    for name, args in silent:
-        rc, out, err = _run(b.binary, args)
-        crash = _crash(rc)
-        if crash:
-            results.append(_ko(name, crash, "pas de crash", inp=" ".join(args) or "(aucun argument)"))
-            continue
-        if args and int(args[0]) > int(args[-1]):  # cas à trier
-            status, _ = check_ops([int(x) for x in args], out)
-            results.append(_ok(name) if status == "OK" and not err else
-                           _ko(name, f"checker : {status}" + (f", stderr={err.strip()!r}" if err else ""),
-                               "OK", inp=" ".join(args)))
-        else:
-            results.append(_ok(name) if not out and not err else
-                           _ko(name, f"stdout={out[:40]!r} stderr={err[:40]!r}", "rien",
-                               inp=" ".join(args) or "(aucun argument)"))
-    return results
-
-
-def check_small(b: Build, limits: Dict[int, int]) -> List[TestResult]:
-    if not b.binary:
-        return _no_binary(b, "petites piles")
-    rng = random.Random(42)
-    groups = [(2, [[2, 1]]),
-              (3, [list(p) for p in itertools.permutations([1, 2, 3])]),
-              (5, [rng.sample(range(-50, 50), 5) for _ in range(40)])]
-    results = []
-    for size, piles in groups:
-        limit = limits.get(size)
-        worst, bad = 0, None
-        for pile in piles:
-            rc, out, _ = _run(b.binary, [str(x) for x in pile])
-            crash = _crash(rc)
-            status, n = ("KO", 0) if crash else check_ops(pile, out)
-            worst = max(worst, n)
-            if crash or status != "OK":
-                bad = bad or (pile, crash or f"checker : {status}")
-        label = f"{size} nombres ({len(piles)} piles)"
-        if bad:
-            results.append(_ko(f"{label} triés", bad[1], "OK", inp=" ".join(map(str, bad[0]))))
-        elif limit is not None and worst > limit:
-            results.append(_ko(f"{label} en ≤ {limit} instructions", f"jusqu'à {worst} instructions",
-                               f"≤ {limit}"))
-        else:
-            results.append(_ok(f"{label} triés" + (f" en ≤ {limit} instructions (max {worst})" if limit else "")))
+            results.append(_ok(name))
     return results
 
 
 # --------------------------------------------------------------------------- séries 100 / 500
 
 
-def _one_run(binary: Path, size: int, seed: int) -> Tuple[List[int], str, int]:
-    pile = random.Random(seed).sample(range(1, size + 1), size)
+def _one_run(binary: Path, size: int) -> Tuple[List[int], str, int]:
+    """Un run de la commande : ARG=$(seq 1 N | shuf) ; ./push_swap $ARG | checker."""
+    pile = random.sample(range(1, size + 1), size)
     rc, out, _ = _run(binary, [str(x) for x in pile], timeout=20)
     crash = _crash(rc)
     if crash:
@@ -244,20 +206,12 @@ def _one_run(binary: Path, size: int, seed: int) -> Tuple[List[int], str, int]:
     return pile, status, n
 
 
-def _grade(size: int, worst: int) -> int:
-    scale = SCALES.get(size)
-    if not scale:
-        return 0
-    return next((5 - i for i, lim in enumerate(scale) if worst <= lim), 0)
-
-
-def benchmark(b: Build, size: int, runs: int, limit: int) -> bool:
+def benchmark(b: Build, size: int, runs: int, levels: Dict[str, int]) -> bool:
     title = f"push_swap/{size}"
     if not b.binary:
         print_results(title, _no_binary(b, f"{runs} piles de {size} nombres"))
         return False
 
-    seeds = [random.randrange(1 << 30) for _ in range(runs)]
     stats: List[Tuple[List[int], str, int]] = []
     console.print()
     with Progress(TextColumn(f"[cyan]🚵 {size} nombres[/]"), BarColumn(bar_width=40, complete_style="green"),
@@ -265,16 +219,15 @@ def benchmark(b: Build, size: int, runs: int, limit: int) -> bool:
                   console=console, transient=True) as progress:
         task = progress.add_task("", total=runs, last="")
         with ThreadPoolExecutor(max_workers=max(2, os.cpu_count() or 4)) as pool:
-            for res in pool.map(lambda s: _one_run(b.binary, size, s), seeds):
+            for res in pool.map(lambda _: _one_run(b.binary, size), range(runs)):
                 stats.append(res)
                 color = "green" if res[1] == "OK" else "red"
-                progress.update(task, advance=1, last=f"dernier : {res[2]} ops [{color}]{res[1]}[/]")
+                progress.update(task, advance=1, last=f"run : {res[2]} ops [{color}]{res[1]}[/]")
 
     errors = [s for s in stats if s[1] != "OK"]
-    ops = [s[2] for s in stats if s[1] == "OK"] or [0]
-    avg, worst, best = sum(ops) // len(ops), max(ops), min(ops)
-    over = sum(1 for n in ops if n > limit)
-    ok = not errors and worst <= limit
+    ops = [s[2] for s in stats]
+    total, worst, best = sum(ops), max(ops), min(ops)
+    ok = not errors and worst < levels["pass"]
 
     grid = Table.grid(padding=(0, 2))
     grid.add_column(style="bold")
@@ -283,34 +236,31 @@ def benchmark(b: Build, size: int, runs: int, limit: int) -> bool:
     grid.add_row("Runs", str(runs), "")
     grid.add_row("Erreurs", f"[{'green' if not errors else 'red'}]{len(errors)}[/]",
                  "" if not errors else f"[red]{errors[0][1]}[/]")
-    grid.add_row("Moyenne", f"{avg}", "ops")
-    grid.add_row("Max", f"[{'green' if worst <= limit else 'red'}]{worst}[/]", "ops")
+    grid.add_row("Moyenne", f"{total // runs}", "ops")
+    grid.add_row("Max", f"{worst}", "ops")
     grid.add_row("Min", f"{best}", "ops")
 
-    # Barre : max par rapport au seuil de la note max.
-    width = 36
-    filled = min(width, round(worst / max(limit, 1) * width * 0.8))
-    mark = round(width * 0.8)
-    bar = Text()
-    bar.append("█" * filled, style="green" if worst <= limit else "red")
-    bar.append("░" * (width - filled), style="grey35")
-    bar = Text.assemble(bar[:mark], ("│", "bold yellow"), bar[mark:])
-    grid.add_row("", bar, f"[yellow]{limit}[/]")
+    # Seuils du sujet, jugés sur le max (chaque run doit passer).
+    seuils = Table.grid(padding=(0, 2))
+    for key, label in (("excellent", "excellent"), ("good", "good"), ("pass", "pass (minimum)")):
+        hit = worst < levels[key]
+        seuils.add_row(f"[{'green' if hit else 'grey50'}]{'✔' if hit else '✘'}[/]", label,
+                       f"[dim]< {levels[key]} ops[/]")
 
-    points = _grade(size, worst)
     if errors:
-        verdict = f"[red]❌ {len(errors)} pile(s) mal triée(s)[/]"
-    elif ok:
-        verdict = f"[green]✅ note max : toutes les piles en ≤ {limit} ops[/]"
+        verdict = f"[red]❌ {len(errors)} run(s) KO : pile mal triée ou crash[/]"
+    elif not ok:
+        over = sum(1 for n in ops if n >= levels["pass"])
+        verdict = f"[red]❌ {over} run(s) à {levels['pass']} ops ou plus : minimum du sujet non atteint[/]"
     else:
-        verdict = f"[red]⚠ {over} run(s) au-dessus de {limit} ops[/]"
+        verdict = "[green]✅ minimum du sujet atteint[/]"
+
     body = Table.grid()
     body.add_row(grid)
     body.add_row("")
+    body.add_row(seuils)
+    body.add_row("")
     body.add_row(Text.from_markup(verdict))
-    if SCALES.get(size):
-        stars = "★" * points + "☆" * (5 - points)
-        body.add_row(Text.from_markup(f"[dim]barème :[/] [yellow]{stars}[/] [dim]{points}/5 points[/]"))
     if errors:
         ko_file = Path(tempfile.gettempdir()) / f"melo_push_swap_ko_{size}.txt"
         ko_file.write_text(" ".join(map(str, errors[0][0])) + "\n")
@@ -346,15 +296,16 @@ def run_push_swap(project_dir: Path, student_dir: Path, only: Optional[str] = No
         simple: Dict[str, Callable[[], List[TestResult]]] = {
             "make": lambda: b.results,
             "erreurs": lambda: check_errors(b),
-            "petits": lambda: check_small(b, {int(k): v for k, v in project.get("small_limits", {}).items()}),
             "norme": lambda: check_norm(project, student_dir),
             "readme": lambda: check_readme(project, student_dir),
         }
         totals = [0, 0]
+        bench_ok: Dict[str, bool] = {}
         for s in wanted:
             if s in bench:
                 cfg = bench[s]
-                ok = benchmark(b, cfg["size"], cfg["runs"], cfg["limit"])
+                ok = benchmark(b, cfg["size"], cfg["runs"], cfg)
+                bench_ok[s] = ok
             else:
                 results = simple[s]()
                 ok = print_results(f"push_swap/{s}", results, compact=len(wanted) > 1)
@@ -365,6 +316,7 @@ def run_push_swap(project_dir: Path, student_dir: Path, only: Optional[str] = No
 
     if len(wanted) > 1:
         color = "green" if all_ok else "red"
+        series = "  ".join(f"{k} {'✅' if v else '❌'}" for k, v in bench_ok.items())
         console.print(f"\n[{color}]=== push_swap : {totals[0]}/{totals[1]} tests réussis"
-                      f" + séries {' / '.join(bench)} {'✅' if all_ok else '❌'} ===[/]")
+                      + (f"  |  séries : {series}" if series else "") + " ===[/]")
     return all_ok

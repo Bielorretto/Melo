@@ -8,15 +8,13 @@ header: push_swap.h
 program: push_swap
 
 # Sections testables seules : test <section>
-sections: [make, erreurs, petits, "100", "500", norme, readme]
+sections: [make, erreurs, "100", "500", norme, readme]
 
-# Séries chronométrées : nombre de runs, taille de la pile, seuil d'instructions de la note max.
+# Séries (comme la commande de test : seq 1 N | shuf, 100 runs, checker).
+# Seuils du sujet (6.6 Performance Benchmarks) : « less than » N opérations.
 benchmarks:
-  "100": {size: 100, runs: 50, limit: 700}
-  "500": {size: 500, runs: 100, limit: 5500}
-
-# Petites piles (barème de correction) : nombre maximum d'instructions.
-small_limits: {3: 3, 5: 12}
+  "100": {size: 100, runs: 100, pass: 2000, good: 1500, excellent: 700}
+  "500": {size: 500, runs: 100, pass: 12000, good: 8000, excellent: 5500}
 
 readme:
   first_line: 'This activity has been created as part of the 42 curriculum by'
