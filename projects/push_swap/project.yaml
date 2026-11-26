@@ -1,0 +1,25 @@
+# Projet Common Core : push_swap
+# Utilisé par core/push_swap.py (programme, pas une lib) : Melo compile avec ton Makefile
+# sur une copie, lance push_swap et vérifie les instructions avec son propre checker.
+
+name: push_swap
+kind: program
+header: push_swap.h
+program: push_swap
+
+# Sections testables seules : test <section>
+sections: [make, erreurs, petits, "100", "500", norme, readme]
+
+# Séries chronométrées : nombre de runs, taille de la pile, seuil d'instructions de la note max.
+benchmarks:
+  "100": {size: 100, runs: 50, limit: 700}
+  "500": {size: 500, runs: 100, limit: 5500}
+
+# Petites piles (barème de correction) : nombre maximum d'instructions.
+small_limits: {3: 3, 5: 12}
+
+readme:
+  first_line: 'This activity has been created as part of the 42 curriculum by'
+  sections: [Description, Instructions, Resources]
+
+functions: {}

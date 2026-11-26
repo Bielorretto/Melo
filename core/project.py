@@ -927,7 +927,9 @@ def check_norm(project: dict, student_dir: Path) -> List[TestResult]:
 def check_readme(project: dict, student_dir: Path) -> List[TestResult]:
     readme = student_dir / "README.md"
     if not readme.is_file():
-        return [_ko("README.md présent", "README.md absent de la racine", "README.md à la racine")]
+        other = next((p.name for p in student_dir.iterdir() if p.name.lower() == "readme.md"), None)
+        got = f"{other} trouvé : renomme-le README.md (majuscules)" if other else "README.md absent de la racine"
+        return [_ko("README.md présent", got, "README.md à la racine")]
     cfg = project["readme"]
     text = readme.read_text(errors="replace")
     lines = text.splitlines()
@@ -978,9 +980,12 @@ def find_project(projects_root: Path, target: str) -> Optional[Tuple[Path, Optio
 
 
 def detect_project(projects_root: Path, student_dir: Path) -> Optional[str]:
-    for pf in sorted(projects_root.glob(f"*/{PROJECT_FILE}")):
-        if (student_dir / load_project(pf.parent)["header"]).is_file():
-            return pf.parent.name
+    # Les programmes d'abord : un push_swap embarque souvent libft.h / ft_printf.h.
+    projects = [(pf.parent.name, load_project(pf.parent)) for pf in sorted(projects_root.glob(f"*/{PROJECT_FILE}"))]
+    projects.sort(key=lambda np: np[1].get("kind") != "program")
+    for name, project in projects:
+        if (student_dir / project["header"]).is_file():
+            return name
     return None
 
 
@@ -1020,6 +1025,9 @@ def run_project(project_dir: Path, student_dir: Path, only: Optional[str] = None
     moulinette (tests marqués strict, helpers static, make re) ne sont pas lancées."""
     project = load_project(project_dir)
     pname = project["name"]
+    if project.get("kind") == "program":  # push_swap : un programme, testé à part
+        from core.push_swap import run_push_swap
+        return run_push_swap(project_dir, student_dir, only)
 
     if not student_dir.is_dir():
         print(f"{RED}Dossier introuvable : {student_dir}{RESET}")

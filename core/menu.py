@@ -107,6 +107,9 @@ def _project_examples(module: str) -> List[str]:
     from core.project import _function_manifests, load_project
     try:
         project_dir = PROJECTS_ROOT / module
+        project = load_project(project_dir)
+        if project.get("sections"):
+            return [str(s) for s in project["sections"]]
         return [m.parent.name for m in _function_manifests(project_dir, load_project(project_dir))]
     except Exception:
         return []
@@ -129,7 +132,10 @@ def _module_help(track: str, module: str) -> None:
             rows.append(("🧪 test bonus", "teste seulement le bonus"))
         if module == "libft":
             rows.append(("   -h", "compile sans ton header (ex. test ft_strlen -h)"))
-        rows.append(("   --strict", "vérifications plus sévères que la moulinette"))
+        if module == "push_swap":
+            rows[1] = ("🧪 test <section>", "teste une seule section (" + ", ".join(names) + ")")
+        else:
+            rows.append(("   --strict", "vérifications plus sévères que la moulinette"))
     rows += [
         ("   -v", "sortie complète du compilateur"),
         ("📏 norme [cible]", "lance norminette sur ton code (ou un fichier / dossier)"),
