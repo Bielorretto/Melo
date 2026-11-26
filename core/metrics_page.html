@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Melo — métriques</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #26324B;
+  --title: #1D1D1F;
+  --muted: #5B6478;
+  --chart-h: clamp(180px, calc(100vh - 490px), 420px);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: #E4E8F2; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', Inter, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+button { font-family: inherit; }
+
+.page {
+  position: relative; overflow: hidden;
+  height: 100vh; min-height: 640px;
+  padding: 28px 32px;
+  display: flex; flex-direction: column; justify-content: center;
+  background: linear-gradient(160deg, #E9ECF2 0%, #DDE2EB 100%);
+}
+.backdrop { position: absolute; inset: 0; pointer-events: none; }
+.blob {
+  position: absolute; border-radius: 50%; filter: blur(70px); opacity: .55;
+  animation: drift 22s ease-in-out infinite alternate;
+}
+@keyframes drift { from { transform: translate(0, 0) scale(1); } to { transform: translate(60px, -40px) scale(1.12); } }
+.backdrop svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+.wrap {
+  position: relative; width: 100%; max-width: 1400px; margin: 0 auto;
+  display: flex; flex-direction: column; gap: 20px;
+}
+
+.glass {
+  background: linear-gradient(135deg, rgba(255,255,255,.58), rgba(255,255,255,.22));
+  -webkit-backdrop-filter: blur(28px) saturate(170%);
+  backdrop-filter: blur(28px) saturate(170%);
+  border: 1px solid rgba(255,255,255,.7);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.95), inset 0 -1px 0 rgba(255,255,255,.3), 0 20px 50px rgba(40,50,90,.14);
+}
+.card { border-radius: 28px; transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s ease; }
+.card:hover {
+  transform: translateY(-6px) scale(1.015);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.95), inset 0 -1px 0 rgba(255,255,255,.3), 0 32px 70px rgba(40,50,90,.24);
+}
+
+.glow {
+  position: relative; display: inline-block;
+  background: linear-gradient(90deg, #3B4A8C, #5B4B9A, #8A4A7E, #9A5A3E, #5B4B9A, #3B4A8C);
+  background-size: 200% 100%;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+  animation: shine 10s linear infinite;
+}
+.glow::before {
+  content: attr(data-text); position: absolute; inset: 0; z-index: -1;
+  background: inherit; background-size: inherit;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: blur(8px); opacity: .3; transform: scale(1.02);
+  animation: inherit; pointer-events: none;
+}
+@keyframes shine { from { background-position: 0% 50%; } to { background-position: 200% 50%; } }
+
+/* ---- en-tête : évolution + échelles de temps ---- */
+.top { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); align-items: center; gap: 20px; }
+.evolution { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.evolution .value { font-size: 76px; font-weight: 600; line-height: 1.1; letter-spacing: -0.035em; }
+.evolution .label { font-size: 15px; color: var(--muted); }
+.periods-wrap { display: flex; justify-content: flex-end; }
+.periods { position: relative; overflow: hidden; display: flex; gap: 6px; border-radius: 999px; padding: 6px; }
+.periods button {
+  position: relative; z-index: 1; width: 60px; height: 40px; padding: 0; border: 0; border-radius: 999px;
+  cursor: pointer; font-size: 15px; font-weight: 500; background: transparent; color: #46506A;
+  transition: color .4s ease;
+}
+.periods button[aria-pressed="true"] { color: var(--ink); }
+.periods button:focus-visible { outline: 2px solid #3B4A8C; outline-offset: 2px; }
+.thumb {
+  position: absolute; top: 6px; left: 6px; width: 60px; height: 40px; border-radius: 999px;
+  background: linear-gradient(135deg, rgba(255,255,255,.75), rgba(255,255,255,.35));
+  -webkit-backdrop-filter: blur(10px) saturate(160%); backdrop-filter: blur(10px) saturate(160%);
+  border: 1px solid rgba(255,255,255,.9);
+  box-shadow: inset 0 1px 0 #FFFFFF, 0 6px 18px rgba(40,50,90,.18);
+  pointer-events: none;
+}
+.smoke {
+  position: absolute; border-radius: 50%; pointer-events: none; filter: blur(4px);
+  background: radial-gradient(circle, rgba(255,255,255,.95) 0%, rgba(255,255,255,.45) 40%, rgba(255,255,255,0) 70%);
+}
+
+/* ---- graphique ---- */
+.chart-card { padding: 22px 28px 18px; display: flex; flex-direction: column; gap: 14px; }
+.card-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; }
+h2 { margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -0.02em; }
+.subtitle { font-size: 14px; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 12px 28px; font-size: 14px; }
+.legend > span { display: inline-flex; align-items: center; gap: 10px; }
+.legend .hint { color: var(--muted); }
+.sw-line { width: 28px; height: 4px; border-radius: 2px; background: linear-gradient(90deg, #F0507A, #F7A531, #2DC59F, #3FA2E8, #8E6CEF); }
+.sw-dot { width: 12px; height: 12px; border-radius: 50%; background: #FFFFFF; border: 3px solid #2DC59F; }
+.sw-bubble { background: var(--ink); color: #FFFFFF; font-size: 12px; padding: 2px 8px; border-radius: 6px; }
+
+.chart { display: flex; gap: 10px; }
+.y-title { width: 18px; display: flex; align-items: center; justify-content: center; }
+.y-title span { transform: rotate(-90deg); white-space: nowrap; font-size: 13px; color: var(--muted); }
+.ticks {
+  display: flex; flex-direction: column; justify-content: space-between;
+  height: calc(var(--chart-h) + 16px); margin: -8px 0;
+  font-size: 14px; color: var(--muted); text-align: right; min-width: 28px;
+}
+.ticks span { line-height: 16px; }
+.plot-col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+.plot {
+  position: relative; height: var(--chart-h);
+  background-image: linear-gradient(rgba(38,50,75,0.10) 1px, transparent 1px);
+  background-size: 100% 25%;
+  border-bottom: 1px solid rgba(38,50,75,0.22);
+}
+.plot svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.dot {
+  position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%;
+  background: #FFFFFF; border: 3px solid; pointer-events: none;
+}
+.bubble {
+  position: absolute; transform: translate(-100%, -150%);
+  background: var(--ink); color: #FFFFFF; font-size: 15px; font-weight: 500;
+  padding: 6px 12px; border-radius: 10px; white-space: nowrap; pointer-events: none;
+}
+.hits { position: absolute; inset: 0; display: flex; }
+.hits div { flex: 1; min-width: 0; height: 100%; }
+.xlabels { position: relative; height: 18px; font-size: 14px; color: var(--muted); }
+.xlabels span { position: absolute; white-space: nowrap; }
+.x-title { text-align: center; font-size: 13px; color: var(--muted); }
+
+/* ---- nouveaux utilisateurs ---- */
+.recent-card { padding: 18px 28px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 40px; }
+.recent { display: flex; flex-wrap: wrap; gap: 10px 36px; flex: 1; min-width: 0; font-size: 16px; }
+.recent > div { display: inline-flex; align-items: center; gap: 10px; }
+.recent .pip { width: 10px; height: 10px; border-radius: 50%; }
+.recent .login { font-weight: 500; }
+.recent .when { color: var(--muted); }
+
+.demo-badge {
+  position: absolute; top: 14px; right: 18px; font-size: 13px; color: var(--muted);
+  padding: 4px 10px; border-radius: 999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blob, .glow, .glow::before { animation: none; }
+  .card { transition: none; }
+  .card:hover { transform: none; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="backdrop" aria-hidden="true">
+    <span class="blob" style="left:-140px; top:-120px; width:520px; height:520px; background:#B9C7E6"></span>
+    <span class="blob" style="right:-120px; top:45%; width:560px; height:560px; background:#CBC2EA; animation-delay:-9s"></span>
+    <svg viewBox="0 0 1440 1000" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.55"/>
+          <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="sea2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#B9C7E6" stop-opacity="0.45"/>
+          <stop offset="1" stop-color="#B9C7E6" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path id="bgC" fill="url(#sea2)"/>
+      <path id="bgB" fill="url(#sea)"/>
+      <path id="bgA" fill="url(#sea2)"/>
+      <path id="bgTop" fill="url(#sea)" transform="translate(0 1000) scale(1 -1)"/>
+    </svg>
+  </div>
+
+  <div class="wrap">
+    <div class="top">
+      <div aria-hidden="true"></div>
+      <div class="evolution">
+        <span class="value glow" id="evolution" data-text="">—</span>
+        <span class="label" id="evolutionLabel"></span>
+      </div>
+      <div class="periods-wrap">
+        <div class="periods glass" role="group" aria-label="Échelle de temps" id="periods">
+          <span class="thumb" id="thumb" aria-hidden="true"></span>
+        </div>
+      </div>
+    </div>
+
+    <section class="card glass chart-card">
+      <div class="card-head">
+        <h2 class="glow" data-text="Évolution des utilisateurs de Melo">Évolution des utilisateurs de Melo</h2>
+        <span class="subtitle" id="subtitle"></span>
+      </div>
+      <div class="legend">
+        <span><span class="sw-line" aria-hidden="true"></span>Total d’utilisateurs différents</span>
+        <span><span class="sw-dot" aria-hidden="true"></span><span id="pointLegend"></span></span>
+        <span><span class="sw-bubble" aria-hidden="true" id="bubbleLegend">0</span>Total actuel</span>
+        <span class="hint">Survole la courbe pour voir le détail</span>
+      </div>
+      <div class="chart">
+        <div class="y-title" aria-hidden="true"><span>Utilisateurs</span></div>
+        <div class="ticks" aria-hidden="true" id="ticks"></div>
+        <div class="plot-col">
+          <div class="plot">
+            <svg viewBox="0 0 1000 420" preserveAspectRatio="none" role="img" id="chartSvg">
+              <defs>
+                <linearGradient id="rainbow" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0" stop-color="#F0507A"/>
+                  <stop offset="0.25" stop-color="#F7A531"/>
+                  <stop offset="0.5" stop-color="#2DC59F"/>
+                  <stop offset="0.75" stop-color="#3FA2E8"/>
+                  <stop offset="1" stop-color="#8E6CEF"/>
+                </linearGradient>
+                <linearGradient id="depth" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.32"/>
+                  <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.06"/>
+                </linearGradient>
+                <clipPath id="areaClip"><path id="clipPath"/></clipPath>
+                <mask id="depthMask" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="420">
+                  <rect id="depthRect" x="0" width="1000" fill="url(#depth)"/>
+                </mask>
+                <mask id="waveMask" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="420">
+                  <path id="waveC" fill="#FFFFFF" fill-opacity="0.22"/>
+                  <path id="waveB" fill="#FFFFFF" fill-opacity="0.3"/>
+                  <path id="waveA" fill="#FFFFFF" fill-opacity="0.4"/>
+                </mask>
+              </defs>
+              <g clip-path="url(#areaClip)">
+                <rect x="0" y="0" width="1000" height="420" fill="url(#rainbow)" mask="url(#depthMask)"/>
+                <rect x="0" y="0" width="1000" height="420" fill="url(#rainbow)" mask="url(#waveMask)"/>
+              </g>
+              <path id="line" fill="none" stroke="url(#rainbow)" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+            </svg>
+            <div id="dots"></div>
+            <div class="bubble" id="bubble"></div>
+            <div class="hits" id="hits"></div>
+          </div>
+          <div class="xlabels" aria-hidden="true" id="xlabels"></div>
+          <div class="x-title" aria-hidden="true" id="xTitle"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card glass recent-card">
+      <h2 class="glow" data-text="Nouveaux utilisateurs">Nouveaux utilisateurs</h2>
+      <div class="recent" id="recent"></div>
+    </section>
+  </div>
+  <span class="demo-badge glass" id="demoBadge" hidden>Données d'exemple</span>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var DATA = /*__MELO_DATA__*/null;
+  DATA = DATA || { launches: [], demo: false };
+
+  var W = 1000, H = 420;
+  var COLORS = ["#F0507A", "#F7A531", "#2DC59F", "#3FA2E8", "#8E6CEF"];
+  var HOUR = 3600 * 1000, DAY = 24 * HOUR;
+  var NOW = Date.now();
+  var reduceMotion = false;
+  try { reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
+
+  function $(id) { return document.getElementById(id); }
+
+  // ------------------------------------------------------------------ données
+  // Premier lancement de chaque login : c'est le moment où il devient utilisateur.
+  var firstSeen = {};
+  DATA.launches.forEach(function (r) {
+    var t = Date.parse(r.launched_at);
+    if (!r.login || isNaN(t)) return;
+    if (firstSeen[r.login] === undefined || t < firstSeen[r.login]) firstSeen[r.login] = t;
+  });
+  var users = Object.keys(firstSeen).map(function (l) { return { login: l, t: firstSeen[l] }; });
+  users.sort(function (a, b) { return a.t - b.t; });
+  var firsts = users.map(function (u) { return u.t; });
+
+  // Nombre d'utilisateurs arrivés strictement avant t.
+  function countBefore(t) {
+    var lo = 0, hi = firsts.length;
+    while (lo < hi) { var mid = (lo + hi) >> 1; if (firsts[mid] < t) lo = mid + 1; else hi = mid; }
+    return lo;
+  }
+
+  // ------------------------------------------------------------------ périodes
+  function dayStart(t, plus) { var d = new Date(t); return new Date(d.getFullYear(), d.getMonth(), d.getDate() + (plus || 0)).getTime(); }
+  function monthStart(t, plus) { var d = new Date(t); return new Date(d.getFullYear(), d.getMonth() + (plus || 0), 1).getTime(); }
+  function fmt(t, opts) { return new Date(t).toLocaleDateString("fr-FR", opts).replace(".", ""); }
+
+  function buckets(period) {
+    var out = [], i, s;
+    if (period === "1j") {
+      var h0 = Math.floor(NOW / HOUR) * HOUR;
+      for (i = 23; i >= 0; i--) { s = h0 - i * HOUR; out.push({ start: s, end: s + HOUR, label: new Date(s).getHours() + "h" }); }
+      return { b: out, every: 4, unit: "par heure", point: "une heure", x: "Heures", label: "sur 24 heures" };
+    }
+    if (period === "1s") {
+      for (i = 6; i >= 0; i--) { s = dayStart(NOW, -i); out.push({ start: s, end: dayStart(NOW, -i + 1), label: fmt(s, { weekday: "short" }) }); }
+      return { b: out, every: 1, unit: "par jour", point: "un jour", x: "Jours", label: "sur 7 jours" };
+    }
+    if (period === "1m") {
+      for (i = 29; i >= 0; i--) { s = dayStart(NOW, -i); out.push({ start: s, end: dayStart(NOW, -i + 1), label: fmt(s, { day: "numeric", month: "short" }) }); }
+      return { b: out, every: 5, unit: "par jour", point: "un jour", x: "Jours", label: "sur 30 jours" };
+    }
+    if (period === "3m") {
+      for (i = 12; i >= 0; i--) { var e = dayStart(NOW, 1 - i * 7); out.push({ start: e - 7 * DAY, end: e, label: fmt(e - 7 * DAY, { day: "numeric", month: "short" }) }); }
+      return { b: out, every: 2, unit: "par semaine", point: "une semaine", x: "Semaines", label: "sur 3 mois" };
+    }
+    // MAX : depuis le premier utilisateur, par mois (par jour si Melo a moins de 2 mois).
+    var first = firsts.length ? firsts[0] : NOW;
+    var m = monthStart(first), last = monthStart(NOW);
+    var months = 0;
+    for (var mm = m; mm <= last; mm = monthStart(mm, 1)) months++;
+    if (months >= 2) {
+      for (i = 0; i < months; i++) { s = monthStart(m, i); out.push({ start: s, end: monthStart(m, i + 1), label: fmt(s, months > 12 ? { month: "short", year: "2-digit" } : { month: "short" }) }); }
+      return { b: out, every: Math.max(1, Math.ceil(months / 10)), unit: "par mois", point: "un mois", x: "Mois", label: "depuis le début" };
+    }
+    var d0 = dayStart(first), days = Math.max(2, Math.round((dayStart(NOW) - d0) / DAY) + 1);
+    for (i = 0; i < days; i++) { s = dayStart(d0, i); out.push({ start: s, end: dayStart(d0, i + 1), label: fmt(s, { day: "numeric", month: "short" }) }); }
+    return { b: out, every: Math.max(1, Math.ceil(days / 8)), unit: "par jour", point: "un jour", x: "Jours", label: "depuis le début" };
+  }
+
+  // ------------------------------------------------------------------ rendu du graphique
+  var G = null; // géométrie courante, utilisée par l'animation
+
+  function render(period) {
+    var p = buckets(period);
+    var n = p.b.length;
+    var base = countBefore(p.b[0].start);
+    var vals = p.b.map(function (b) { return countBefore(Math.min(b.end, NOW + 1)); });
+    var end = vals[n - 1];
+    var start = base > 0 ? base : vals[0];
+    var pct = start > 0 ? Math.round(((end - start) / start) * 100) : null;
+
+    var low = base === 0 ? 0 : Math.max(0, base - 1);
+    var step = Math.max(1, Math.ceil((end + 1 - low) / 4));
+    var ymin = low, ymax = low + step * 4;
+    function px(i) { return n === 1 ? W / 2 : (i / (n - 1)) * W; }
+    function py(v) { return (1 - (v - ymin) / (ymax - ymin)) * H; }
+    function pcx(i) { return (px(i) / W * 100).toFixed(2) + "%"; }
+    function pcy(v) { return (py(v) / H * 100).toFixed(2) + "%"; }
+
+    var line = "";
+    for (var i = 0; i < n; i++) line += (i ? " L" : "M") + px(i).toFixed(1) + "," + py(vals[i]).toFixed(1);
+    var area = line + " L" + px(n - 1).toFixed(1) + "," + H + " L" + px(0).toFixed(1) + "," + H + " Z";
+    $("line").setAttribute("d", line);
+    $("clipPath").setAttribute("d", area);
+
+    var topY = H;
+    for (i = 0; i < n; i++) topY = Math.min(topY, py(vals[i]));
+    $("depthRect").setAttribute("y", topY.toFixed(1));
+    $("depthRect").setAttribute("height", Math.max(1, H - topY).toFixed(1));
+
+    // En-tête
+    var evo = pct === null ? "—" : (pct >= 0 ? "+" : "") + pct + " %";
+    $("evolution").textContent = evo;
+    $("evolution").setAttribute("data-text", evo);
+    var added = end - base;
+    $("evolutionLabel").textContent = added + " nouveau" + (added > 1 ? "x" : "") + " " + p.label + " · " + end + " au total";
+    $("subtitle").textContent = "total cumulé, " + p.unit;
+    $("pointLegend").textContent = n <= 13 ? "Un point = " + p.point : "Dernier point";
+    $("bubbleLegend").textContent = String(end);
+    $("xTitle").textContent = p.x;
+    $("chartSvg").setAttribute("aria-label", "Total d’utilisateurs " + p.label + " : de " + start + " à " + end);
+
+    // Graduations
+    var ticks = "";
+    for (i = 4; i >= 0; i--) ticks += "<span>" + (ymin + step * i) + "</span>";
+    $("ticks").innerHTML = ticks;
+
+    // Points
+    var dots = $("dots");
+    dots.textContent = "";
+    function addDot(i, color) {
+      var d = document.createElement("span");
+      d.className = "dot";
+      d.style.left = pcx(i); d.style.top = pcy(vals[i]); d.style.borderColor = color;
+      dots.appendChild(d);
+    }
+    if (n <= 13) for (i = 0; i < n; i++) addDot(i, COLORS[Math.min(4, Math.floor((i / Math.max(1, n - 1)) * 4.999))]);
+    else addDot(n - 1, COLORS[4]);
+
+    var bubble = $("bubble");
+    bubble.textContent = end + " utilisateur" + (end > 1 ? "s" : "");
+    bubble.style.left = pcx(n - 1); bubble.style.top = pcy(end);
+
+    // Zones de survol
+    var hits = $("hits");
+    hits.textContent = "";
+    for (i = 0; i < n; i++) {
+      var h = document.createElement("div");
+      var inc = vals[i] - (i ? vals[i - 1] : base);
+      h.title = p.b[i].label + " : " + vals[i] + " utilisateur" + (vals[i] > 1 ? "s" : "") + " (+" + inc + ")";
+      hits.appendChild(h);
+    }
+
+    // Étiquettes de l'axe du bas
+    var xl = $("xlabels");
+    xl.textContent = "";
+    function addLabel(i, shift) {
+      var s = document.createElement("span");
+      s.textContent = p.b[i].label;
+      s.style.left = pcx(i); s.style.transform = shift;
+      xl.appendChild(s);
+    }
+    var lastDone = false;
+    for (i = 0; i < n; i += p.every) {
+      var isLast = i === n - 1;
+      lastDone = lastDone || isLast;
+      addLabel(i, i === 0 ? "translateX(0)" : isLast ? "translateX(-100%)" : "translateX(-50%)");
+    }
+    if (!lastDone && n > 1) addLabel(n - 1, "translateX(-100%)");
+
+    G = { n: n, vals: vals, px: px, py: py };
+    drawWaves(lastT);
+  }
+
+  // ------------------------------------------------------------------ vagues
+  function curveY(x) {
+    var n = G.n, vals = G.vals;
+    if (n === 1) return G.py(vals[0]);
+    var f = (x / W) * (n - 1);
+    var i0 = Math.min(n - 2, Math.floor(f)), k = f - i0;
+    return G.py(vals[i0]) * (1 - k) + G.py(vals[i0 + 1]) * k;
+  }
+
+  // Vague sous la courbe : toujours sous elle, plus ou moins haute selon le graphique.
+  function chartWave(t, frac, ampFrac, len, speed) {
+    var d = "";
+    for (var x = 0; x <= W; x += 10) {
+      var cy = curveY(x), depth = H - cy;
+      var amp = Math.min(14, depth * ampFrac);
+      var y = cy + depth * frac + amp * Math.sin((x / len) * 2 * Math.PI - t * speed);
+      y = Math.min(H, Math.max(cy + 1, y));
+      d += (x ? " L" : "M") + x + "," + y.toFixed(1);
+    }
+    return d + " L" + W + "," + H + " L0," + H + " Z";
+  }
+
+  // Vagues du fond : très lentes, sur toute la page.
+  function bgWave(t, base, amp, len, speed, phase) {
+    var d = "";
+    for (var x = 0; x <= 1440; x += 20) {
+      var y = base + amp * Math.sin((x / len) * 2 * Math.PI + t * speed + phase)
+        + amp * 0.35 * Math.sin((x / (len * 0.47)) * 2 * Math.PI - t * speed * 1.3 + phase);
+      d += (x ? " L" : "M") + x + "," + y.toFixed(1);
+    }
+    return d + " L1440,1000 L0,1000 Z";
+  }
+
+  var lastT = 0;
+  function drawWaves(t) {
+    if (!G) return;
+    $("waveA").setAttribute("d", chartWave(t, 0.55, 0.12, 260, 0.6));
+    $("waveB").setAttribute("d", chartWave(t, 0.35, 0.12, 340, -0.4));
+    $("waveC").setAttribute("d", chartWave(t, 0.18, 0.1, 430, 0.25));
+    $("bgA").setAttribute("d", bgWave(t, 820, 26, 1300, 0.16, 0));
+    $("bgB").setAttribute("d", bgWave(t, 740, 34, 1700, -0.11, 1.7));
+    $("bgC").setAttribute("d", bgWave(t, 660, 40, 2100, 0.08, 3.1));
+    $("bgTop").setAttribute("d", bgWave(t, 860, 30, 1900, -0.07, 0.9));
+  }
+
+  // ------------------------------------------------------------------ échelles de temps
+  var PERIODS = [["max", "MAX"], ["3m", "3M"], ["1m", "1M"], ["1s", "1S"], ["1j", "1J"]];
+  var slide = { from: 0, to: 0, at: -1e9 };
+  function slidePos(delay, duration, now) {
+    var p = Math.min(1, Math.max(0, (now - slide.at - delay) / duration));
+    return slide.from + (slide.to - slide.from) * (1 - Math.pow(1 - p, 3));
+  }
+
+  var group = $("periods"), thumb = $("thumb");
+  var buttons = PERIODS.map(function (def, idx) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.textContent = def[1];
+    b.setAttribute("aria-pressed", idx === 0 ? "true" : "false");
+    b.addEventListener("click", function () {
+      var now = performance.now();
+      slide = { from: reduceMotion ? idx : slidePos(0, 700, now), to: idx, at: reduceMotion ? -1e9 : now };
+      buttons.forEach(function (o, j) { o.setAttribute("aria-pressed", j === idx ? "true" : "false"); });
+      render(def[0]);
+      if (reduceMotion) thumb.style.transform = "translateX(" + idx * 66 + "px)";
+    });
+    group.appendChild(b);
+    return b;
+  });
+
+  // ------------------------------------------------------------------ nouveaux utilisateurs
+  function ago(t) {
+    var days = Math.floor((dayStart(NOW) - dayStart(t)) / DAY + 0.5);
+    if (days <= 0) return "aujourd'hui";
+    if (days === 1) return "hier";
+    if (days < 31) return "il y a " + days + " jours";
+    var months = Math.floor(days / 30);
+    return months < 12 ? "il y a " + months + " mois" : "il y a plus d'un an";
+  }
+  (function renderRecent() {
+    var box = $("recent");
+    var latest = users.slice(-4).reverse();
+    if (!latest.length) { box.innerHTML = '<span class="when">Personne pour l’instant</span>'; return; }
+    latest.forEach(function (u, i) {
+      var row = document.createElement("div");
+      var pip = document.createElement("span"); pip.className = "pip"; pip.style.background = COLORS[i % COLORS.length];
+      var login = document.createElement("span"); login.className = "login"; login.textContent = u.login;
+      var when = document.createElement("span"); when.className = "when"; when.textContent = ago(u.t);
+      row.appendChild(pip); row.appendChild(login); row.appendChild(when);
+      box.appendChild(row);
+    });
+  })();
+
+  if (DATA.demo) $("demoBadge").hidden = false;
+
+  // ------------------------------------------------------------------ animation
+  render("max");
+
+  if (!reduceMotion) {
+    var startTs = performance.now(), lastTs = startTs;
+    var lastHead = slidePos(0, 700, startTs) * 66;
+    var particles = [];
+    var frame = function (ts) {
+      var dt = Math.min(50, ts - lastTs);
+      lastTs = ts;
+      lastT = (ts - startTs) / 1000;
+      drawWaves(lastT);
+
+      var head = slidePos(0, 700, ts) * 66;
+      thumb.style.transform = "translateX(" + head.toFixed(2) + "px)";
+      // Fumée blanche discrète derrière le curseur quand il glisse.
+      var vel = head - lastHead;
+      lastHead = head;
+      var count = Math.abs(vel) > 0.6 && Math.random() < 0.6 ? (Math.abs(vel) > 4 ? 2 : 1) : 0;
+      for (var k = 0; k < count && particles.length < 120; k++) {
+        var el = document.createElement("span");
+        el.className = "smoke";
+        group.insertBefore(el, thumb);
+        particles.push({
+          el: el,
+          x: 36 + head + (Math.random() - 0.5) * 40,
+          y: 26 + (Math.random() - 0.5) * 10,
+          vx: -Math.sign(vel) * (0.01 + Math.random() * 0.03),
+          vy: (Math.random() - 0.5) * 0.012,
+          size: 12 + Math.random() * 8,
+          age: 0,
+          life: 700 + Math.random() * 500
+        });
+      }
+      particles = particles.filter(function (p) {
+        p.age += dt; p.x += p.vx * dt; p.y += p.vy * dt;
+        if (p.age >= p.life) { p.el.remove(); return false; }
+        var q = p.age / p.life;
+        var size = p.size * (1 + q * 1.1);
+        var op = (q < 0.2 ? q / 0.2 : 1 - (q - 0.2) / 0.8) * 0.55;
+        p.el.style.cssText = "left:" + (p.x - size / 2).toFixed(1) + "px;top:" + (p.y - size / 2).toFixed(1) +
+          "px;width:" + size.toFixed(1) + "px;height:" + size.toFixed(1) + "px;opacity:" + op.toFixed(3);
+        return true;
+      });
+      requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+  }
+})();
+</script>
+</body>
+</html>

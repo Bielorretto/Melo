@@ -7,3 +7,12 @@ exercises_dir: "exercises"
 openai:
   model: "gpt-4o-mini"
   api_key_env: "OPENAI_API_KEY"
+
+# Statistiques d'utilisation (./cli.py metrique), stockées dans Supabase.
+# Au lancement, Melo envoie le login ($USER) et la date. MELO_NO_STATS=1 désactive l'envoi.
+stats:
+  supabase_url: "https://arcjtriaqhrsbjivoqts.supabase.co"
+  # Clé publique : elle permet seulement d'AJOUTER des lancements, pas de les lire.
+  publishable_key: "sb_publishable_fUcoqqiXhcUzSIeVysW9BA_nmLUTNm4"
+  # Clé secrète (lecture), jamais dans le dépôt : à mettre dans .env ou en export.
+  secret_key_env: "MELO_SUPABASE_SECRET_KEY"

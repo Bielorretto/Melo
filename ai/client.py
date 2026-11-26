@@ -5,20 +5,10 @@ from pathlib import Path
 from dotenv import load_dotenv
 import yaml
 from openai import OpenAI
-from rich.console import Console
-from rich.panel import Panel
 
-from ai.lldb_session import LldbSession
-from ai.tools import (
-    DEBUG_TOOLS_SCHEMA,
-    EXERCISE_TOOLS_SCHEMA,
-    get_exercise_subject,
-    list_exercise_names,
-)
+from ai.tools import EXERCISE_TOOLS_SCHEMA, get_exercise_subject, list_exercise_names
 
 load_dotenv()
-
-console = Console()
 
 CONFIG_PATH = Path(__file__).parent.parent / "config.yaml"
 
@@ -37,55 +27,13 @@ class Assistant:
                 f"variable d'environnement {api_key_env} non définie "
                 f"(export {api_key_env}=sk-...)"
             )
-        self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        self.client = OpenAI(api_key=api_key)
         self.model = config["openai"]["model"]
-        self.lldb_session: LldbSession | None = None
-
-    def close_lldb_session(self) -> None:
-        if self.lldb_session:
-            self.lldb_session.close()
-            self.lldb_session = None
 
     def _dispatch_tool(self, tool_call) -> str:
         """Exécute l'outil demandé par le modèle et renvoie le résultat texte."""
         name = tool_call.function.name
         args = json.loads(tool_call.function.arguments or "{}")
-
-        if name == "start_debug":
-            self.close_lldb_session()
-            self.lldb_session = LldbSession(args["binary_path"])
-            output = self.lldb_session.start_at_main()
-            console.print(Panel(output, title="📍 main", border_style="cyan",
-                                 expand=False, padding=(0, 2)))
-            return (
-                "Session de debug démarrée, le programme est arrêté au début "
-                f"de main (aucun autre appel n'est nécessaire pour ça) :\n{output}"
-            )
-
-        if name in ("goto_line", "goto_function", "print_variable",
-                    "list_variables", "show_source"):
-            if not self.lldb_session:
-                return "Erreur : appelle d'abord start_debug avec le chemin du binaire."
-            if name == "goto_line":
-                output = self.lldb_session.goto_line(args["file"], args["line"])
-                title = f"📍 {args['file']}:{args['line']}"
-            elif name == "goto_function":
-                output = self.lldb_session.goto_function(args["function"])
-                title = f"📍 {args['function']}()"
-            elif name == "print_variable":
-                output = self.lldb_session.print_variable(args["name"])
-                title = "🔍 Variables"
-            elif name == "show_source":
-                output = self.lldb_session.show_source(
-                    args["file"], args.get("line", 1), args.get("count", 200)
-                )
-                title = f"📄 {args['file']}"
-            else:
-                output = self.lldb_session.list_variables()
-                title = "🔍 Variables"
-            console.print(Panel(output, title=title, border_style="cyan",
-                                 expand=False, padding=(0, 2)))
-            return output
 
         if name == "list_exercises":
             names = list_exercise_names()
@@ -119,35 +67,27 @@ class Assistant:
 
         return "L'assistant a dépassé le nombre d'appels d'outils autorisés."
 
-    def ask(self, system_prompt: str, user_message: str, use_tools: bool = False) -> str:
-        """Un seul aller-retour, sans mémoire (utilisé par ai-explain / ai-debug).
-        use_tools=True donne accès à lldb (mode debug historique).
-        """
+    def ask(self, system_prompt: str, user_message: str) -> str:
+        """Un seul aller-retour, sans mémoire."""
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_message},
         ]
-        tools = DEBUG_TOOLS_SCHEMA if use_tools else None
-        return self._run_completion(messages, tools)
+        return self._run_completion(messages)
 
     def start_chat(self, system_prompt: str) -> None:
         """Démarre une nouvelle conversation avec mémoire (utilisé par `chat`)."""
         self.messages = [{"role": "system", "content": system_prompt}]
 
-    def send(self, user_message: str, use_tools: bool = False) -> str:
+    def send(self, user_message: str) -> str:
         """Envoie un message dans la conversation en cours (démarrée via
         start_chat) et renvoie la réponse, en gardant tout l'historique.
 
         Les outils "exercices" (list_exercises, get_exercise_subject) sont
-        toujours disponibles en chat, pour que l'IA aille lire elle-même le
-        bon sujet. use_tools=True ajoute en plus l'outil lldb (mode debug).
+        toujours disponibles, pour que l'IA aille lire elle-même le bon sujet.
         """
         if not hasattr(self, "messages"):
             raise RuntimeError("start_chat() doit être appelé avant send()")
 
-        tools = list(EXERCISE_TOOLS_SCHEMA)
-        if use_tools:
-            tools += DEBUG_TOOLS_SCHEMA
-
         self.messages.append({"role": "user", "content": user_message})
-        return self._run_completion(self.messages, tools)
+        return self._run_completion(self.messages, EXERCISE_TOOLS_SCHEMA)

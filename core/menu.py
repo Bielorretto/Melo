@@ -248,33 +248,30 @@ def run_chat() -> None:
     console.print("Discussion avec l'assistant piscine 42.")
     console.print("(tape 'retour' pour revenir au menu, 'q' ou 'diouf' pour arrêter, Ctrl+D marche aussi)\n")
 
-    try:
-        while True:
-            try:
-                user_input = console.input("[bold cyan]User: [/]")
-            except (EOFError, KeyboardInterrupt):
-                console.print("\n[yellow]Bonne chance pour ta piscine ![/]")
-                return
+    while True:
+        try:
+            user_input = console.input("[bold cyan]User: [/]")
+        except (EOFError, KeyboardInterrupt):
+            console.print("\n[yellow]Bonne chance pour ta piscine ![/]")
+            return
 
-            if not user_input.strip():
-                continue
+        if not user_input.strip():
+            continue
 
-            word = user_input.strip().lower()
-            if word in BACK:
-                return
-            if word in ("diouf",) + QUIT:
-                console.print("[yellow]Bonne chance pour ta piscine ![/]")
-                sys.exit(0)
+        word = user_input.strip().lower()
+        if word in BACK:
+            return
+        if word in ("diouf",) + QUIT:
+            console.print("[yellow]Bonne chance pour ta piscine ![/]")
+            sys.exit(0)
 
-            try:
-                answer = assistant.send(user_input, use_tools=True)
-            except Exception as e:
-                console.print(f"[bold red]Erreur : {e}[/]")
-                continue
+        try:
+            answer = assistant.send(user_input)
+        except Exception as e:
+            console.print(f"[bold red]Erreur : {e}[/]")
+            continue
 
-            console.print(Panel(answer, title="🚲 Melo", border_style="green", expand=False))
-    finally:
-        assistant.close_lldb_session()
+        console.print(Panel(answer, title="🚲 Melo", border_style="green", expand=False))
 
 
 # --------------------------------------------------------------------------- menus

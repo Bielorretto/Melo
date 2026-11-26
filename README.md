@@ -50,6 +50,13 @@ Tout se fait ensuite dans le menu, en tapant juste un numéro :
 
 Dans chaque menu : `r` (ou `retour`) revient au menu précédent, `q` quitte Melo.
 
+### 📊 Statistiques
+
+À chaque lancement, Melo envoie **ton login (`$USER`) et la date** pour compter le nombre d'utilisateurs. Rien d'autre n'est envoyé (ni ton code, ni tes fichiers).
+Pour le désactiver : `export MELO_NO_STATS=1`.
+
+`./cli.py metrique` ouvre le graphique d'évolution des utilisateurs dans le navigateur (il faut la clé secrète `MELO_SUPABASE_SECRET_KEY` dans un `.env`). `./cli.py metrique --demo` l'affiche avec des données d'exemple.
+
 
 # 🤖 Assistant IA
 
