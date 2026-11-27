@@ -1,6 +1,6 @@
 # 🚲 Melo
 
-Melo est un simulateur maison pour la **Piscine** et le **Common Core** de 42.
+Melo est un testeur maison pour la **Piscine** et le **Common Core** de 42.
 
 Le but : tester ton code **avant la Moulinette**, t'entraîner aux **examens** dans des conditions proches du réel, et avoir un **assistant IA** qui t'explique les sujets sans jamais te donner la solution.
 
